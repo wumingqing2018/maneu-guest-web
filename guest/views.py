@@ -1,3 +1,5 @@
+# Create your views here.
+
 # django shortcuts 组件
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
@@ -7,9 +9,6 @@ from .service import find_order
 from my_lib import verify_lib
 
 
-# Create your views here.
-
-
 def index(request):
     """
     授权产品页面
@@ -17,7 +16,7 @@ def index(request):
     return render(request, "guest/index.html")
 
 
-def check_order(request, order_id, token):
+def guest(request, order_id, token):
     """
     查找订单
     """

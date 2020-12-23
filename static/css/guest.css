@@ -1,0 +1,25 @@
+h4{
+    font-weight: bold;
+    color: #fbc21d
+}
+p{
+    font-weight: bold;
+    color: #fbc21d
+}
+a{
+    font-weight: bold;
+    color: #fbc21d
+}
+img{
+    height: 100px; width: 100px
+}
+.viewport{
+    width: 500%;
+    height: 100%;
+    overflow: hidden;
+    display: -webkit-box;
+    pointer-events: none;
+    -webkit-transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    position: relative;
+}

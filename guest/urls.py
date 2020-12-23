@@ -19,5 +19,5 @@ from guest import views
 
 urlpatterns = [
     path('', views.index, name='test_page'),
-    # path('check_order/<int:order_id>/<int:token>/', views.check_order, name='check_order'),
+    path('guest/<int:order_id>/<int:token>/', views.guest, name='guest'),
 ]
