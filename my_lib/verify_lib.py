@@ -4,7 +4,7 @@ import re
 
 def order_id(string):
     try:
-        pattern = r"^\d{10}$"
+        pattern = r"^\d{16}$"
         if re.match(pattern, string, flags=0):
             return True
         return False

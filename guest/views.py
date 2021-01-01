@@ -20,11 +20,8 @@ def guest(request, order_id, token):
     """
     查找订单
     """
-    verify1 = verify_lib.order_id(order_id)
-    verify2 = verify_lib.token(token)
-    if verify1 and verify2:
-        order = find_order(order_id, token)
-        if order:
-            return render(request, 'guest/check_order.html', {'order': order})
+    order = find_order(order_id, token)
+    if order:
+            return render(request, 'guest/guest.html', {'order': order})
     else:
-        return HttpResponse('啥都没有找到')
+        return HttpResponse('啥都没有找到1')
