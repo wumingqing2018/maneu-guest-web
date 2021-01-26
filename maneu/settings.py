@@ -102,7 +102,7 @@ DATABASES = {
         'NAME': 'maneu',  # 数据库名称
         'HOST': 'localhost',  # 数据库地址，本机 ip 地址 127.0.0.1
         'PORT': 3306,  # 端口
-        'USER': 'maneu_guest',  # 数据库用户名
+        'USER': 'root',  # 数据库用户名
         'PASSWORD': '123456',  # 数据库密码
     }
 }
