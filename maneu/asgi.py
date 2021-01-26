@@ -1,5 +1,5 @@
 """
-ASGI config for maneu_guest project.
+ASGI config for maneu project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maneu_guest.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maneu.settings')
 
 application = get_asgi_application()

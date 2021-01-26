@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/maneu/admin.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="text-center">
+            <div class="row justify-content-center">
+                <div class="col-md-12" style="padding: 5%">
+                        <img src="{% static 'images/logo.svg' %}">
+                        <h4>徕可</h4>
+                </div>
+
+                <div class="col-md-12" style="padding: 5%">
+                    <h4>报错信息</h4>
+                    <p>{{ error }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,4 +1,4 @@
-"""maneu_guest URL Configuration
+"""maneu URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.0/topics/http/urls/
@@ -19,5 +19,5 @@ from guest import views
 
 urlpatterns = [
     path('', views.index, name='test_page'),
-    path('guest/<int:order_id>/<int:token>/', views.guest, name='guest'),
+    path('order/<int:order_id>/<int:token>/', views.order, name='order'),
 ]
