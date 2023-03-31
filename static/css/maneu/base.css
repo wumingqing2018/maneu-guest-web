@@ -1,0 +1,25 @@
+.yellow {
+    font-weight: bold;
+    color: black;
+    background: #FFC048;
+}
+
+.blue {
+    color: #FFC048;
+    background: #003153;
+}
+
+span {
+    font-size: 10px;
+    color: #FFC048;
+    display: block;
+}
+span.banner {
+    font-size: 10px;
+    color: black;
+    display: block;
+}
+
+h5 {
+    color: #FFC048;
+}
