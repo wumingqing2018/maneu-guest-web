@@ -4,7 +4,7 @@
 
 <head>
     <title>徕可</title>
-    <link rel="icon" href="{% static 'img/logo16x9.svg' %}">
+    <link rel="icon" href="{% static 'img/logo.svg' %}">
     <link rel="stylesheet" href="{% static 'css/maneu/base.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- 新 Bootstrap5 核心 CSS 文件 -->
@@ -14,7 +14,8 @@
     <!-- 最新的 Bootstrap5 核心 JavaScript 文件 -->
     <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
 </head>
-<body class="blue">
+<body>
 {% block content %}{% endblock %}
+{% block css %}{% endblock %}
 </body>
 </html>
