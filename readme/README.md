@@ -42,3 +42,4 @@ python 迁徙模块
 
 github 更新
 > git pull git@github.com:wumingqing2018/maneu.git master
+>小程序密码 9a7ac5730b249c8ccc8a2b410631935b
