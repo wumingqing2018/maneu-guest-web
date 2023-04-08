@@ -13,12 +13,10 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import include
 from django.urls import path
-from maneu import views
+from maneu.views import *
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('login/', views.login, name='login'),
-    path('maneu_order', include('maneu_order.'))
+    path('', index, name='index'),
+    path('login/', login, name='login'),
 ]
