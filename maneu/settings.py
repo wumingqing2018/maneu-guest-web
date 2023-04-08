@@ -73,12 +73,21 @@ WSGI_APPLICATION = 'maneu.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+"""
+配置数据库
+https:#docs.djangoproject.com/en/3.0/ref/settings/#databases
+"""
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'maneu',
+        'HOST': 'localhost',
+        'PORT': 3306,
+        'USER': 'root',
+        'PASSWORD': '',
     }
 }
+
 
 
 # Password validation

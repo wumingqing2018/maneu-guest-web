@@ -16,6 +16,8 @@ Including another URLconf
 from django.urls import path
 from maneu.views import *
 
+
+app_name = 'maneu_report'
 urlpatterns = [
     path('', index, name='index'),
     path('login/', login, name='login'),
