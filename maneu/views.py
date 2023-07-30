@@ -1,6 +1,6 @@
 import requests
 from django.shortcuts import render, HttpResponse
-from django.http import JsonResponse
+from maneu import service
 
 
 def index(request):
@@ -29,6 +29,7 @@ def getPhoneCall(request):
 
 
 def getOrderList(request):
-    phone = request.GET.get('phone')
+    phone = service.ManeuOrderV2_phone(code=request.GET.get('code'))
+    print(phone)
     return HttpResponse(phone)
 
