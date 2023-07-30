@@ -1,5 +1,6 @@
 import requests
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render
+from django.http import JsonResponse
 
 
 def index(request):
@@ -26,6 +27,7 @@ def getPhoneCall(request):
     access_token = requests.get(getAccessTokenUrl, data).json()
     print(access_token)
     url = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
+    print(request.GET.get('code'))
     data2 = {"code": request.GET.get('code')}
     phoneCall = requests.post(url, data2).json()
-    return HttpResponse(phoneCall)
+    return JsonResponse(phoneCall)
