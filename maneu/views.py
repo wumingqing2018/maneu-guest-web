@@ -25,8 +25,10 @@ def getPhoneCall(request):
             "grant_type": "client_credential"
             }
     access_token = requests.get(getAccessTokenUrl, data).json()
-    # print(access_token)
-    # url = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber'
-    # data2 = {"access_token": access_token['access_token'], "code": request.GET.get('code')}
-    # phoneCall = requests.post(url, data2).json()
     return HttpResponse(access_token['access_token'])
+
+
+def getOrderList(request):
+    phone = request.GET.get('phone')
+    return HttpResponse(phone)
+
