@@ -7,13 +7,11 @@ def index(request):
 
 
 def login(request):
-    code = request.GET.get('code')
-    url = 'https://api.weixin.qq.com/cgi-bin/token'
+    url = 'https://api.weixin.qq.com/sns/jscode2session'
     data = {"appid": "wxf48b774de9be5613",
             "secret": "9a7ac5730b249c8ccc8a2b410631935b",
-            "grant_type": "client_credential"
+            "grant_type": "authorization_code",
+            "js_code": request.GET.get('js_code')
             }
     reecho = requests.get(url, data)
-    access_token = reecho.json()['access_token']
-    reecho = requests.post(url='https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token, data={"code": code})
-    return HttpResponse(reecho.json())
+    return HttpResponse(reecho, reecho.json())
