@@ -1,6 +1,8 @@
 import requests
 from django.shortcuts import render, HttpResponse
-from maneu import service
+from django.http import JsonResponse
+from maneu.models import ManeuOrderV2
+from django.core import serializers
 
 
 def index(request):
@@ -29,7 +31,12 @@ def getPhoneCall(request):
 
 
 def getOrderList(request):
-    phone = service.ManeuOrderV2_phone(code=request.GET.get('code'))
-    print(phone)
-    return HttpResponse(phone)
+    phone = ManeuOrderV2.objects.filter(phone=request.GET.get('code')).all()
+    content = serializers.serialize("json", phone)
+    return HttpResponse(content, "application/json")
 
+
+def getOrderDetail(request):
+    phone = ManeuOrderV2.objects.filter(id=request.GET.get('code')).all()
+    content = serializers.serialize("json", phone)
+    return HttpResponse(content, "application/json")

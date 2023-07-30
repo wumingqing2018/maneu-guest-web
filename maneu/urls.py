@@ -22,5 +22,6 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('getPhoneCall/', views.getPhoneCall, name='getPhoneCall'),
     path('getOrderList/', views.getOrderList, name='getOrderList'),
+    path('getOrderDetail/', views.getOrderDetail, name='getOrderDetail'),
 
 ]
