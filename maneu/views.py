@@ -11,7 +11,6 @@ def login(request):
     url = 'https://api.weixin.qq.com/cgi-bin/token'
     data = {"appid": "wxf48b774de9be5613",
             "secret": "9a7ac5730b249c8ccc8a2b410631935b",
-            "js_code": "1",
             "grant_type": "client_credential"
             }
     reecho = requests.get(url, data)
@@ -20,4 +19,4 @@ def login(request):
     data = {"code": code}
     reecho = requests.post(url=url, data=data)
 
-    return HttpResponse("code:"+code, 'url:'+url, reecho.json())
+    return HttpResponse(code, url, reecho.json())
