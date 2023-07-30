@@ -15,10 +15,9 @@ def login(request):
             "grant_type": "client_credential"
             }
     reecho = requests.get(url, data)
-    print(reecho, reecho.json())
-    url = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+reecho.json()['access_token']
-    print(url)
+    access_token = reecho.json()['access_token']
+    url = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token
     data = {"code": code}
     reecho = requests.post(url=url, data=data)
 
-    return HttpResponse(reecho, reecho.json())
+    return HttpResponse("code:"+code, 'url:'+url, reecho.json())
