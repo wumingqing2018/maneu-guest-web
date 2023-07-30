@@ -16,9 +16,9 @@ def login(request):
             }
     reecho = requests.get(url, data)
     print(reecho, reecho.json())
-    url = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber'
-    data = {"access_token": reecho.json()['access_token'],
-            "code": code}
+    url = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+reecho.json()['access_token']
+    print(url)
+    data = {"code": '0e6d1f93fa99cd1909740b830ab561c7cacb061d947301d2bc2f595abef5008d'}
     reecho = requests.post(url=url, data=data)
 
     return HttpResponse(reecho, reecho.json())
