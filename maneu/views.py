@@ -2,6 +2,7 @@ import requests
 from django.shortcuts import render, HttpResponse
 from django.http import JsonResponse
 from maneu.models import ManeuOrderV2
+from maneu.models import ManeuSubjectiveRefraction
 from django.core import serializers
 
 
@@ -31,12 +32,20 @@ def getPhoneCall(request):
 
 
 def getOrderList(request):
-    phone = ManeuOrderV2.objects.filter(phone=request.GET.get('code')).all()
-    content = serializers.serialize("json", phone)
-    return HttpResponse(content, "application/json")
+    data = {}
+    content = ManeuOrderV2.objects.filter(phone=request.GET.get('code')).all().values('id', 'time')
+    data['list'] = list(content)
+    return JsonResponse(data)
 
 
 def getOrderDetail(request):
     phone = ManeuOrderV2.objects.filter(id=request.GET.get('code')).all()
     content = serializers.serialize("json", phone)
     return HttpResponse(content, "application/json")
+
+
+def getReportList(request):
+    data = {}
+    content = ManeuSubjectiveRefraction.objects.filter(phone=request.GET.get('code')).all().values('id', 'time')
+    data['list'] = list(content)
+    return JsonResponse(data)
