@@ -32,20 +32,21 @@ def getPhoneCall(request):
 
 
 def getOrderList(request):
-    # data = {}
     content = list(ManeuOrderV2.objects.filter(phone=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
-    # data['list'] = list(content)
     return JsonResponse(content, safe=False)
 
 
 def getOrderDetail(request):
     phone = ManeuOrderV2.objects.filter(id=request.GET.get('code')).all()
     content = serializers.serialize("json", phone)
-    return HttpResponse(content, "application/json")
+    return JsonResponse(content, safe=False)
 
 
 def getReportList(request):
-    data = {}
-    content = ManeuSubjectiveRefraction.objects.filter(phone=request.GET.get('code')).order_by('-time').all().values('id', 'time')
-    data['list'] = list(content)
-    return JsonResponse(data)
+    content = list(ManeuSubjectiveRefraction.objects.filter(phone=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
+    return JsonResponse(content, safe=False)
+
+
+def getReportDetail(request):
+    content = list(ManeuSubjectiveRefraction.objects.filter(id=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
+    return JsonResponse(content, safe=False)
