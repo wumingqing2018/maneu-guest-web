@@ -35,8 +35,9 @@ def getPhoneCall(request):
     access_token = requests.get(getAccessTokenUrl, data).json()
 
     getPhoneUrl = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
-    data = {"code": request.GET.get('code')}
-    phone = request.POST(getPhoneUrl, data)
+    data = json.dumps({'code': request.GET.get('code')})
+    phone = requests.post(getPhoneUrl, data)
+    print(phone)
     return HttpResponse(phone)
 
 
