@@ -53,7 +53,7 @@ def getOrderList(request):
     data = json.dumps({'code': request.GET.get('code')})
     phone = requests.post(getPhoneUrl, data).json()
 
-    content = list(ManeuOrderV2.objects.filter(phone='').order_by('-time').all().values('id', 'time'))
+    content = list(ManeuOrderV2.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('id', 'time'))
     return JsonResponse(content, safe=False)
 
 
