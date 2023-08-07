@@ -3,7 +3,10 @@ from django.shortcuts import render, HttpResponse
 from django.http import JsonResponse
 from maneu.models import ManeuOrderV2
 from maneu.models import ManeuSubjectiveRefraction
-from django.core import serializers
+from maneu.models import ManeuVisionSolutions
+from maneu.models import ManeuStore
+import json
+
 
 
 def index(request):
@@ -37,8 +40,12 @@ def getOrderList(request):
 
 
 def getOrderDetail(request):
-    phone = ManeuOrderV2.objects.filter(id=request.GET.get('code')).all()
-    content = serializers.serialize("json", phone)
+    content = []
+    order = ManeuOrderV2.objects.filter(id=request.GET.get('code')).first()
+    # content.append(ManeuStore.objects.filter(id=order.visionsolutions_id).all().values())
+    # content.append(ManeuVisionSolutions.objects.filter(id=order.visionsolutions_id).all().values())
+    content.append(json.loads(ManeuStore.objects.filter(id=order.store_id).first().content))
+    content.append(json.loads(ManeuVisionSolutions.objects.filter(id=order.visionsolutions_id).first().content))
     return JsonResponse(content, safe=False)
 
 
@@ -48,5 +55,5 @@ def getReportList(request):
 
 
 def getReportDetail(request):
-    content = list(ManeuSubjectiveRefraction.objects.filter(id=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
+    content = list(ManeuSubjectiveRefraction.objects.filter(id=request.GET.get('code')).all())
     return JsonResponse(content, safe=False)
