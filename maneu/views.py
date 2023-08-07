@@ -50,7 +50,7 @@ def getOrderList(request):
     access_token = requests.get(getAccessTokenUrl, data).json()
 
     getPhoneUrl = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
-    data = json.dumps({'code': 'a9b4d777fe0c0e6f1a7788809032fea2bce1e8077c8b1f2dbf041c93b8d10ccd'})
+    data = json.dumps({'code': request.GET.get('code')})
     phone = requests.post(getPhoneUrl, data).json()
 
     content = list(ManeuOrderV2.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('id', 'time'))
