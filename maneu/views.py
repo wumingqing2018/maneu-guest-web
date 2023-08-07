@@ -1,12 +1,14 @@
+import json
+import math
+
 import requests
-from django.shortcuts import render, HttpResponse
 from django.http import JsonResponse
+from django.shortcuts import render, HttpResponse
+
 from maneu.models import ManeuOrderV2
+from maneu.models import ManeuStore
 from maneu.models import ManeuSubjectiveRefraction
 from maneu.models import ManeuVisionSolutions
-from maneu.models import ManeuStore
-import json
-
 
 
 def index(request):
@@ -42,9 +44,18 @@ def getOrderList(request):
 def getOrderDetail(request):
     content = []
     order = ManeuOrderV2.objects.filter(id=request.GET.get('code')).first()
-    # content.append(ManeuStore.objects.filter(id=order.visionsolutions_id).all().values())
-    # content.append(ManeuVisionSolutions.objects.filter(id=order.visionsolutions_id).all().values())
-    content.append(json.loads(ManeuStore.objects.filter(id=order.store_id).first().content))
+    store_content = json.loads(ManeuStore.objects.filter(id=order.store_id).first().content)
+    store_length = math.ceil(len(store_content)/5)
+    store_list = []
+    for i in range(1, store_length):
+        store_list.append({'arg0': store_content['arg'+ str(i) +'0'],
+                           'arg1': store_content['arg'+ str(i) +'1'],
+                           'arg2': store_content['arg'+ str(i) +'2'],
+                           'arg3': store_content['arg'+ str(i) +'3'],
+                           'arg4': store_content['arg'+ str(i) +'4'],
+                           })
+    content.append(store_content['remark'])
+    content.append(store_list)
     content.append(json.loads(ManeuVisionSolutions.objects.filter(id=order.visionsolutions_id).first().content))
     return JsonResponse(content, safe=False)
 
