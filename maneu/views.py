@@ -80,7 +80,18 @@ def getOrderDetail(request):
 
 
 def getReportList(request):
-    content = list(ManeuSubjectiveRefraction.objects.filter(phone=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
+    getAccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token'
+    data = {"appid": "wxf48b774de9be5613",
+            "secret": "9a7ac5730b249c8ccc8a2b410631935b",
+            "grant_type": "client_credential"
+            }
+    access_token = requests.get(getAccessTokenUrl, data).json()
+
+    getPhoneUrl = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
+    data = {'code': request.GET.get('code')}
+    phone = requests.post(getPhoneUrl, json.dumps(data)).json()
+
+    content = list(ManeuSubjectiveRefraction.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('id', 'time'))
     return JsonResponse(content, safe=False)
 
 
