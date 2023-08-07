@@ -54,7 +54,10 @@ def getOrderDetail(request):
                            'arg3': store_content['arg'+ str(i) +'3'],
                            'arg4': store_content['arg'+ str(i) +'4'],
                            })
-    content.append(store_content['remark'])
+    try:
+        content.append(store_content['remark'])
+    except:
+        content.append('')
     content.append(store_list)
     content.append(json.loads(ManeuVisionSolutions.objects.filter(id=order.visionsolutions_id).first().content))
     return JsonResponse(content, safe=False)
