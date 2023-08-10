@@ -102,5 +102,5 @@ def getReportList(request):
 
 
 def getReportDetail(request):
-    content = list(ManeuSubjectiveRefraction.objects.filter(id=request.GET.get('code')).first())
+    content = list(ManeuSubjectiveRefraction.objects.filter(id=request.GET.get('code')).all().values('content'))
     return JsonResponse(content, safe=False)
