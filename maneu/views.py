@@ -7,6 +7,7 @@ from django.shortcuts import render, HttpResponse
 
 from maneu.models import ManeuOrderV2
 from maneu.models import ManeuStore
+from maneu.models import ManeuGuess
 from maneu.models import ManeuSubjectiveRefraction
 from maneu.models import ManeuVisionSolutions
 
@@ -37,7 +38,6 @@ def getPhoneCall(request):
     getPhoneUrl = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
     data = json.dumps({'code': 'a9b4d777fe0c0e6f1a7788809032fea2bce1e8077c8b1f2dbf041c93b8d10ccd'})
     phone = requests.post(getPhoneUrl, data).json()
-    print(phone['phone_info']['purePhoneNumber'])
     return HttpResponse(phone)
 
 
@@ -92,11 +92,13 @@ def getReportList(request):
     getPhoneUrl = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
     data = {'code': request.GET.get('code')}
     phone = requests.post(getPhoneUrl, json.dumps(data)).json()
-
-    content = list(ManeuSubjectiveRefraction.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('id', 'time'))
-    return JsonResponse(content, safe=False)
+    if phone['errcode'] == 0:
+        content = list(ManeuGuess.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('subjective_id', 'time'))
+        return JsonResponse(content, safe=False)
+    else:
+        return JsonResponse(phone)
 
 
 def getReportDetail(request):
-    content = list(ManeuSubjectiveRefraction.objects.filter(id=request.GET.get('code')).all())
+    content = list(ManeuSubjectiveRefraction.objects.filter(id=request.GET.get('code')).first())
     return JsonResponse(content, safe=False)
