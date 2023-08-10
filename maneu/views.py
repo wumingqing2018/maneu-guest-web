@@ -5,11 +5,7 @@ import requests
 from django.http import JsonResponse
 from django.shortcuts import render, HttpResponse
 
-from maneu.models import ManeuOrderV2
-from maneu.models import ManeuStore
-from maneu.models import ManeuGuess
-from maneu.models import ManeuSubjectiveRefraction
-from maneu.models import ManeuVisionSolutions
+from maneu.models import *
 
 
 def index(request):
@@ -95,12 +91,12 @@ def getReportList(request):
     if phone['errcode'] == 0:
         guess = ManeuGuess.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').first()
 
-        content = list(ManeuSubjectiveRefraction.objects.filter(guess_id=guess.id).order_by('-time').all().values('id', 'time'))
+        content = list(ManeuRefraction.objects.filter(guess_id=guess.id).order_by('-time').all().values('id', 'time'))
         return JsonResponse(content, safe=False)
     else:
         return JsonResponse(phone)
 
 
 def getReportDetail(request):
-    content = json.loads(ManeuSubjectiveRefraction.objects.filter(id=request.GET.get('code')).first().content)
+    content = json.loads(ManeuRefraction.objects.filter(id=request.GET.get('code')).first().content)
     return JsonResponse(content)

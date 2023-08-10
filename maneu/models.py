@@ -30,6 +30,7 @@ class ManeuAdmin(models.Model):
 
 class ManeuGuess(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
+    admin_id = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField()
     name = models.CharField(max_length=36, blank=True, null=True)
     phone = models.CharField(max_length=36, blank=True, null=True)
@@ -39,17 +40,30 @@ class ManeuGuess(models.Model):
     em = models.CharField(db_column='EM', max_length=36, blank=True, null=True)  # Field name made lowercase.
     dfh = models.CharField(db_column='DFH', max_length=36, blank=True, null=True)  # Field name made lowercase.
     remark = models.TextField()
-    admin_id = models.CharField(max_length=36, blank=True, null=True)
-    subjective_id = models.CharField(max_length=36, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'maneu_guess'
 
 
+class ManeuOrder(models.Model):
+    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
+    time = models.DateTimeField()
+    name = models.CharField(max_length=36)
+    phone = models.CharField(max_length=36)
+    guess_id = models.CharField(max_length=36)
+    admin_id = models.CharField(max_length=36)
+    store_id = models.CharField(max_length=36)
+    vision_id = models.CharField(max_length=36)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'maneu_order'
+
+
 class ManeuOrderV2(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
-    time = models.DateField()
+    time = models.DateTimeField()
     name = models.CharField(max_length=36)
     phone = models.CharField(max_length=36)
     guess_id = models.CharField(max_length=36)
@@ -60,7 +74,7 @@ class ManeuOrderV2(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'maneu_order_v2'
+        db_table = 'maneu_order'
 
 
 class ManeuService(models.Model):
@@ -79,7 +93,7 @@ class ManeuService(models.Model):
 class ManeuStore(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
     time = models.DateTimeField()
-    orderId = models.CharField(db_column='orderId', max_length=36)  # Field name made lowercase.
+    order_id = models.CharField(db_column='order_id', max_length=36)  # Field name made lowercase.
     admin_id = models.CharField(max_length=36)
     guess_id = models.CharField(db_column='guess_id', max_length=36)  # Field name made lowercase.
     content = models.TextField()
@@ -89,7 +103,7 @@ class ManeuStore(models.Model):
         db_table = 'maneu_store'
 
 
-class ManeuSubjectiveRefraction(models.Model):
+class ManeuRefraction(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
     admin_id = models.CharField(max_length=36)
     guess_id = models.CharField(db_column='guess_id', max_length=36)  # Field name made lowercase.
@@ -98,10 +112,10 @@ class ManeuSubjectiveRefraction(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'maneu_subjective_refraction'
+        db_table = 'maneu_refraction'
 
 
-class ManeuVisionSolutions(models.Model):
+class ManeuVision(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
     admin_id = models.CharField(max_length=36)
     guess_id = models.CharField(db_column='guess_id', max_length=36)  # Field name made lowercase.
@@ -110,4 +124,4 @@ class ManeuVisionSolutions(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'maneu_vision_solutions'
+        db_table = 'maneu_vision'
