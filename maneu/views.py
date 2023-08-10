@@ -65,7 +65,7 @@ def getOrderDetail(request):
     store_content = json.loads(ManeuStore.objects.filter(id=order.store_id).first().content)
     store_length = math.ceil(len(store_content)/5)
     store_list = []
-    for i in range(1, store_length):
+    for i in range(1, store_length+1):
         store_list.append({'arg0': store_content['arg'+ str(i) +'0'],
                            'arg1': store_content['arg'+ str(i) +'1'],
                            'arg2': store_content['arg'+ str(i) +'2'],

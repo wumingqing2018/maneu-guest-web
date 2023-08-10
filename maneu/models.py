@@ -79,7 +79,7 @@ class ManeuService(models.Model):
 class ManeuStore(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
     time = models.DateTimeField()
-    order_id = models.CharField(db_column='order_id', max_length=36)  # Field name made lowercase.
+    orderId = models.CharField(db_column='orderId', max_length=36)  # Field name made lowercase.
     admin_id = models.CharField(max_length=36)
     guess_id = models.CharField(db_column='guess_id', max_length=36)  # Field name made lowercase.
     content = models.TextField()
