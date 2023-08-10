@@ -93,7 +93,9 @@ def getReportList(request):
     data = {'code': request.GET.get('code')}
     phone = requests.post(getPhoneUrl, json.dumps(data)).json()
     if phone['errcode'] == 0:
-        content = list(ManeuGuess.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('subjective_id', 'time'))
+        guess = ManeuGuess.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').first()
+
+        content = list(ManeuSubjectiveRefraction.objects.filter(guess_id=guess.id).order_by('-time').all().values('id', 'time'))
         return JsonResponse(content, safe=False)
     else:
         return JsonResponse(phone)
