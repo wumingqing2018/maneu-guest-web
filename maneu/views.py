@@ -49,7 +49,7 @@ def getOrderList(request):
     data = {'code': request.GET.get('code')}
     phone = requests.post(getPhoneUrl, json.dumps(data)).json()
     if phone['errcode'] == 0:
-        content = list(ManeuOrderV2.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('id', 'time'))
+        content = list(ManeuOrder.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('id', 'time'))
         return JsonResponse(content, safe=False)
     else:
         return JsonResponse(phone)
@@ -57,7 +57,7 @@ def getOrderList(request):
 
 def getOrderDetail(request):
     content = []
-    order = ManeuOrderV2.objects.filter(id=request.GET.get('code')).first()
+    order = ManeuOrder.objects.filter(id=request.GET.get('code')).first()
     store_content = json.loads(ManeuStore.objects.filter(id=order.store_id).first().content)
     store_length = math.ceil(len(store_content)/5)
     store_list = []
