@@ -103,5 +103,6 @@ def getReportDetail(request):
 
 
 def Test(request):
+    print(ManeuOrder.objects.filter(phone='111').order_by('-time').all().values('id', 'time'))
     content = list(ManeuOrder.objects.filter(phone='13640651582').order_by('-time').all().values('id', 'time'))
     return JsonResponse(content, safe=False)

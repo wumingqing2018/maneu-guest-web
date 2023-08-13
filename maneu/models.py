@@ -49,7 +49,7 @@ class ManeuGuess(models.Model):
 
 class ManeuOrder(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
-    time = models.DateTimeField()
+    time = models.DateField()
     name = models.CharField(max_length=36)
     phone = models.CharField(max_length=36)
     guess_id = models.CharField(max_length=36)
