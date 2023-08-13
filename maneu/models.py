@@ -5,8 +5,9 @@
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
-from django.db import models
 import uuid
+
+from django.db import models
 
 
 class ManeuAdmin(models.Model):
@@ -69,8 +70,7 @@ class ManeuOrderV2(models.Model):
     guess_id = models.CharField(max_length=36)
     admin_id = models.CharField(max_length=36)
     store_id = models.CharField(max_length=36)
-    visionsolutions_id = models.CharField(db_column='visionSolutions_id', max_length=36)  # Field name made lowercase.
-    subjectiverefraction_id = models.CharField(db_column='subjectiveRefraction_id', max_length=36)  # Field name made lowercase.
+    vision_id = models.CharField(db_column='vision_id', max_length=36)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -82,7 +82,8 @@ class ManeuService(models.Model):
     time = models.DateTimeField()
     admin_id = models.CharField(max_length=36)
     guess_id = models.CharField(max_length=36)
-    order_id = models.CharField(db_column='order_id', max_length=36, blank=True, null=True)  # Field name made lowercase.
+    order_id = models.CharField(db_column='order_id', max_length=36, blank=True,
+                                null=True)  # Field name made lowercase.
     content = models.CharField(max_length=300, blank=True, null=True)
 
     class Meta:
