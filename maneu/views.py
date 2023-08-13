@@ -73,7 +73,7 @@ def getOrderDetail(request):
     except:
         content.append('')
     content.append(store_list)
-    content.append(json.loads(ManeuVision.objects.filter(id=order.visionsolutions_id).first().content))
+    content.append(json.loads(ManeuVision.objects.filter(id=order.vision_id).first().content))
     return JsonResponse(content, safe=False)
 
 
