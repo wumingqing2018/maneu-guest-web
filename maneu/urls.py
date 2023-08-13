@@ -22,5 +22,6 @@ urlpatterns = [
     path('getReportList/', views.getReportList, name='getReportList'),
     path('getOrderDetail/', views.getOrderDetail, name='getOrderDetail'),
     path('getReportDetail/', views.getReportDetail, name='getReportDetail'),
+    path('Test/', views.Test, name='Test'),
 
 ]
