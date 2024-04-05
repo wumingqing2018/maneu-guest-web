@@ -1,23 +1,23 @@
-h4{
-    font-weight: bold;
-    color: #fbc21d
+.mothod {
+    margin-top: 10%;
+    text-align: center;
 }
-p{
-    font-weight: bold;
-    color: #fbc21d
+h4 {
+    color: #FFC048;
+    background: #003153;
 }
-a{
-    font-weight: bold;
-    color: #fbc21d
+
+p {
+    color: #FFC048;
+    background: #003153;
 }
-img{
-    height: 100px; width: 100px
+
+a {
+    color: #FFC048;
+    background: #003153;
 }
-.yellow{
-    font-weight: bold;
-    color: #fbc21d
-}
-.blue{
-    font-weight: bold;
-    color: #fbc21d
+
+body {
+    background: #003153;
+    height: 100%;
 }
