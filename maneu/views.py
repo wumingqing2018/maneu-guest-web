@@ -9,7 +9,7 @@ from maneu.models import *
 
 
 def index(request):
-    return render(request, 'maneu/index.html')
+    return render(request, 'index.html')
 
 
 def login(request):
