@@ -77,6 +77,7 @@ def getOrderDetail(request):
     return JsonResponse(content, safe=False)
 
 
+
 def getReportList(request):
     getAccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token'
     data = {"appid": "wxf48b774de9be5613",
