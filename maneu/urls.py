@@ -18,6 +18,7 @@ from maneu import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('getPhoneCall/', views.getPhoneCall, name='getPhoneCall'),
     path('getOrderList/', views.getOrderList, name='getOrderList'),
     path('getReportList/', views.getReportList, name='getReportList'),
     path('getOrderDetail/', views.getOrderDetail, name='getOrderDetail'),
