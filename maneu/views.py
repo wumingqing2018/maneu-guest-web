@@ -35,7 +35,7 @@ def getPhoneCall(request):
     data = {'code': request.GET.get('code')}
     phone = requests.post(getPhoneUrl, json.dumps(data)).json()
     print(phone)
-    return HttpResponse(phone)
+    return JsonResponse(phone)
 
 
 def getOrderList(request):
