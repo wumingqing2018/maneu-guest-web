@@ -37,7 +37,6 @@ def getPhoneCall(request):
     print(phone)
     return JsonResponse(phone)
 
-
 def getOrderList(request):
     getAccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token'
     data = {"appid": "wxf48b774de9be5613",
