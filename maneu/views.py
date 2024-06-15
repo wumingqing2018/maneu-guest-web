@@ -54,8 +54,8 @@ def getOrderList(request):
     #     return JsonResponse(content, safe=False)
     # else:
     #     return JsonResponse(phone)
-
-    content = list(ManeuOrder.objects.filter(phone=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
+    guess = ManeuGuess.objects.filter(phone=request.GET.get('code')).order_by('-time').first()
+    content = list(ManeuOrder.objects.filter(guess_id=guess.id).order_by('-time').all().values('id', 'time'))
     return JsonResponse(content, safe=False)
 
 
@@ -101,10 +101,8 @@ def getReportList(request):
     # else:
     #     return JsonResponse(phone)
     #
-    print(request.GET.get('code'))
     guess = ManeuGuess.objects.filter(phone=request.GET.get('code')).order_by('-time').first()
     content = list(ManeuRefraction.objects.filter(guess_id=guess.id).order_by('-time').all().values('id', 'time'))
-    print(content)
     return JsonResponse(content, safe=False)
 
 
