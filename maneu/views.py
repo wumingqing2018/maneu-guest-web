@@ -38,21 +38,25 @@ def getPhoneCall(request):
     return JsonResponse(phone)
 
 def getOrderList(request):
-    getAccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token'
-    data = {"appid": "wxf48b774de9be5613",
-            "secret": "9b0d309b24e5cd3298f67f570ce5bfde",
-            "grant_type": "client_credential"
-            }
-    access_token = requests.get(getAccessTokenUrl, data).json()
+    # getAccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token'
+    # data = {"appid": "wxf48b774de9be5613",
+    #         "secret": "9b0d309b24e5cd3298f67f570ce5bfde",
+    #         "grant_type": "client_credential"
+    #         }
+    # access_token = requests.get(getAccessTokenUrl, data).json()
+    #
+    # getPhoneUrl = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
+    # data = {'code': request.GET.get('code')}
+    # phone = requests.post(getPhoneUrl, json.dumps(data)).json()
+    #
+    # if phone['errcode'] == 0:
+    #     content = list(ManeuOrder.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('id', 'time'))
+    #     return JsonResponse(content, safe=False)
+    # else:
+    #     return JsonResponse(phone)
 
-    getPhoneUrl = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
-    data = {'code': request.GET.get('code')}
-    phone = requests.post(getPhoneUrl, json.dumps(data)).json()
-    if phone['errcode'] == 0:
-        content = list(ManeuOrder.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').all().values('id', 'time'))
-        return JsonResponse(content, safe=False)
-    else:
-        return JsonResponse(phone)
+    content = list(ManeuOrder.objects.filter(phone=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
+    return JsonResponse(content, safe=False)
 
 
 def getOrderDetail(request):
