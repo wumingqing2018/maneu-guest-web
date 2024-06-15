@@ -101,9 +101,10 @@ def getReportList(request):
     # else:
     #     return JsonResponse(phone)
     #
-
-        content = list(ManeuRefraction.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
-        return JsonResponse(content, safe=False)
+    print(request.GET.get('code'))
+    content = list(ManeuRefraction.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
+    print(content)
+    return JsonResponse(content, safe=False)
 
 
 def getReportDetail(request):
