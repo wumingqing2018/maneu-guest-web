@@ -102,7 +102,8 @@ def getReportList(request):
     #     return JsonResponse(phone)
     #
     print(request.GET.get('code'))
-    content = list(ManeuRefraction.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
+    guess = ManeuGuess.objects.filter(phone=request.GET.get('code')).order_by('-time').first()
+    content = list(ManeuRefraction.objects.filter(guess_id=guess.id).order_by('-time').all().values('id', 'time'))
     print(content)
     return JsonResponse(content, safe=False)
 
