@@ -13,8 +13,8 @@ def index(request):
 
 
 def login(request):
-    if(request.GET.get('call') and request.GET.get('code') ==''):
-        print(1)
+    print('call:'+request.GET.get('call')+',code:'+request.GET.get('code'))
+
     return JsonResponse('ok')
 
 
