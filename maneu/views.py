@@ -14,6 +14,7 @@ def index(request):
 
 def login(request):
     print('call:'+request.GET.get('call')+',code:'+request.GET.get('code'))
+    print(type(request.GET.get('code')))
     if(request.GET.get('call') or request.GET.get('code') == None):
         print('1')
     return HttpResponse('ok')
