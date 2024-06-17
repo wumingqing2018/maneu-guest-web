@@ -15,7 +15,7 @@ def index(request):
 def login(request):
     print('call:'+request.GET.get('call')+',code:'+request.GET.get('code'))
 
-    return JsonResponse('ok')
+    return HttpResponse('ok')
 
 
 
