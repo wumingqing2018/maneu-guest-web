@@ -17,7 +17,7 @@ def login(request):
         content = {'status': False, 'message': 'call or code is none', 'data': {}}
     else:
         data = ManeuGuess.objects.filter(phone=request.GET.get('call')).first()
-        content = {'status': True, 'message': 'success', 'data': {'call': data.call, 'name': data.name}}
+        content = {'status': True, 'message': 'success', 'data': {'call': data.phone, 'name': data.name}}
     return JsonResponse(content)
 
 
