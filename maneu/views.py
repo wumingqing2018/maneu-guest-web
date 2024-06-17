@@ -13,7 +13,7 @@ def index(request):
 
 
 def login(request):
-    if('' == request.GET.get('call') and request.GET.get('code')):
+    if(request.GET.get('call') or request.GET.get('code') ==''):
         content = {'status': False, 'message': 'call or code is none', 'data': {}}
     else:
         data = ManeuGuess.objects.filter(phone=request.GET.get('call')).all().values('phone', 'name')
