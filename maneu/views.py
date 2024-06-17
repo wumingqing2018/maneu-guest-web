@@ -13,12 +13,13 @@ def index(request):
 
 
 def login(request):
-    print('call:'+request.GET.get('call','')+',code:'+request.GET.get('code',''))
-    print(type(request.GET.get('code')))
     if('' == request.GET.get('call') or request.GET.get('code')):
-        print('1')
-    return HttpResponse('ok')
-
+        content = {'status': False, 'message': 'call or code is none', 'data': {}}
+        return JsonResponse(content)
+    else:
+        data = ManeuGuess.objects.filter(phone=request.GET.get('call')).first().values('phone', 'name')
+        content = {'status': True, 'message': 'success', 'data': data}
+        return JsonResponse(content)
 
 
 def getPhoneCall(request):
