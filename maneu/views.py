@@ -13,14 +13,10 @@ def index(request):
 
 
 def login(request):
-    url = 'https://api.weixin.qq.com/sns/jscode2session'
-    data = {"appid": "wxf48b774de9be5613",
-            "secret": "9b0d309b24e5cd3298f67f570ce5bfde",
-            "grant_type": "authorization_code",
-            "js_code": request.GET.get('js_code')
-            }
-    reecho = requests.get(url, data)
-    return HttpResponse(reecho, reecho.json())
+    if(request.GET.get('call') and request.GET.get('code') ==''):
+        print(1)
+    return JsonResponse('ok')
+
 
 
 def getPhoneCall(request):
