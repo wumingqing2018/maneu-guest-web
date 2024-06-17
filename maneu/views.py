@@ -3,7 +3,7 @@ import math
 
 import requests
 from django.http import JsonResponse
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render
 
 from maneu.models import *
 
@@ -16,8 +16,8 @@ def login(request):
     if(request.GET.get('call') == '' or request.GET.get('code') == ''):
         content = {'status': False, 'message': 'call or code is none', 'data': {}}
     else:
-        data = ManeuGuess.objects.filter(phone=request.GET.get('call')).all().values('phone', 'name')
-        content = {'status': True, 'message': 'success', 'data': list(data)}
+        data = ManeuGuess.objects.filter(phone=request.GET.get('call')).all().value('phone', 'name')
+        content = {'status': True, 'message': 'success', 'data': data}
     return JsonResponse(content)
 
 
