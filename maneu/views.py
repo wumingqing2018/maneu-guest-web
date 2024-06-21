@@ -110,6 +110,7 @@ def getReportDetail(request):
 
 def getServiceList(request):
     content = list(ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('time', 'id'))
+    print(content)
     return JsonResponse(content)
 
 
