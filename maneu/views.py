@@ -108,6 +108,16 @@ def getReportDetail(request):
     return JsonResponse(content)
 
 
+def getServiceList(request):
+    content = list(ManeuService.objects.filter(phone=request.GET.get('call')).all().values('time', 'id'))
+    return JsonResponse(content)
+
+
+def getServiceDetail(request):
+    content = json.loads(ManeuService.objects.filter(id=request.GET.get('id')).first())
+    return JsonResponse(content)
+
+
 def Test(request):
     content = list(ManeuOrder.objects.filter(phone='13640651582').order_by('-time').all().values('id', 'time'))
     return JsonResponse(content, safe=False)
