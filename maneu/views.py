@@ -17,7 +17,7 @@ def login(request):
         content = {'status': False, 'message': 'call or code is none', 'data': {}}
     else:
         data = ManeuGuess.objects.filter(phone=request.GET.get('call')).first()
-        content = {'status': True, 'message': 'success', 'content': {'call': data.phone, 'name': data.name}}
+        content = {'status': True, 'message': 'success', 'content': {'call': data.phone, 'name': data.name, 'id': data.id}}
     return JsonResponse(content)
 
 
@@ -109,12 +109,12 @@ def getReportDetail(request):
 
 
 def getServiceList(request):
-    content = list(ManeuService.objects.filter(phone=request.GET.get('call')).all().values('time', 'id'))
+    content = list(ManeuService.objects.filter(id=request.GET.get('code')).all().values('time', 'id'))
     return JsonResponse(content)
 
 
 def getServiceDetail(request):
-    content = json.loads(ManeuService.objects.filter(id=request.GET.get('id')).first())
+    content = json.loads(ManeuService.objects.filter(id=request.GET.get('code')).first())
     return JsonResponse(content)
 
 
