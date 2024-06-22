@@ -18,7 +18,7 @@ def login(request):
     else:
         data = ManeuGuess.objects.filter(phone=request.GET.get('call')).first()
         content = {'status': True, 'message': 'success', 'content': {'call': data.phone, 'name': data.name, 'id': data.id}}
-    return JsonResponse(content)
+    return JsonResponse(content, safe=False)
 
 
 def getPhoneCall(request):
@@ -105,7 +105,7 @@ def getReportList(request):
 
 def getReportDetail(request):
     content = json.loads(ManeuRefraction.objects.filter(id=request.GET.get('code')).first().content)
-    return JsonResponse(content)
+    return JsonResponse(content, safe=False)
 
 
 def getServiceList(request):
@@ -116,7 +116,7 @@ def getServiceList(request):
 
 def getServiceDetail(request):
     content = json.loads(ManeuService.objects.filter(id=request.GET.get('code')).first())
-    return JsonResponse(content)
+    return JsonResponse(content, safe=False)
 
 
 def Test(request):
