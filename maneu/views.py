@@ -18,7 +18,7 @@ def login(request):
     else:
         data = ManeuGuess.objects.filter(phone=request.GET.get('call')).first()
         content = {'status': True, 'message': 'success', 'content': {'call': data.phone, 'name': data.name, 'id': data.id}}
-    return JsonResponse(content, safe=False)
+    return JsonResponse(content)
 
 
 def getPhoneCall(request):
@@ -66,29 +66,13 @@ def getOrderDetail(request):
     return JsonResponse(content, safe=False)
 
 
-
 def getReportList(request):
-    # getAccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token'
-    # data = {"appid": "wxf48b774de9be5613",
-    #         "secret": "9b0d309b24e5cd3298f67f570ce5bfde",
-    #         "grant_type": "client_credential"
-    #         }
-    # access_token = requests.get(getAccessTokenUrl, data).json()
-    #
-    # getPhoneUrl = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
-    # data = {'code': request.GET.get('code')}
-    # phone = requests.post(getPhoneUrl, json.dumps(data)).json()
-    # if phone['errcode'] == 0:
-    #     guess = ManeuGuess.objects.filter(phone=phone['phone_info']['purePhoneNumber']).order_by('-time').first()
-    #
-    #     content = list(ManeuRefraction.objects.filter(guess_id=guess.id).order_by('-time').all().values('id', 'time'))
-    #     return JsonResponse(content, safe=False)
-    # else:
-    #     return JsonResponse(phone)
-    #
-    guess = ManeuGuess.objects.filter(phone=request.GET.get('code')).order_by('-time').first()
-    content = list(ManeuRefraction.objects.filter(guess_id=guess.id).order_by('-time').all().values('id', 'time'))
-    return JsonResponse(content, safe=False)
+    if(request.GET.get('code') == ''):
+        content = {'status': False, 'message': 'code is none', 'data': {}}
+    else:
+        data = ManeuRefraction.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time')
+        content = {'status': True, 'message': 'success', 'content': list(data)}
+    return JsonResponse(content)
 
 
 def getReportDetail(request):
