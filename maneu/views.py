@@ -82,7 +82,7 @@ def getReportDetail(request):
 
 def getServiceList(request):
     content = list(ManeuService.objects.filter().order_by('-time').all().values('time', 'id'))
-    print(content )
+    print(content)
     return JsonResponse(content,safe=False)
 
 
