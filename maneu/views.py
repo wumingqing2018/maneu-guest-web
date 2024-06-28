@@ -81,10 +81,12 @@ def getReportDetail(request):
 
 
 def getServiceList(request):
-    content = list(ManeuService.objects.filter().order_by('-time').all().values('time', 'id'))
-    print(content)
-    return JsonResponse(content,safe=False)
-
+    if(request.GET.get('code') == ''):
+        content = {'status': False, 'message': 'code is none', 'data': {}}
+    else:
+        data = list(ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('time', 'id'))
+        content = {'status': True, 'message': 'success', 'content': list(data)}
+    return JsonResponse(content)
 
 def getServiceDetail(request):
     content = json.loads(ManeuService.objects.filter(id=request.GET.get('code')).first())
