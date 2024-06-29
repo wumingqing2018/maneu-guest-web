@@ -39,8 +39,8 @@ def getOrderList(request):
     if(request.GET.get('code') == ''):
         content = {'status': False, 'message': 'code is none', 'data': {}}
     else:
-        data = list(ManeuOrder.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time'))
-        content = {'status': True, 'message': 'success', 'content': data}
+        data = ManeuOrder.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time')
+        content = {'status': True, 'message': 'success', 'content': list(data)}
     return JsonResponse(content)
 
 
@@ -84,7 +84,7 @@ def getServiceList(request):
     if(request.GET.get('code') == ''):
         content = {'status': False, 'message': 'code is none', 'data': {}}
     else:
-        data = list(ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('time', 'id'))
+        data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('time', 'id')
         content = {'status': True, 'message': 'success', 'content': list(data)}
     return JsonResponse(content)
 
