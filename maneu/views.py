@@ -46,7 +46,7 @@ def getOrderList(request):
 
 def getOrderDetail(request):
     if(request.GET.get('code') == ''):
-        content = {'status': False, 'message': 'code is none', 'data': {}}
+        content = {'status': False, 'message': 'code is none'}
     else:
         order = ManeuOrderV2.objects.filter(id=request.GET.get('code')).first()
         store = ManeuStore.objects.filter(id=order.store_id).first()
