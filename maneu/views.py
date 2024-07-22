@@ -50,7 +50,7 @@ def getOrderDetail(request):
     else:
         data = ManeuOrder.objects.filter(id=request.GET.get('code')).first()
         store = ManeuStore.objects.filter(id=data.store_id).first()
-        content = {'status': True, 'message': 'success', 'content': {'time': data.time, 'data': store.content}}
+        content = {'status': True, 'message': 'success', 'content': {'time': data.time, 'data': list(store.content)}}
     return JsonResponse(content)
 
 
