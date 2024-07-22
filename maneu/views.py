@@ -45,25 +45,14 @@ def getOrderList(request):
 
 
 def getOrderDetail(request):
-    content = []
-    order = ManeuOrder.objects.filter(id=request.GET.get('code')).first()
-    store_content = json.loads(ManeuStore.objects.filter(id=order.store_id).first().content)
-    store_length = math.ceil(len(store_content)/5)
-    store_list = []
-    for i in range(1, store_length+1):
-        store_list.append({'arg0': store_content['arg'+ str(i) +'0'],
-                           'arg1': store_content['arg'+ str(i) +'1'],
-                           'arg2': store_content['arg'+ str(i) +'2'],
-                           'arg3': store_content['arg'+ str(i) +'3'],
-                           'arg4': store_content['arg'+ str(i) +'4'],
-                           })
-    try:
-        content.append(store_content['remark'])
-    except:
-        content.append('')
-    content.append(store_list)
-    content.append(json.loads(ManeuVision.objects.filter(id=order.vision_id).first().content))
-    return JsonResponse(content, safe=False)
+    if(request.GET.get('code') == ''):
+        content = {'status': False, 'message': 'code is none', 'data': {}}
+    else:
+        data = ManeuOrder.objects.filter(id=request.GET.get('code')).first()
+        store = ManeuStore.objects.filter(id=data.store_id).first()
+        content = {'status': True, 'message': 'success', 'content': {'time': data.time, 'date': store.content}}
+    return JsonResponse(content)
+
 
 
 def getReportList(request):
@@ -88,10 +77,14 @@ def getServiceList(request):
         content = {'status': True, 'message': 'success', 'content': list(data)}
     return JsonResponse(content)
 
-def getServiceDetail(request):
-    content = json.loads(ManeuService.objects.filter(id=request.GET.get('code')).first())
-    return JsonResponse(content, safe=False)
 
+def getServiceDetail(request):
+    if(request.GET.get('code') == ''):
+        content = {'status': False, 'message': 'code is none', 'data': {}}
+    else:
+        data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').first()
+        content = {'status': True, 'message': 'success', 'content': list(data)}
+    return JsonResponse(content)
 
 def Test(request):
     content = list(ManeuOrder.objects.filter(phone='13640651582').order_by('-time').all().values('id', 'time'))
