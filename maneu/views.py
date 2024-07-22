@@ -51,12 +51,8 @@ def getOrderDetail(request):
         order = ManeuOrderV2.objects.filter(id=request.GET.get('code')).first()
         store = ManeuStore.objects.filter(id=order.store_id).first()
         vision = ManeuVision.objects.filter(id=order.vision_id).first()
-        content = {'status': True, 'message': 'success', 'content': {'time': order.time,
-                                                                     'store': json.loads(store.content)},
-                   'vision': json.loads(vision.content)
-                   }
+        content = {'status': True, 'message': 'success', 'content': {'time': order.time, 'store': json.loads(store.content), 'vision': json.loads(vision.content)}}
     return JsonResponse(content)
-
 
 
 def getReportList(request):
