@@ -24,8 +24,7 @@ def get_list(request):
         content = {'status': False, 'message': 'code is none', 'data': {}}
     else:
         if request.GET.get('text') == "Order":
-            data = ManeuOrder.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
-                                                                                                              'time')
+            data = ManeuOrder.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Service":
             data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
@@ -48,14 +47,14 @@ def get_detail(request):
             vision = ManeuVision.objects.filter(id=order.vision_id).first()
             content = {'status': True,
                        'message': 'success',
-                        'time': order.time,
+                        "time": order.time,
                        'store': json.loads(store.content),
                        'vision': json.loads(vision.content)}
         except Exception as e:
                 content = {'status': False, 'message': e}
     elif request.GET.get('text') == "Service":
         try:
-            data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').first()
+            data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').first().values('time', 'content')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         except Exception as e:
             content = {'status': False, 'message': e}
