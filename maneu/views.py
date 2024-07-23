@@ -20,18 +20,23 @@ def login(request):
 
 
 def get_list(request):
-    if request.GET.get('code') != '':
+    if request.GET.get('code') == '':
+        content = {'status': False, 'message': 'code is none', 'data': {}}
+    else:
         if request.GET.get('text') == "Order":
-            data = ManeuOrder.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time')
+            data = ManeuOrder.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
+                                                                                                              'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Service":
-            data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time')
+            data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
+                                                                                                                'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Refraction":
-            data = ManeuRefraction.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time')
+            data = ManeuRefraction.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
+                                                                                                                   'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
-    else:
-        content = {'status': False, 'message': 'code is none', 'data': {}}
+        else:
+            content = {'status': False, 'message': 'code is none', 'data': {}}
     return JsonResponse(content)
 
 
