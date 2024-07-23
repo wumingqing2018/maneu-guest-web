@@ -20,11 +20,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login, name='login'),
     path('get_list/', views.get_list, name='get_list'),
-    path('getReportList/', views.getReportList, name='getReportList'),
-    path('getServiceList/', views.getServiceList, name='getServiceList'),
-    path('getOrderDetail/', views.getOrderDetail, name='getOrderDetail'),
-    path('getReportDetail/', views.getReportDetail, name='getReportDetail'),
-    path('getServiceDetail/', views.getServiceDetail, name='getServiceDetail'),
+    path('get_detail/', views.get_detail, name='get_detail'),
     path('Test/', views.Test, name='Test'),
-
 ]
