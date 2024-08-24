@@ -1,8 +1,6 @@
 import json
-# import requests
 from django.http import JsonResponse
 from django.shortcuts import render
-
 from maneu.models import *
 
 
@@ -27,12 +25,10 @@ def get_list(request):
             data = ManeuOrder.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Service":
-            data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
-                                                                                                                'time')
+            data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Refraction":
-            data = ManeuRefraction.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
-                                                                                                                   'time')
+            data = ManeuRefraction.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         else:
             content = {'status': False, 'message': 'code is none', 'data': {}}
@@ -47,11 +43,11 @@ def get_detail(request):
             vision = ManeuVision.objects.filter(id=order.vision_id).first()
             content = {'status': True,
                        'message': 'success',
-                        "time": order.time,
+                       'time': order.time,
                        'store': json.loads(store.content),
                        'vision': json.loads(vision.content)}
         except Exception as e:
-                content = {'status': False, 'message': e}
+            content = {'status': False, 'message': e}
     elif request.GET.get('text') == "Service":
         try:
             data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').first().values('time', 'content')
@@ -67,22 +63,3 @@ def get_detail(request):
     else:
         content = {'status': False, 'message': 'code is none'}
     return JsonResponse(content)
-
-
-def Test(request):
-    content = list(ManeuOrder.objects.filter(phone='13640651582').order_by('-time').all().values('id', 'time'))
-    return JsonResponse(content, safe=False)
-
-
-# def getPhoneCall(request):
-#     getAccessTokenUrl = 'https://api.weixin.qq.com/cgi-bin/token'
-#     data = {"appid": "wxf48b774de9be5613",
-#             "secret": "9b0d309b24e5cd3298f67f570ce5bfde",
-#             "grant_type": "client_credential"
-#             }
-#     access_token = requests.get(getAccessTokenUrl, data).json()
-#
-#     getPhoneUrl = 'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='+access_token['access_token']
-#     data = {'code': request.GET.get('code')}
-#     phone = requests.post(getPhoneUrl, json.dumps(data)).json()
-#     return JsonResponse(phone)
