@@ -5,11 +5,7 @@ from maneu.models import *
 
 import os
 from aliyunsdkcore.client import AcsClient
-from aliyunsdkcore.acs_exception.exceptions import ClientException
-from aliyunsdkcore.acs_exception.exceptions import ServerException
-from aliyunsdkcore.auth.credentials import AccessKeyCredential
-from aliyunsdkcore.auth.credentials import StsTokenCredential
-from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
+from aliyunsdkcore.request import CommonRequest
 
 def index(request):
     return render(request, 'index.html')
@@ -73,20 +69,31 @@ def get_detail(request):
 
 
 def sendSMS(request):
-    # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
-    credentials = AccessKeyCredential(access_key_id="LTAI5tHZfZCA2dDYRNYr2npm", access_key_secret="bEIG6o5Rm4Zo7QwwZPGb1GLpCb9TCm")
-    # use STS Token
-    # credentials = StsTokenCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'], os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'], os.environ['ALIBABA_CLOUD_SECURITY_TOKEN'])
-    client = AcsClient(region_id='cn-shenzhen', credential=credentials)
+    # 创建AcsClient实例，需替换为您自己的AccessKey信息
+    ACCESS_KEY_ID = 'LTAI5tCTtBTqsjYnsgHHGt8H'  # 在阿里云控制台创建AccessKey时自动生成的一对访问密钥，上面保存的AccessKey
+    ACCESS_KEY_SECRET = '1lMUPjj2tOi9c1OyNpCOrsbNhmWrZQ'  # 在阿里云控制台创建AccessKey时自动生成的一对访问密钥AccessKey
+    SIGN_NAME = '徕可'  # 短信签名
+    template_code = 'maneu'  # 短信模板CODE
+    PhoneNumber = '13268651582'  # 绑定的测试手机号
+    acs_client = AcsClient(ACCESS_KEY_ID, ACCESS_KEY_SECRET, template_code)
 
-    request = SendSmsRequest()
-    request.set_accept_format('json')
+    # 创建CommonRequest实例
+    request = CommonRequest()
 
-    request.set_SignName("阿里云短信测试")
-    request.set_TemplateCode("SMS_154950909")
-    request.set_PhoneNumbers("13640651582")
-    request.set_TemplateParam("{\"code\":\"1234\"}")
+    # 设置请求参数,下面这5行其实不用动
+    request.set_accept_format('json')  # 设置API响应格式的方法
+    request.set_domain('dysmsapi.aliyuncs.com')  # 设置API的域名的方法
+    request.set_method('POST')  # 设置API请求方法
+    request.set_version('2017-05-25')  # 设置API版本号
+    request.set_action_name('SendSms')  # 设置API操作名
 
-    response = client.do_action_with_exception(request)
-    # python2:  print(response)
-    print(str(response, encoding='utf-8'))
+    # 设置短信模板参数
+    request.add_query_param('PhoneNumbers', PhoneNumber)
+    request.add_query_param('SignName', SIGN_NAME)
+    request.add_query_param('TemplateCode', template_code)
+    request.add_query_param('TemplateParam', '{"code":"123456"}')
+
+    # 发送短信请求并获取返回结果
+    response = acs_client.do_action_with_exception(request)
+
+    print(response)
