@@ -20,5 +20,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login, name='login'),
     path('get_list/', views.get_list, name='get_list'),
-    path('get_detail/', views.get_detail, name='get_detail')
+    path('get_detail/', views.get_detail, name='get_detail'),
+    path('sendSMS/', views.sendSMS, name='sendSMS')
 ]
