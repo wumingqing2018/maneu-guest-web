@@ -85,7 +85,7 @@ def sendSMS(request):
     request.set_SignName("徕可")
     request.set_TemplateCode("SMS_471990239")
     request.set_PhoneNumbers("13640651582")
-    request.set_TemplateParam("{\"code\":\"1234\"}")
+    request.set_TemplateParam("{'code':'123'}")
 
     response = client.do_action_with_exception(request)
     # python2:  print(response)
