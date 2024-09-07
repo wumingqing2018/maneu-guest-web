@@ -76,7 +76,6 @@ def sendSMS(request):
     template_code = 'maneu'  # 短信模板CODE
     PhoneNumber = '13268651582'  # 绑定的测试手机号
     acs_client = AcsClient(ACCESS_KEY_ID, ACCESS_KEY_SECRET, template_code)
-
     # 创建CommonRequest实例
     request = CommonRequest()
 
