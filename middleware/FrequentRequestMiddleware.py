@@ -1,6 +1,7 @@
-from django.utils.deprecation import MiddlewareMixin
-from common import common
 import time
+
+from common import common
+from django.utils.deprecation import MiddlewareMixin
 
 
 class FrequentRequestMiddleware(MiddlewareMixin):
