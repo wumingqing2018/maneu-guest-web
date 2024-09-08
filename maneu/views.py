@@ -1,9 +1,5 @@
 import json
-import os
 
-from aliyunsdkcore.auth.credentials import AccessKeyCredential
-from aliyunsdkcore.client import AcsClient
-from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
 from django.http import JsonResponse
 from django.shortcuts import render
 
