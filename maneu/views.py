@@ -83,9 +83,7 @@ def get_detail(request):
 def sendsms(request):
     pattern = re.compile(r'^1[3-9]\d{9}$')
     code = str(request.GET.get('code'))
-    print(pattern.match(code))
-
-    try:
+    if pattern.match(code) is None:
             # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
             credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'], os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'])
             # use STS Token
@@ -103,6 +101,6 @@ def sendsms(request):
             response = client.do_action_with_exception(request)
             # python2:  print(response)
             print(str(response, encoding='utf-8'))
-    except Exception as e:
-            print(e)
+    else:
+        content = {'status': False, 'message': 'code is none', 'data': {}}
     return JsonResponse('1')
