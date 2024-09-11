@@ -92,7 +92,7 @@ def sendsms(request):
             request.set_accept_format('json')
             request.set_SignName("徕可")
             request.set_TemplateCode("SMS_471990239")
-            request.set_PhoneNumbers("13640651582")
+            request.set_PhoneNumbers(data.phone)
             request.set_TemplateParam("{\"code\":\"1234\"}")
 
             response = client.do_action_with_exception(request)
