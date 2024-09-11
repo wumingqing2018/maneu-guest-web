@@ -79,7 +79,7 @@ def get_detail(request):
 
 def sendsms(request):
     # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
-    credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_IDv'],
+    credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'],
                                       os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'])
     # use STS Token
     # credentials = StsTokenCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'], os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'], os.environ['ALIBABA_CLOUD_SECURITY_TOKEN'])
