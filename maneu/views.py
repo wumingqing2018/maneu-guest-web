@@ -95,8 +95,8 @@ def sendsms(request):
 
         # python2:  print(response)
         response1 = client.do_action_with_exception(request)
-        response2 = str(response1, encoding='utf-8')
-        content = {'status': True, 'message': response2, 'data': response1}
+        # response2 = str(response1, encoding='utf-8')
+        content = {'status': True, 'message': '', 'data': response1}
     else:
         content = {'status': False, 'message': 'code is :none', 'data': {}}
     return JsonResponse(content)
