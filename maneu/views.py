@@ -93,7 +93,7 @@ def sendsms(request):
         request.set_TemplateParam("{\"code\":\"1234\"}")
 
         # python2:  print(response)
-        content = client.do_action_with_exception(request)
+        content = {'status': True, 'message': 'ok', 'data': client.do_action_with_exception(request)}
     else:
-        content = {'status': False, 'message': 'code is none', 'data': {}}
+        content = {'status': False, 'message': 'code is :none', 'data': {}}
     return JsonResponse(content)
