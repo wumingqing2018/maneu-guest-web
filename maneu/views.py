@@ -78,28 +78,21 @@ def get_detail(request):
 
 
 def sendsms(request):
-    pattern = re.compile(r'^1[3-9]\d{9}$')
-    code = str(request.GET.get('code'))
-    if pattern.match(code) is None:
-        # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
-        credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_IDv'],
-                                          os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'])
-        # use STS Token
-        # credentials = StsTokenCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'], os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'], os.environ['ALIBABA_CLOUD_SECURITY_TOKEN'])
-        client = AcsClient(region_id='cn-shenzhen', credential=credentials)
+    # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
+    credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_IDv'],
+                                      os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'])
+    # use STS Token
+    # credentials = StsTokenCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'], os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'], os.environ['ALIBABA_CLOUD_SECURITY_TOKEN'])
+    client = AcsClient(region_id='cn-shenzhen', credential=credentials)
 
-        request = SendSmsRequest()
-        request.set_accept_format('json')
+    request = SendSmsRequest()
+    request.set_accept_format('json')
 
-        request.set_SignName("徕可")
-        request.set_TemplateCode("SMS_471990239")
-        request.set_PhoneNumbers("13640651582")
-        request.set_TemplateParam("{\"code\":\"1234\"}")
+    request.set_SignName("徕可")
+    request.set_TemplateCode("SMS_471990239")
+    request.set_PhoneNumbers("13640651582")
+    request.set_TemplateParam("{\"code\":\"1234\"}")
 
-        response = client.do_action_with_exception(request)
-        # python2:  print(response)
-        # print(str(response, encoding='utf-8'))
-        content = response
-    else:
-        content = {'status': False, 'message': 'code is none', 'data': {}}
-    return JsonResponse(content)
+    response = client.do_action_with_exception(request)
+    # python2:  print(response)
+    print(str(response, encoding='utf-8'))
