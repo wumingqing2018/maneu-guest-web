@@ -79,6 +79,8 @@ def sendsms(request):
     pattern = re.compile(r'^1[3-9]\d{9}$')
     phone_number = request.GET.get('code')
     if pattern.match(str(phone_number)) is not None:
+        data = ManeuGuess.objects.filter(phone=request.GET.get('call')).first()
+        print(data.phone)
         # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
         credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'],
                                           os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'])
