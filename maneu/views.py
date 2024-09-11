@@ -82,7 +82,7 @@ def get_detail(request):
 
 def sendsms(request):
     pattern = re.compile(r'^1[3-9]\d{9}$')
-    code = request.GET.get('code')
+    code = str(request.GET.get('code'))
     print(pattern.match(code))
 
     try:
