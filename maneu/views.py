@@ -77,9 +77,9 @@ def get_detail(request):
 
 def sendsms(request):
     pattern = re.compile(r'^1[3-9]\d{9}$')
-    phone_number = request.GET.get('code')
-    if pattern.match(str(phone_number)) is not None:
-        data = ManeuGuess.objects.filter(phone=request.GET.get('call')).first()
+    phone_number = str(request.GET.get('code'))
+    if pattern.match(phone_number) is not None:
+        data = ManeuGuess.objects.filter(phone=phone_number).first()
         if data is not None:
             # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
             credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'],
@@ -92,7 +92,7 @@ def sendsms(request):
             request.set_accept_format('json')
             request.set_SignName("徕可")
             request.set_TemplateCode("SMS_471990239")
-            request.set_PhoneNumbers(data.phone)
+            request.set_PhoneNumbers(phone_number)
             request.set_TemplateParam("{\"code\":\"1234\"}")
 
             response = client.do_action_with_exception(request)
