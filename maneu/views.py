@@ -1,4 +1,5 @@
 import json, os, re
+from http.client import responses
 
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
@@ -93,7 +94,9 @@ def sendsms(request):
         request.set_TemplateParam("{\"code\":\"1234\"}")
 
         # python2:  print(response)
-        content = {'status': True, 'message': 'ok', 'data': client.do_action_with_exception(request)}
+        response1 = client.do_action_with_exception(request)
+        response2 = str(response1, encoding='utf-8')
+        content = {'status': True, 'message': 'ok', 'data': response2}
     else:
         content = {'status': False, 'message': 'code is :none', 'data': {}}
     return JsonResponse(content)
