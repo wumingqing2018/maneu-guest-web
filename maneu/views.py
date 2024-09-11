@@ -1,6 +1,4 @@
-import json
-import os
-import re
+import json, os, re
 
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
@@ -26,23 +24,22 @@ def login(request):
 
 
 def get_list(request):
-    if request.GET.get('code') == '':
-        content = {'status': False, 'message': 'code is none', 'data': {}}
-    else:
+    pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
+    code = request.GET.get('code')
+    if pattern.match(str(code)) is not None:
         if request.GET.get('text') == "Order":
-            data = ManeuOrder.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
-                                                                                                              'time')
+            data = ManeuOrder.objects.filter(guess_id=code).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Service":
-            data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
-                                                                                                                'time')
+            data = ManeuService.objects.filter(guess_id=code).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Refraction":
-            data = ManeuRefraction.objects.filter(guess_id=request.GET.get('code')).order_by('-time').all().values('id',
-                                                                                                                   'time')
+            data = ManeuRefraction.objects.filter(guess_id=code).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         else:
             content = {'status': False, 'message': 'code is none', 'data': {}}
+    else:
+        content = {'status': False, 'message': 'code is none', 'data': {}}
     return JsonResponse(content)
 
 
@@ -80,8 +77,7 @@ def get_detail(request):
 def sendsms(request):
     pattern = re.compile(r'^1[3-9]\d{9}$')
     phone_number = request.GET.get('code')
-    print(phone_number)
-    if pattern.match(str(phone_number)) is None:
+    if pattern.match(str(phone_number)) is not None:
         # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
         credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'],
                                           os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'])
@@ -91,15 +87,13 @@ def sendsms(request):
 
         request = SendSmsRequest()
         request.set_accept_format('json')
-
         request.set_SignName("徕可")
         request.set_TemplateCode("SMS_471990239")
         request.set_PhoneNumbers("13640651582")
         request.set_TemplateParam("{\"code\":\"1234\"}")
 
-        response = client.do_action_with_exception(request)
         # python2:  print(response)
-        content = response
+        content = client.do_action_with_exception(request)
     else:
         content = {'status': False, 'message': 'code is none', 'data': {}}
     return JsonResponse(content)
