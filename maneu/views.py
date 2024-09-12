@@ -110,7 +110,6 @@ def sendsms(request):
 
             response = client.do_action_with_exception(request)
             content = {'status': True, 'message': '2', 'data': {}}
-
         else:
             content = {'status': False, 'message': 'phone is :none', 'data': {}}
     else:
