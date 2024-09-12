@@ -98,7 +98,7 @@ def sendsms(request):
 
             response1 = client.do_action_with_exception(request)
             response2 = str(response1, encoding='utf-8')
-            content = {'status': True, 'message': response2, 'data': response1}
+            content = {'status': True, 'message': response2, 'data': {}}
         else:
             content = {'status': False, 'message': 'phone is :none', 'data': {}}
     else:
