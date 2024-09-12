@@ -37,6 +37,7 @@ def login(request):
 def get_list(request):
     pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
     code = request.GET.get('code')
+
     if pattern.match(str(code)) is not None:
         if request.GET.get('text') == "Order":
             data = ManeuOrder.objects.filter(guess_id=code).order_by('-time').all().values('id', 'time')
@@ -51,6 +52,7 @@ def get_list(request):
             content = {'status': False, 'message': 'code is none', 'data': {}}
     else:
         content = {'status': False, 'message': 'code is none', 'data': {}}
+
     return JsonResponse(content)
 
 
@@ -88,6 +90,7 @@ def get_detail(request):
 def sendsms(request):
     pattern = re.compile(r'^1[3-9]\d{9}$')
     phone_number = str(request.GET.get('code'))
+
     if pattern.match(phone_number) is not None:
         random_num = random.randint(111111,999999)
         data = ManeuGuess.objects.filter(phone=phone_number).update(remark=random_num)
@@ -112,4 +115,5 @@ def sendsms(request):
             content = {'status': False, 'message': 'phone is :none', 'data': {}}
     else:
         content = {'status': False, 'message': 'code is :none', 'data': {}}
+
     return JsonResponse(content)
