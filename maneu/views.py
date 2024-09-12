@@ -94,11 +94,11 @@ def sendsms(request):
             request.set_SignName("徕可")
             request.set_TemplateCode("SMS_471990239")
             request.set_PhoneNumbers(phone_number)
-            request.set_TemplateParam("{\"code\":\"1234\"}")
+            request.set_TemplateParam({'code': random_num})
 
             response1 = client.do_action_with_exception(request)
             response2 = str(response1, encoding='utf-8')
-            content = {'status': True, 'message': response1, 'data': {}}
+            content = {'status': True, 'message': response2, 'data': response1}
         else:
             content = {'status': False, 'message': 'phone is :none', 'data': {}}
     else:
