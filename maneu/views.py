@@ -1,4 +1,4 @@
-import json, os, re
+import json, os, re,random
 from http.client import responses
 
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
@@ -79,7 +79,8 @@ def sendsms(request):
     pattern = re.compile(r'^1[3-9]\d{9}$')
     phone_number = str(request.GET.get('code'))
     if pattern.match(phone_number) is not None:
-        data = ManeuGuess.objects.filter(phone=phone_number).first()
+        random_num = random.randint(111111,999999)
+        data = ManeuGuess.objects.filter(phone=phone_number).update(remark=random_num)
         if data is not None:
             # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
             credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'],os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'])
@@ -92,11 +93,11 @@ def sendsms(request):
             request.set_SignName("徕可")
             request.set_TemplateCode("SMS_471990239")
             request.set_PhoneNumbers(phone_number)
-            request.set_TemplateParam("{\"code\":\"1234\"}")
+            request.set_TemplateParam({'code':data })
 
-            response = client.do_action_with_exception(request)
-            # response2 = str(response1, encoding='utf-8')
-            content = {'status': True, 'message': '', 'data': response}
+            response1 = client.do_action_with_exception(request)
+            response2 = str(response1, encoding='utf-8')
+            content = {'status': True, 'message': response2, 'data': {}}
         else:
             content = {'status': False, 'message': 'phone is :none', 'data': {}}
     else:
