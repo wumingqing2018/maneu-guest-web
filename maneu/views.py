@@ -15,12 +15,21 @@ def index(request):
 
 
 def login(request):
-    if request.GET.get('call') == '' or request.GET.get('code') == '':
-        content = {'status': False, 'message': 'call or code is none', 'data': {}}
+    pattern_call = re.compile(r'^1[3-9]\d{9}$')
+    pattern_code = re.compile(r'^\d{6}$')
+
+    call = request.GET.get('call')
+    code = request.GET.get('code')
+    if pattern_call.match(call) is not None:
+        if pattern_code.match(code) is not None:
+            data = ManeuGuess.objects.filter(phone=call, remark=code).first()
+            content = {'status': True, 'message': 'success',
+                       'content': {'call': data.phone, 'name': data.name, 'id': data.id}}
+        else:
+            content = {'status': False, 'message': 'code is warning', 'data': {}}
     else:
-        data = ManeuGuess.objects.filter(phone=request.GET.get('call')).first()
-        content = {'status': True, 'message': 'success',
-                   'content': {'call': data.phone, 'name': data.name, 'id': data.id}}
+        content = {'status': False, 'message': 'call is none', 'data': {}}
+
     return JsonResponse(content)
 
 
