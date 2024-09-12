@@ -20,6 +20,7 @@ def login(request):
 
     call = request.GET.get('call')
     code = request.GET.get('code')
+
     if pattern_call.match(call) is not None:
         if pattern_code.match(code) is not None:
             data = ManeuGuess.objects.filter(phone=call, remark=code).first()
