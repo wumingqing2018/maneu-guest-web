@@ -96,10 +96,7 @@ def sendsms(request):
             request.set_TemplateParam({'code': random_num})
 
             response = client.do_action_with_exception(request)
-            try:
-                content = {'status': True, 'message': '1', 'data': response}
-            except:
-                content = {'status': True, 'message': '2', 'data': json.load(response)}
+            content = {'status': True, 'message': '2', 'data': {}}
 
         else:
             content = {'status': False, 'message': 'phone is :none', 'data': {}}
