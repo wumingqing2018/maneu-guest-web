@@ -108,8 +108,10 @@ def sendsms(request):
             request.set_TemplateCode("SMS_471990239")
             request.set_PhoneNumbers(phone_number)
             request.set_TemplateParam({'code': random_num})
+
             response =client.do_action_with_exception(request)
             response = eval(response)
+
             if response['Code'] == 'OK':
                 content = {'status': True, 'message': 'OK', 'data': {}}
             else:
