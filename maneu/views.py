@@ -110,6 +110,8 @@ def sendsms(request):
             request.set_TemplateParam({'code': random_num})
 
             response = eval(client.do_action_with_exception(request))
+            print(response['Code'] )
+            print(str(response['Message'], "utf-8")
             if response['Code'] =='OK':
                 content = {'status': True, 'message': str(response['Message'], "utf-8"), 'data': {}}
             else:
