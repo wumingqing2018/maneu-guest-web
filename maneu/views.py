@@ -111,7 +111,7 @@ def sendsms(request):
 
             response = eval(client.do_action_with_exception(request))
             print(response)
-            if response.code =='OK':
+            if response['code'] =='OK':
                 content = {'status': True, 'message': response['code'], 'data': {}}
             else:
                 content = {'status': False, 'message': response['code'], 'data': {}}
