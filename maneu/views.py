@@ -110,11 +110,11 @@ def sendsms(request):
             request.set_TemplateParam({'code': random_num})
 
             response = client.do_action_with_exception(request)
-            response2 = str(response, encoding='utf-8')
+            if response.code =='OK':
+                content = {'status': True, 'message': '1', 'data': {}}
+            else:
+                content = {'status': True, 'message': response.code, 'data': {}}
 
-            print(response)
-            print(response2)
-            content = {'status': True, 'message': '2', 'data': {}}
         else:
             content = {'status': False, 'message': 'phone is :none', 'data': {}}
     else:
