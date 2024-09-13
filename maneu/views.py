@@ -1,4 +1,5 @@
 import json, os, re,random
+from encodings.utf_7 import encode
 from http.client import responses
 
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
@@ -109,6 +110,7 @@ def sendsms(request):
             request.set_TemplateParam({'code': random_num})
 
             response = client.do_action_with_exception(request)
+            print(response)
             content = {'status': True, 'message': '2', 'data': {}}
         else:
             content = {'status': False, 'message': 'phone is :none', 'data': {}}
