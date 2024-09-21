@@ -81,6 +81,7 @@ def get_detail(request):
 
 def sendsms(request):
     call = verify.is_call(request.GET.get('call'))
+    print(call)
 
     if call:
         random_num = random.randint(111111, 999999)
