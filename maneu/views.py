@@ -80,7 +80,7 @@ def get_detail(request):
 
 
 def sendsms(request):
-    call = verify.is_call(request.GET.get('call'))
+    call = verify.is_call(request.GET.get('code'))
     print(call)
 
     if call:
