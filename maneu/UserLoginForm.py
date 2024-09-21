@@ -12,8 +12,8 @@ class UserLoginForm(forms.Form):
                            widget=widgets.TextInput(
                                attrs={'id': 'call', 'class': 'form-control', 'placeholder': '手机号'}
                            ),
-                           validators=[RegexValidator(
-                               r'^1[3-9]\d{9}$', '请输入正确的手机号')
+                           validators=[
+                               RegexValidator(r'^1[3-9]\d{9}$', '请输入正确的手机号')
                            ],
                            error_messages={'required': '请输入手机号'},
                            )
@@ -23,8 +23,8 @@ class UserLoginForm(forms.Form):
                            widget=widgets.PasswordInput(
                                attrs={'id': 'code', 'class': 'form-control', 'placeholder': '验证码'}
                            ),
-                           validators=[RegexValidator(
-                               r'^\d{6}$', '请输入正确的验证码')
+                           validators=[
+                               RegexValidator(r'^\d{6}$', '请输入正确的验证码')
                            ],
                            error_messages={'required': '请输入验证码'},
                            )
