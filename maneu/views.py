@@ -10,26 +10,19 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from maneu.models import *
-
+from common import verify
 
 def index(request):
     return render(request, 'index.html')
 
 
 def login(request):
-    pattern_call = re.compile(r'^1[3-9]\d{9}$')
-    pattern_code = re.compile(r'^\d{6}$')
+    call = verify.is_call(request.GET.get('call'))
+    code = verify.is_code(request.GET.get('code'))
 
-    call = request.GET.get('call')
-    code = request.GET.get('code')
-
-    if pattern_call.match(call) is not None:
-        if pattern_code.match(code) is not None:
-            data = ManeuGuess.objects.filter(phone=call, remark=code).first()
-            content = {'status': True, 'message': 'success',
-                       'content': {'call': data.phone, 'name': data.name, 'id': data.id}}
-        else:
-            content = {'status': False, 'message': 'code is warning', 'data': {}}
+    if call and code:
+        data = ManeuGuess.objects.filter(phone=call, remark=code).first()
+        content = {'status': True, 'message': 'success', 'content': {'call': data.phone, 'name': data.name, 'id': data.id} }
     else:
         content = {'status': False, 'message': 'call is none', 'data': {}}
 
@@ -38,9 +31,9 @@ def login(request):
 
 def get_list(request):
     pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
-    code = request.GET.get('code')
+    code = str(request.GET.get('code'))
 
-    if pattern.match(str(code)) is not None:
+    if pattern.match(code):
         if request.GET.get('text') == "Order":
             data = ManeuOrder.objects.filter(guess_id=code).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
@@ -60,30 +53,20 @@ def get_list(request):
 
 def get_detail(request):
     if request.GET.get('text') == "Order":
-        try:
-            order = ManeuOrderV2.objects.filter(id=request.GET.get('code')).first()
-            store = ManeuStore.objects.filter(id=order.store_id).first()
-            vision = ManeuVision.objects.filter(id=order.vision_id).first()
-            content = {'status': True,
-                       'message': 'success',
-                       'time': order.time,
-                       'store': json.loads(store.content),
-                       'vision': json.loads(vision.content)}
-        except Exception as e:
-            content = {'status': False, 'message': e}
+        order = ManeuOrderV2.objects.filter(id=request.GET.get('code')).first()
+        store = ManeuStore.objects.filter(id=order.store_id).first()
+        vision = ManeuVision.objects.filter(id=order.vision_id).first()
+        content = {'status': True,
+                   'message': 'success',
+                   'time': order.time,
+                   'store': json.loads(store.content),
+                   'vision': json.loads(vision.content)}
     elif request.GET.get('text') == "Service":
-        try:
-            data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').first().values(
-                'time', 'content')
-            content = {'status': True, 'message': 'success', 'content': list(data)}
-        except Exception as e:
-            content = {'status': False, 'message': e}
+        data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').first().values('time', 'content')
+        content = {'status': True, 'message': 'success', 'content': list(data)}
     elif request.GET.get('text') == "Refraction":
-        try:
-            data = json.loads(ManeuRefraction.objects.filter(id=request.GET.get('code')).first().content)
-            content = {'status': True, 'message': 'success', 'content': data}
-        except Exception as e:
-            content = {'status': False, 'message': e}
+        data = json.loads(ManeuRefraction.objects.filter(id=request.GET.get('code')).first().content)
+        content = {'status': True, 'message': 'success', 'content': data}
     else:
         content = {'status': False, 'message': 'code is none'}
     return JsonResponse(content)
@@ -93,10 +76,10 @@ def sendsms(request):
     pattern = re.compile(r'^1[3-9]\d{9}$')
     phone_number = str(request.GET.get('code'))
 
-    if pattern.match(phone_number) is not None:
+    if pattern.match(phone_number):
         random_num = random.randint(111111, 999999)
         data = ManeuGuess.objects.filter(phone=phone_number).update(remark=random_num)
-        if data is not None:
+        if data:
             # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
             credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'],
                                               os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'])
