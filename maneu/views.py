@@ -96,7 +96,6 @@ def sendsms(request):
     if pattern.match(phone_number) is not None:
         random_num = random.randint(111111, 999999)
         data = ManeuGuess.objects.filter(phone=phone_number).update(remark=random_num)
-        print(data)
         if data is not None:
             # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
             credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'],
