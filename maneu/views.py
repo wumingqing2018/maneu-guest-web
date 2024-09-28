@@ -22,7 +22,7 @@ def login(request):
     if call and code:
         data = ManeuGuess.objects.filter(phone=call, remark=code).first()
         if data:
-            content = {'status': True, 'message': 'success', 'content': {'call': data.phone, 'name': data.name, 'id': data.id} }
+            content = {'status': True, 'message': 'success', 'content': {'call': data.phone, 'name': data.name, 'id': data.phone} }
         else:
             content = {'status': False, 'message': 'call is none', 'data': {}}
     else:
@@ -32,17 +32,17 @@ def login(request):
 
 
 def get_list(request):
-    code = verify.is_uuid(request.GET.get('code'))
+    code = verify.is_call(request.GET.get('code'))
 
     if code:
         if request.GET.get('text') == "Order":
-            data = ManeuOrder.objects.filter(guess_id=code).order_by('-time').all().values('id', 'time')
+            data = ManeuOrder.objects.filter(phone=code).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Service":
-            data = ManeuService.objects.filter(guess_id=code).order_by('-time').all().values('id', 'time')
+            data = ManeuService.objects.filter(phone=code).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Refraction":
-            data = ManeuRefraction.objects.filter(guess_id=code).order_by('-time').all().values('id', 'time')
+            data = ManeuRefraction.objects.filter(phone=code).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         else:
             content = {'status': False, 'message': 'code is none', 'data': {}}
