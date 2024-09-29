@@ -1,7 +1,3 @@
-import json
-import os
-import random
-
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
@@ -10,6 +6,8 @@ from django.shortcuts import render
 
 from maneu.models import *
 from common.verify import *
+
+import os, random, json
 
 def index(request):
     return render(request, 'index.html')
