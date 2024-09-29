@@ -9,15 +9,15 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from maneu.models import *
-from common import verify
+from common.verify import *
 
 def index(request):
     return render(request, 'index.html')
 
 
 def login(request):
-    call = verify.is_call(request.GET.get('call'))
-    code = verify.is_code(request.GET.get('code'))
+    call = is_call(request.GET.get('call'))
+    code = is_code(request.GET.get('code'))
 
     if call and code:
         data = ManeuGuess.objects.filter(phone=call, remark=code).first()
@@ -32,7 +32,7 @@ def login(request):
 
 
 def get_list(request):
-    code = verify.is_call(request.GET.get('code'))
+    code = is_call(request.GET.get('code'))
 
     if code:
         if request.GET.get('text') == "Order":
@@ -53,11 +53,11 @@ def get_list(request):
 
 
 def get_detail(request):
-    code = verify.is_uuid(request.GET.get('code'))
+    code = is_uuid(request.GET.get('code'))
 
     if code:
         if request.GET.get('text') == "Order":
-            order = ManeuOrderV2.objects.filter(id=request.GET.get('code')).first()
+            order = ManeuOrderV2.objects.filter(id=code).first()
             store = ManeuStore.objects.filter(id=order.store_id).first()
             vision = ManeuVision.objects.filter(id=order.vision_id).first()
             content = {'status': True,
@@ -66,10 +66,10 @@ def get_detail(request):
                        'store': json.loads(store.content),
                        'vision': json.loads(vision.content)}
         elif request.GET.get('text') == "Service":
-            data = ManeuService.objects.filter(guess_id=request.GET.get('code')).order_by('-time').first().values('time', 'content')
+            data = ManeuService.objects.filter(guess_id=code).order_by('-time').first().values('time', 'content')
             content = {'status': True, 'message': 'success', 'content': list(data)}
         elif request.GET.get('text') == "Refraction":
-            data = json.loads(ManeuRefraction.objects.filter(id=request.GET.get('code')).first().content)
+            data = json.loads(ManeuRefraction.objects.filter(id=code).first().content)
             content = {'status': True, 'message': 'success', 'content': data}
         else:
             content = {'status': False, 'message': 'code is none'}
@@ -80,7 +80,7 @@ def get_detail(request):
 
 
 def sendsms(request):
-    call = verify.is_call(request.GET.get('code'))
+    call = is_call(request.GET.get('code'))
 
     if call:
         random_num = random.randint(111111, 999999)
