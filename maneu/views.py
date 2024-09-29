@@ -19,9 +19,11 @@ def login(request):
 
     if call and code:
         data = ManeuGuess.objects.filter(phone=call, remark=code).all()
-        print(data.values('id'))
         if data:
-            content = {'status': True, 'message': '100000', 'content': {'call': call, 'id': data.values('id')}}
+            id = []
+            for i in data:
+                id.append(i.id)
+            content = {'status': True, 'message': '100000', 'content': {'call': call, 'id': id}}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
