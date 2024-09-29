@@ -18,12 +18,9 @@ def login(request):
     code = is_code(request.GET.get('code'))
 
     if call and code:
-        data = ManeuGuess.objects.filter(phone=call, remark=code).all()
+        data = ManeuGuess.objects.filter(phone=call, remark=code).first()
         if data:
-            id = []
-            for i in data:
-                id.append(i.id)
-            content = {'status': True, 'message': '100000', 'content': {'call': call, 'id': id}}
+            content = {'status': True, 'message': '100000', 'content': {'call': call, 'id': call}}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
@@ -43,8 +40,11 @@ def get_list(request):
             data = ManeuService.objects.filter(phone=code).order_by('-time').all().values('id', 'time')
             content = {'status': True, 'message': '100000', 'content': list(data)}
         elif request.GET.get('text') == "Refraction":
-            data = ManeuRefraction.objects.filter(phone=code).order_by('-time').all().values('id', 'time')
-            content = {'status': True, 'message': '100000', 'content': list(data)}
+            content = []
+            guess = ManeuGuess.objects.filter(phone=code).all()
+            for i in guess:
+                content.extend(ManeuRefraction.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
+            content = {'status': True, 'message': '100000', 'content': content}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
