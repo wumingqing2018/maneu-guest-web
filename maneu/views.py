@@ -18,9 +18,10 @@ def login(request):
     code = is_code(request.GET.get('code'))
 
     if call and code:
-        data = ManeuGuess.objects.filter(phone=call, remark=code).first()
+        data = ManeuGuess.objects.filter(phone=call, remark=code).all()
         if data:
-            content = {'status': True, 'message': '100000', 'content': {'call': data.phone, 'name': data.name, 'id': data.phone}}
+            print(data.id)
+            content = {'status': True, 'message': '100000', 'content': {'call': data.id, 'name': data.name, 'id': data.phone}}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
@@ -58,7 +59,7 @@ def get_detail(request):
             order = ManeuOrderV2.objects.filter(id=code).first()
             store = ManeuStore.objects.filter(id=order.store_id).first()
             vision = ManeuVision.objects.filter(id=order.vision_id).first()
-            content = {'status': True, 'message': '100000', 'content': {'time': order.time, 'store': json.loads(store.content), 'vision': json.loads(vision.content)}}
+            content = {'status': True, 'message': '100000', 'content': {'time': order.time, 'remark':order.remark, 'store': json.loads(store.content), 'vision': json.loads(vision.content)}}
         elif request.GET.get('text') == "Service":
             data = ManeuService.objects.filter(guess_id=code).order_by('-time').first().values('time', 'content')
             content = {'status': True, 'message': '100000', 'content': data}
