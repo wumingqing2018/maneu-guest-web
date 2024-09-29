@@ -20,8 +20,7 @@ def login(request):
     if call and code:
         data = ManeuGuess.objects.filter(phone=call, remark=code).all()
         if data:
-            print(data.id)
-            content = {'status': True, 'message': '100000', 'content': {'call': data.id, 'name': data.name, 'id': data.phone}}
+            content = {'status': True, 'message': '100000', 'content': {'call': call, 'id': data.values('id')}}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
