@@ -22,11 +22,11 @@ def login(request):
     if call and code:
         data = ManeuGuess.objects.filter(phone=call, remark=code).first()
         if data:
-            content = {'status': True, 'message': 'success', 'content': {'call': data.phone, 'name': data.name, 'id': data.phone} }
+            content = {'status': True, 'message': '100000', 'content': {'call': data.phone, 'name': data.name, 'id': data.phone}}
         else:
-            content = {'status': False, 'message': 'call is none', 'data': {}}
+            content = {'status': False, 'message': '100002', 'content': {}}
     else:
-        content = {'status': False, 'message': 'call or code is warning', 'data': {}}
+        content = {'status': False, 'message': '100001', 'content': {}}
 
     return JsonResponse(content)
 
@@ -37,17 +37,17 @@ def get_list(request):
     if code:
         if request.GET.get('text') == "Order":
             data = ManeuOrder.objects.filter(phone=code).order_by('-time').all().values('id', 'time')
-            content = {'status': True, 'message': 'success', 'content': list(data)}
+            content = {'status': True, 'message': '100000', 'content': list(data)}
         elif request.GET.get('text') == "Service":
             data = ManeuService.objects.filter(phone=code).order_by('-time').all().values('id', 'time')
-            content = {'status': True, 'message': 'success', 'content': list(data)}
+            content = {'status': True, 'message': '100000', 'content': list(data)}
         elif request.GET.get('text') == "Refraction":
             data = ManeuRefraction.objects.filter(phone=code).order_by('-time').all().values('id', 'time')
-            content = {'status': True, 'message': 'success', 'content': list(data)}
+            content = {'status': True, 'message': '100000', 'content': list(data)}
         else:
-            content = {'status': False, 'message': 'code is none', 'data': {}}
+            content = {'status': False, 'message': '100002', 'content': {}}
     else:
-        content = {'status': False, 'message': 'code is none', 'data': {}}
+        content = {'status': False, 'message': '100001', 'content': {}}
 
     return JsonResponse(content)
 
@@ -60,21 +60,17 @@ def get_detail(request):
             order = ManeuOrderV2.objects.filter(id=code).first()
             store = ManeuStore.objects.filter(id=order.store_id).first()
             vision = ManeuVision.objects.filter(id=order.vision_id).first()
-            content = {'status': True,
-                       'message': 'success',
-                       'time': order.time,
-                       'store': json.loads(store.content),
-                       'vision': json.loads(vision.content)}
+            content = {'status': True, 'message': '100000', 'content': {'time': order.time, 'store': json.loads(store.content), 'vision': json.loads(vision.content)}}
         elif request.GET.get('text') == "Service":
             data = ManeuService.objects.filter(guess_id=code).order_by('-time').first().values('time', 'content')
-            content = {'status': True, 'message': 'success', 'content': list(data)}
+            content = {'status': True, 'message': '100000', 'content': data}
         elif request.GET.get('text') == "Refraction":
             data = json.loads(ManeuRefraction.objects.filter(id=code).first().content)
-            content = {'status': True, 'message': 'success', 'content': data}
+            content = {'status': True, 'message': '100000', 'content': data}
         else:
-            content = {'status': False, 'message': 'code is none'}
+            content = {'status': False, 'message': '100002', 'content': {}}
     else:
-        content = {'status': False, 'message': 'code is none', 'data': {}}
+        content = {'status': False, 'message': '100001', 'content': {}}
 
     return JsonResponse(content)
 
@@ -104,12 +100,12 @@ def sendsms(request):
             response = eval(response)
 
             if response['Code'] == 'OK':
-                content = {'status': True, 'message': 'OK', 'data': {}}
+                content = {'status': True, 'message': '100000', 'content': {}}
             else:
-                content = {'status': False, 'message': '', 'data': response}
+                content = {'status': False, 'message': '短息发送失败', 'content': {}}
         else:
-            content = {'status': False, 'message': 'phone is :none', 'data': {}}
+            content = {'status': False, 'message': '100002', 'content': {}}
     else:
-        content = {'status': False, 'message': 'code is :none', 'data': {}}
+        content = {'status': False, 'message': '100001', 'content': {}}
 
     return JsonResponse(content)
