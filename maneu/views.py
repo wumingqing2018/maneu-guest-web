@@ -51,12 +51,8 @@ def get_list(request):
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
-
-        if request.GET.get('text') == "Index":
-            content = ['3.gif', '1mcjs.jpg', '1xzy.jpg', '1njj.jpg']
-            content = {'status': True, 'message': '100000', 'content': content}
-        else:
-            content = {'status': False, 'message': '100001', 'content': {}}
+        content = ['3.gif', '1mcjs.jpg', '1xzy.jpg', '1njj.jpg']
+        content = {'status': True, 'message': '100000', 'content': content}
 
     return JsonResponse(content)
 
