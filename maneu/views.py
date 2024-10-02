@@ -52,24 +52,8 @@ def get_list(request):
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
         if request.GET.get('text') == "Index":
-            data = [{
-                "index": 'https://maneu.online/static/img/3.gif',
-                "data": 'https://maneu.online/static/img/3.gif',
-            }, {
-                "index": 'https://maneu.online/static/img/1mcjs.jpg',
-                "data": 'https://maneu.online/static/img/2mcjs.jpg',
-            }, {
-                "index": 'https://maneu.online/static/img/1xzy.jpg',
-                "data": 'https://maneu.online/static/img/2xzy.jpg',
-            }, {
-                "index": 'https://maneu.online/static/img/1yqs.jpg',
-                "data": 'https://maneu.online/static/img/2yqs.jpg',
-            }, {
-                "index": 'https://maneu.online/static/img/1njj.jpg',
-                "data": 'https://maneu.online/static/img/2njj.jpg',
-            }]
-            print(data)
-            content = {'status': True, 'message': '100000', 'content': {}}
+            data = ['3.gif', '1mcjs.jpg',  '1xzy.jpg', '1njj.jpg']
+            content = {'status': True, 'message': '100000', 'content': data}
         else:
             content = {'status': False, 'message': '100001', 'content': {}}
 
