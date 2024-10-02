@@ -1,6 +1,7 @@
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
+from attr import dataclass
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -48,10 +49,24 @@ def get_list(request):
             for i in guess:
                 content.extend(ManeuRefraction.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
             content = {'status': True, 'message': '100000', 'content': content}
-        else:
-            content = {'status': False, 'message': '100002', 'content': {}}
     else:
-        content = {'status': True, 'message': '100000', 'content': {}}
+        data = [{
+            "index": 'https://maneu.online/static/img/3.gif',
+            "data": 'https://maneu.online/static/img/3.gif',
+        }, {
+            "index": 'https://maneu.online/static/img/1mcjs.jpg',
+            "data": 'https://maneu.online/static/img/2mcjs.jpg',
+        }, {
+            "index": 'https://maneu.online/static/img/1xzy.jpg',
+            "data": 'https://maneu.online/static/img/2xzy.jpg',
+        }, {
+            "index": 'https://maneu.online/static/img/1yqs.jpg',
+            "data": 'https://maneu.online/static/img/2yqs.jpg',
+        }, {
+            "index": 'https://maneu.online/static/img/1njj.jpg',
+            "data": 'https://maneu.online/static/img/2njj.jpg',
+        }]
+        content = {'status': True, 'message': '100001', 'content': data}
 
     return JsonResponse(content)
 
