@@ -68,8 +68,7 @@ def get_list(request):
                 "index": 'https://maneu.online/static/img/1njj.jpg',
                 "data": 'https://maneu.online/static/img/2njj.jpg',
             }]
-            print(data)
-            content = {'status': True, 'message': '100000', 'content': json.dumps(data)}
+            content = {'status': True, 'message': '100000', 'content': {}}
         else:
             content = {'status': False, 'message': '100001', 'content': {}}
 
