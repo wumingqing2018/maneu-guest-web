@@ -1,7 +1,6 @@
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
-from attr import dataclass
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -40,15 +39,15 @@ def get_list(request):
         if request.GET.get('text') == "Order":
             for i in guess:
                 content.extend(ManeuOrder.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
-            content = {'status': True, 'message': '100000', 'content': content}
+            content = {'status': True, 'message': '', 'content': content}
         elif request.GET.get('text') == "Service":
             for i in guess:
                 content.extend(ManeuService.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
-            content = {'status': True, 'message': '100000', 'content': content}
+            content = {'status': True, 'message': '', 'content': content}
         elif request.GET.get('text') == "Refraction":
             for i in guess:
                 content.extend(ManeuRefraction.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
-            content = {'status': True, 'message': '100000', 'content': content}
+            content = {'status': True, 'message': '', 'content': content}
     else:
         data = [{
             "index": 'https://maneu.online/static/img/3.gif',
@@ -66,7 +65,7 @@ def get_list(request):
             "index": 'https://maneu.online/static/img/1njj.jpg',
             "data": 'https://maneu.online/static/img/2njj.jpg',
         }]
-        content = {'status': True, 'message': '100001', 'content': data}
+        content = {'status': True, 'message': '', 'content': data}
 
     return JsonResponse(content)
 
