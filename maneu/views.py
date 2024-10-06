@@ -48,24 +48,28 @@ def get_list(request):
             for i in guess:
                 content.extend(ManeuRefraction.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
             content = {'status': True, 'message': '', 'content': content}
+        elif request.GET.get('text') == "Index":
+            data = [{
+                "index": 'https://maneu.online/static/img/3.gif',
+                "data": 'https://maneu.online/static/img/3.gif',
+            }, {
+                "index": 'https://maneu.online/static/img/1mcjs.jpg',
+                "data": 'https://maneu.online/static/img/2mcjs.jpg',
+            }, {
+                "index": 'https://maneu.online/static/img/1xzy.jpg',
+                "data": 'https://maneu.online/static/img/2xzy.jpg',
+            }, {
+                "index": 'https://maneu.online/static/img/1yqs.jpg',
+                "data": 'https://maneu.online/static/img/2yqs.jpg',
+            }, {
+                "index": 'https://maneu.online/static/img/1njj.jpg',
+                "data": 'https://maneu.online/static/img/2njj.jpg',
+            }]
+            content = {'status': True, 'message': '', 'content': data}
+        else:
+            content = {'status': False, 'message': '请提交准确的参数: 100002', 'content': ''}
     else:
-        data = [{
-            "index": 'https://maneu.online/static/img/3.gif',
-            "data": 'https://maneu.online/static/img/3.gif',
-        }, {
-            "index": 'https://maneu.online/static/img/1mcjs.jpg',
-            "data": 'https://maneu.online/static/img/2mcjs.jpg',
-        }, {
-            "index": 'https://maneu.online/static/img/1xzy.jpg',
-            "data": 'https://maneu.online/static/img/2xzy.jpg',
-        }, {
-            "index": 'https://maneu.online/static/img/1yqs.jpg',
-            "data": 'https://maneu.online/static/img/2yqs.jpg',
-        }, {
-            "index": 'https://maneu.online/static/img/1njj.jpg',
-            "data": 'https://maneu.online/static/img/2njj.jpg',
-        }]
-        content = {'status': True, 'message': '', 'content': data}
+        content = {'status': False, 'message': '请提交准确的参数：100001', 'content': ''}
 
     return JsonResponse(content)
 
@@ -97,7 +101,7 @@ def sendsms(request):
     call = is_call(request.GET.get('code'))
 
     if call:
-        random_num = random.randint(111111, 999999)
+        random_num = random.randint(100000, 999999)
         data = ManeuGuess.objects.filter(phone=call).update(remark=random_num)
         if data:
             # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
