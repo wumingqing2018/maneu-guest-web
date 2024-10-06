@@ -1,14 +1,16 @@
+import json
+import os
+import random
+
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
-
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from maneu.models import *
 from common.verify import *
+from maneu.models import *
 
-import os, random, json
 
 def index(request):
     return render(request, 'index.html')
@@ -34,11 +36,14 @@ def get_list(request):
     code = is_call(request.GET.get('code'))
 
     if code:
+        data = []
+        guess = ManeuGuess.objects.filter(phone=code).all()
+
         if request.GET.get('text') == "Index":
-            data = [{
+            data.extend([{
                 "index": 'https://maneu.online/static/img/3.gif',
                 "data": 'https://maneu.online/static/img/3.gif',
-            }, {
+            },{
                 "index": 'https://maneu.online/static/img/1mcjs.jpg',
                 "data": 'https://maneu.online/static/img/2mcjs.jpg',
             }, {
@@ -50,32 +55,20 @@ def get_list(request):
             }, {
                 "index": 'https://maneu.online/static/img/1njj.jpg',
                 "data": 'https://maneu.online/static/img/2njj.jpg',
-            }]
+            }])
             content = {'status': True, 'message': '', 'content': data}
         elif request.GET.get('text') == "Order":
-            content = []
-            guess = ManeuGuess.objects.filter(phone=code).all()
-
             for i in guess:
-                content.extend(ManeuOrder.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
-
-            content = {'status': True, 'message': '', 'content': content}
+                data.extend(ManeuOrder.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
+            content = {'status': True, 'message': '', 'content': data}
         elif request.GET.get('text') == "Service":
-            content = []
-            guess = ManeuGuess.objects.filter(phone=code).all()
-
             for i in guess:
-                content.extend(ManeuService.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
-
-            content = {'status': True, 'message': '', 'content': content}
+                data.extend(ManeuService.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
+            content = {'status': True, 'message': '', 'content': data}
         elif request.GET.get('text') == "Refraction":
-            content = []
-            guess = ManeuGuess.objects.filter(phone=code).all()
-
             for i in guess:
-                content.extend(ManeuRefraction.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
-
-            content = {'status': True, 'message': '', 'content': content}
+                data.extend(ManeuRefraction.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
+            content = {'status': True, 'message': '', 'content': data}
         else:
             content = {'status': False, 'message': '请提交准确的参数: 100002', 'content': ''}
     else:
