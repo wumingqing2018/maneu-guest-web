@@ -71,9 +71,10 @@ def get_list(request):
             content = {'status': True, 'message': '', 'content': data}
         else:
             content = {'status': False, 'message': '请提交准确的参数: 100002', 'content': ''}
+        print(data)
+
     else:
         content = {'status': False, 'message': '请提交准确的参数：100001', 'content': ''}
-    print(data)
     return JsonResponse(content)
 
 
