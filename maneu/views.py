@@ -21,7 +21,7 @@ def login(request):
     code = is_code(request.GET.get('code'))
 
     if call and code:
-        data = ManeuGuess.objects.filter(phone=call, remark=code).first()
+        data = ManeuGuest.objects.filter(phone=call, remark=code).first()
         if data:
             content = {'status': True, 'message': '100000', 'content': {'call': data.phone, 'name': data.name, 'id': data.phone}}
         else:
@@ -37,7 +37,7 @@ def get_list(request):
 
     if code:
         data = []
-        guess = ManeuGuess.objects.filter(phone=code).all()
+        guess = ManeuGuest.objects.filter(phone=code).all()
 
         if request.GET.get('text') == "Index":
             data.extend([{
@@ -111,7 +111,7 @@ def sendsms(request):
 
     if call:
         random_num = random.randint(100000, 999999)
-        data = ManeuGuess.objects.filter(phone=call).update(remark=random_num)
+        data = ManeuGuest.objects.filter(phone=call).update(remark=random_num)
         if data:
             # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
             credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'],

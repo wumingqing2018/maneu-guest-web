@@ -29,7 +29,7 @@ class ManeuAdmin(models.Model):
         unique_together = (('id', 'username'),)
 
 
-class ManeuGuess(models.Model):
+class ManeuGuest(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
     admin_id = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField()
@@ -44,7 +44,7 @@ class ManeuGuess(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'maneu_guess'
+        db_table = 'maneu_guest'
 
 
 class ManeuOrder(models.Model):
