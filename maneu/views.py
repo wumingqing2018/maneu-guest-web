@@ -86,6 +86,12 @@ def get_detail(request):
             store = ManeuStore.objects.filter(id=order.store_id).first()
             vision = ManeuVision.objects.filter(id=order.vision_id).first()
             content = {'status': True, 'message': '100000', 'content': {'time': order.time, 'store': json.loads(store.content), 'vision': json.loads(vision.content)}}
+        elif request.GET.get('text') == "Store":
+            store = ManeuStore.objects.filter(id=code).first()
+            content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
+        elif request.GET.get('text') == "Report":
+            store = ManeuStore.objects.filter(id=code).first()
+            content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
         elif request.GET.get('text') == "Service":
             data = ManeuService.objects.filter(guess_id=code).order_by('-time').first().values('time', 'content')
             content = {'status': True, 'message': '100000', 'content': data}
