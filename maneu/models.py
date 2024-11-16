@@ -104,25 +104,16 @@ class ManeuStore(models.Model):
         db_table = 'maneu_store'
 
 
-class ManeuRefraction(models.Model):
+class ManeuReport(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
-    admin_id = models.CharField(max_length=36)
-    guess_id = models.CharField(db_column='guess_id', max_length=36)  # Field name made lowercase.
-    time = models.DateTimeField()
-    content = models.TextField()
+    admin_id = models.CharField(max_length=36, blank=True, null=True)
+    guest_id = models.CharField(max_length=36, blank=True, null=True)
+    time = models.DateTimeField(blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    phone = models.CharField(max_length=255, blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'maneu_refraction'
-
-
-class ManeuVision(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
-    admin_id = models.CharField(max_length=36)
-    guess_id = models.CharField(db_column='guess_id', max_length=36)  # Field name made lowercase.
-    time = models.DateTimeField()
-    content = models.TextField()
-
-    class Meta:
-        managed = False
-        db_table = 'maneu_vision'
+        db_table = 'maneu_report'

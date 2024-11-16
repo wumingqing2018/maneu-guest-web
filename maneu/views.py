@@ -67,7 +67,7 @@ def get_list(request):
             content = {'status': True, 'message': '', 'content': data}
         elif request.GET.get('text') == "Refraction":
             for i in guess:
-                data.extend(ManeuRefraction.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
+                data.extend(ManeuReport.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
             content = {'status': True, 'message': '', 'content': data}
         else:
             content = {'status': False, 'message': '请提交准确的参数: 100002', 'content': ''}
@@ -84,19 +84,19 @@ def get_detail(request):
         if request.GET.get('text') == "Order":
             order = ManeuOrderV2.objects.filter(id=code).first()
             store = ManeuStore.objects.filter(id=order.store_id).first()
-            vision = ManeuVision.objects.filter(id=order.vision_id).first()
+            vision = ManeuReport.objects.filter(id=order.vision_id).first()
             content = {'status': True, 'message': '100000', 'content': {'time': order.time, 'store': json.loads(store.content), 'vision': json.loads(vision.content)}}
         elif request.GET.get('text') == "Store":
             store = ManeuStore.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
         elif request.GET.get('text') == "Report":
-            store = ManeuStore.objects.filter(id=code).first()
+            store = ManeuReport.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
         elif request.GET.get('text') == "Service":
             data = ManeuService.objects.filter(guess_id=code).order_by('-time').first().values('time', 'content')
             content = {'status': True, 'message': '100000', 'content': data}
         elif request.GET.get('text') == "Refraction":
-            data = json.loads(ManeuRefraction.objects.filter(id=code).first().content)
+            data = json.loads(ManeuReport.objects.filter(id=code).first().content)
             content = {'status': True, 'message': '100000', 'content': data}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
