@@ -23,7 +23,8 @@ def login(request):
     if call and code:
         data = ManeuGuest.objects.filter(phone=call, remark=code).first()
         if data:
-            content = {'status': True, 'message': '100000', 'content': {'call': data.phone, 'name': data.name, 'id': data.phone}}
+            content = {'status': True, 'message': '100000',
+                       'content': {'call': data.phone, 'name': data.name, 'id': data.phone}}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
@@ -34,46 +35,40 @@ def login(request):
 
 def get_list(request):
     code = is_call(request.GET.get('code'))
+    data = []
 
     if code:
-        data = []
         guest = ManeuGuest.objects.filter(phone=code).all()
 
-        if request.GET.get('text') == "Index":
-            data.extend([{
-                "index": 'https://maneu.online/static/img/3.gif',
-                "data": 'https://maneu.online/static/img/3.gif',
-            },{
-                "index": 'https://maneu.online/static/img/1mcjs.jpg',
-                "data": 'https://maneu.online/static/img/2mcjs.jpg',
-            }, {
-                "index": 'https://maneu.online/static/img/1xzy.jpg',
-                "data": 'https://maneu.online/static/img/2xzy.jpg',
-            }, {
-                "index": 'https://maneu.online/static/img/1yqs.jpg',
-                "data": 'https://maneu.online/static/img/2yqs.jpg',
-            }, {
-                "index": 'https://maneu.online/static/img/1njj.jpg',
-                "data": 'https://maneu.online/static/img/2njj.jpg',
-            }])
-            content = {'status': True, 'message': '', 'content': data}
-        elif request.GET.get('text') == "Order":
+        if request.GET.get('text') == "Order":
             for i in guest:
                 data.extend(ManeuOrder.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
+            content = {'status': True, 'message': '', 'content': data}
+        elif request.GET.get('text') == "Report":
+            for i in guest:
+                data.extend(ManeuReport.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
             content = {'status': True, 'message': '', 'content': data}
         elif request.GET.get('text') == "Service":
             for i in guest:
                 data.extend(ManeuService.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
             content = {'status': True, 'message': '', 'content': data}
-        elif request.GET.get('text') == "Refraction":
-            for i in guest:
-                data.extend(ManeuReport.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
-            content = {'status': True, 'message': '', 'content': data}
-        else:
-            content = {'status': False, 'message': '请提交准确的参数: 100002', 'content': ''}
-    else:
-        content = {'status': False, 'message': '请提交准确的参数：100001', 'content': ''}
-
+    data.extend([{
+        "index": 'https://maneu.online/static/img/3.gif',
+        "data": 'https://maneu.online/static/img/3.gif',
+    }, {
+        "index": 'https://maneu.online/static/img/1mcjs.jpg',
+        "data": 'https://maneu.online/static/img/2mcjs.jpg',
+    }, {
+        "index": 'https://maneu.online/static/img/1xzy.jpg',
+        "data": 'https://maneu.online/static/img/2xzy.jpg',
+    }, {
+        "index": 'https://maneu.online/static/img/1yqs.jpg',
+        "data": 'https://maneu.online/static/img/2yqs.jpg',
+    }, {
+        "index": 'https://maneu.online/static/img/1njj.jpg',
+        "data": 'https://maneu.online/static/img/2njj.jpg',
+    }])
+    content = {'status': True, 'message': '', 'content': data}
     return JsonResponse(content)
 
 
@@ -85,7 +80,9 @@ def get_detail(request):
             order = ManeuOrder.objects.filter(id=code).first()
             store = ManeuStore.objects.filter(id=order.store_id).first()
             vision = ManeuReport.objects.filter(id=order.vision_id).first()
-            content = {'status': True, 'message': '100000', 'content': {'time': order.time, 'store': json.loads(store.content), 'vision': json.loads(vision.content)}}
+            content = {'status': True, 'message': '100000',
+                       'content': {'time': order.time, 'store': json.loads(store.content),
+                                   'vision': json.loads(vision.content)}}
         elif request.GET.get('text') == "Store":
             store = ManeuStore.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
@@ -94,9 +91,6 @@ def get_detail(request):
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
         elif request.GET.get('text') == "Service":
             data = ManeuService.objects.filter(guest_id=code).order_by('-time').first().values('time', 'content')
-            content = {'status': True, 'message': '100000', 'content': data}
-        elif request.GET.get('text') == "Refraction":
-            data = json.loads(ManeuReport.objects.filter(id=code).first().content)
             content = {'status': True, 'message': '100000', 'content': data}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
