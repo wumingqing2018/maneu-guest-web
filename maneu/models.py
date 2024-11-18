@@ -52,7 +52,7 @@ class ManeuOrder(models.Model):
     time = models.DateField()
     name = models.CharField(max_length=36)
     phone = models.CharField(max_length=36)
-    guess_id = models.CharField(max_length=36)
+    guest_id = models.CharField(max_length=36)
     admin_id = models.CharField(max_length=36)
     store_id = models.CharField(max_length=36)
     vision_id = models.CharField(max_length=36)  # Field name made lowercase.
@@ -67,7 +67,7 @@ class ManeuOrderV2(models.Model):
     time = models.DateTimeField()
     name = models.CharField(max_length=36)
     phone = models.CharField(max_length=36)
-    guess_id = models.CharField(max_length=36)
+    guest_id = models.CharField(max_length=36)
     admin_id = models.CharField(max_length=36)
     store_id = models.CharField(max_length=36)
     vision_id = models.CharField(db_column='vision_id', max_length=36)  # Field name made lowercase.
@@ -81,7 +81,7 @@ class ManeuService(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
     time = models.DateTimeField()
     admin_id = models.CharField(max_length=36)
-    guess_id = models.CharField(max_length=36)
+    guest_id = models.CharField(max_length=36)
     order_id = models.CharField(db_column='order_id', max_length=36, blank=True,
                                 null=True)  # Field name made lowercase.
     content = models.CharField(max_length=300, blank=True, null=True)
@@ -96,7 +96,7 @@ class ManeuStore(models.Model):
     time = models.DateTimeField()
     order_id = models.CharField(db_column='order_id', max_length=36)  # Field name made lowercase.
     admin_id = models.CharField(max_length=36)
-    guess_id = models.CharField(db_column='guess_id', max_length=36)  # Field name made lowercase.
+    guest_id = models.CharField(db_column='guest_id', max_length=36)  # Field name made lowercase.
     content = models.TextField()
 
     class Meta:
