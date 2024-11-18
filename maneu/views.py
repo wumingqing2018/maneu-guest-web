@@ -82,7 +82,7 @@ def get_detail(request):
 
     if code:
         if request.GET.get('text') == "Order":
-            order = ManeuOrderV2.objects.filter(id=code).first()
+            order = ManeuOrder.objects.filter(id=code).first()
             store = ManeuStore.objects.filter(id=order.store_id).first()
             vision = ManeuReport.objects.filter(id=order.vision_id).first()
             content = {'status': True, 'message': '100000', 'content': {'time': order.time, 'store': json.loads(store.content), 'vision': json.loads(vision.content)}}
