@@ -37,7 +37,7 @@ def get_list(request):
 
     if code:
         data = []
-        guess = ManeuGuest.objects.filter(phone=code).all()
+        guest = ManeuGuest.objects.filter(phone=code).all()
 
         if request.GET.get('text') == "Index":
             data.extend([{
@@ -58,23 +58,22 @@ def get_list(request):
             }])
             content = {'status': True, 'message': '', 'content': data}
         elif request.GET.get('text') == "Order":
-            for i in guess:
-                data.extend(ManeuOrder.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
+            for i in guest:
+                data.extend(ManeuOrder.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
             content = {'status': True, 'message': '', 'content': data}
         elif request.GET.get('text') == "Service":
-            for i in guess:
-                data.extend(ManeuService.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
+            for i in guest:
+                data.extend(ManeuService.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
             content = {'status': True, 'message': '', 'content': data}
         elif request.GET.get('text') == "Refraction":
-            for i in guess:
-                data.extend(ManeuReport.objects.filter(guess_id=i.id).order_by('-time').all().values('id', 'time'))
+            for i in guest:
+                data.extend(ManeuReport.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
             content = {'status': True, 'message': '', 'content': data}
         else:
             content = {'status': False, 'message': '请提交准确的参数: 100002', 'content': ''}
-        print(data)
-
     else:
         content = {'status': False, 'message': '请提交准确的参数：100001', 'content': ''}
+
     return JsonResponse(content)
 
 
@@ -94,7 +93,7 @@ def get_detail(request):
             store = ManeuReport.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
         elif request.GET.get('text') == "Service":
-            data = ManeuService.objects.filter(guess_id=code).order_by('-time').first().values('time', 'content')
+            data = ManeuService.objects.filter(guest_id=code).order_by('-time').first().values('time', 'content')
             content = {'status': True, 'message': '100000', 'content': data}
         elif request.GET.get('text') == "Refraction":
             data = json.loads(ManeuReport.objects.filter(id=code).first().content)
