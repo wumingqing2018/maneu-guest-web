@@ -2,9 +2,12 @@ import re
 
 def is_call(code):
     pattern = re.compile(r'^1[3-9]\d{9}$')
-    if pattern.match(code):
-        return str(code)
-    else:
+    try:
+        if pattern.match(code):
+            return str(code)
+        else:
+            return None
+    except:
         return None
 
 
