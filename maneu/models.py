@@ -29,13 +29,14 @@ class ManeuGuest(models.Model):
 
 class ManeuOrder(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
-    time = models.DateField()
+    admin_id = models.CharField(max_length=36)
+    guest_id = models.CharField(max_length=36)
+    store_id = models.CharField(max_length=36)
+    report_id = models.CharField(max_length=36)
+    time = models.DateTimeField()
     name = models.CharField(max_length=36)
     phone = models.CharField(max_length=36)
-    guest_id = models.CharField(max_length=36)
-    admin_id = models.CharField(max_length=36)
-    store_id = models.CharField(max_length=36)
-    vision_id = models.CharField(max_length=36)  # Field name made lowercase.
+    remark = models.CharField(max_length=512)
 
     class Meta:
         managed = False
