@@ -140,12 +140,13 @@ def get_detail(request):
 
 def get_visual(request):
     code = is_call(request.GET.get('code'))
+    data = []
 
     if code:
-        guest = ManeuGuest.objects.filter(phone=code).all().values('id')
-        content = {'status': True, 'message': '100000', 'content': list(guest)}
+        guest_list = ManeuGuest.objects.filter(phone=code).all().values('id')
+        for guest in guest_list:
+            data.extend(ManeuReport.objects.filter(guest_id=guest).order_by('-time').all().values('time'))
 
-    else:
-        content = {'status': False, 'message': '100001', 'content': {}}
+        return JsonResponse({'status': True, 'message': '', 'content': data})
 
-    return JsonResponse(content)
+    return JsonResponse({'status': False, 'message': '', 'content': {}})
