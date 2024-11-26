@@ -150,6 +150,9 @@ def get_visual(request):
             for report in report_list:
                 content = json.loads(report.content)
                 print(content)
+                print(content.OD.SPH)
+                print(content.OS.SPH)
+
                 OD.extend(content.OD.SPH)
                 OS.extend(content.OS.SPH)
 
