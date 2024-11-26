@@ -135,3 +135,16 @@ def get_detail(request):
         content = {'status': False, 'message': '100001', 'content': {}}
 
     return JsonResponse(content)
+
+
+def get_visual(request):
+    code = is_call(request.GET.get('code'))
+
+    if code:
+        data = ManeuGuest.objects.filter(phone=code).all().values('id')
+        content = {'status': True, 'message': '100000', 'content': data}
+
+    else:
+        content = {'status': False, 'message': '100001', 'content': {}}
+
+    return JsonResponse(content)
