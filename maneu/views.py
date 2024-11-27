@@ -148,17 +148,15 @@ def get_visual(request):
         for i in guest:
             report_list = ManeuReport.objects.filter(guest_id=i.id).order_by('-time').all()
             for report in report_list:
-                report_time = report.time
-                time.extend(report_time.strftime('%Y-%m-%d %H:%M:%S'))
                 content = json.loads(report.content)
                 if content['OD']['SPH']:
-                    OD.extend(content['OD']['SPH'])
+                    OD.extend(float(content['OD']['SPH']))
                 else:
-                    OD.extend('0')
+                    OD.extend(0)
                 if content['OS']['SPH']:
-                    OS.extend(content['OS']['SPH'])
+                    OS.extend(float(content['OS']['SPH']))
                 else:
-                    OS.extend('0')
+                    OS.extend(0)
 
         return JsonResponse({'status': True, 'message': '', 'content': {'OD':OD, 'OS':OS, 'time':time}})
 
