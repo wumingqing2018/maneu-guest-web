@@ -150,8 +150,14 @@ def get_visual(request):
             for report in report_list:
                 time.append(str(report.time))
                 content = json.loads(report.content)
-                OD.append(int(content['OD']['SPH']))
-                OS.append(int(content['OS']['SPH']))
+                if content['OD']['SPH']:
+                    OD.append(int(content['OD']['SPH']))
+                else:
+                    OD.append(0)
+                if content['OS']['SPH']:
+                    OS.append(int(content['OS']['SPH']))
+                else:
+                    OS.append(0)
 
         return JsonResponse({'status': True, 'message': '', 'content': {'OD':OD, 'OS':OS, 'time':time}})
 
