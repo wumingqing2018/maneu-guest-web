@@ -104,7 +104,7 @@ def get_list(request):
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif request.GET.get('text') == "Report":
             for i in guest:
-                data.extend(ManeuReport.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
+                data.extend(ManeuReport.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time' ,'content'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif request.GET.get('text') == "Service":
             for i in guest:
