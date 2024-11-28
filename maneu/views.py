@@ -151,12 +151,7 @@ def get_list(request):
                     OS_CYL.append(float(content['OS']['CYL']))
                 else:
                     OS_CYL.append(0.0)
-
-
-            return JsonResponse({'status': True, 'message': '',
-                                 'content': {'id': id, 'time': time, 'OD_VA': OD_VA, 'OS_VA': OS_VA, 'OD_SPH': OD_SPH,
-                                             'OS_SPH': OS_SPH, 'OD_CYL': OD_CYL, 'OS_CYL': OS_CYL, 'OD_AL': OD_AL,
-                                             'OS_AL': OS_AL}})
+            return JsonResponse({'status': True, 'message': '', 'content': {'id': id, 'time': time, 'OD_VA': OD_VA, 'OS_VA': OS_VA, 'OD_SPH': OD_SPH,'OS_SPH': OS_SPH, 'OD_CYL': OD_CYL, 'OS_CYL': OS_CYL, 'OD_AL': OD_AL,'OS_AL': OS_AL}})
         elif request.GET.get('text') == "Service":
             data.extend(ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
