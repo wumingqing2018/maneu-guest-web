@@ -97,6 +97,7 @@ def get_list(request):
 
     if code:
         guest = list(ManeuGuest.objects.filter(phone=code).all().values_list('id', flat=True))
+        print(guest)
         if request.GET.get('text') == "Order":
             for i in guest:
                 data.extend(ManeuOrder.objects.filter(guest_id=i).order_by('-time').all().values('id', 'time'))
