@@ -96,19 +96,19 @@ def get_list(request):
     data = []
 
     if code:
-        guest = ManeuGuest.objects.filter(phone=code).all()
+        guest = ManeuGuest.objects.filter(phone=code).all().values('id')
 
         if request.GET.get('text') == "Order":
             for i in guest:
-                data.extend(ManeuOrder.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
+                data.extend(ManeuOrder.objects.filter(guest_id=i).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif request.GET.get('text') == "Report":
             for i in guest:
-                data.extend(ManeuReport.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time' ,'content'))
+                data.extend(ManeuReport.objects.filter(guest_id=i).order_by('-time').all().values('id', 'time' ,'content'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif request.GET.get('text') == "Service":
             for i in guest:
-                data.extend(ManeuService.objects.filter(guest_id=i.id).order_by('-time').all().values('id', 'time'))
+                data.extend(ManeuService.objects.filter(guest_id=i).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
 
     return JsonResponse({'status': False, 'message': '', 'content': {}})
