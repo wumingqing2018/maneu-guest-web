@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from importlib.resources import contents
 from os import lseek
 
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
@@ -97,17 +98,30 @@ def get_list(request):
 
     if code:
         guest = list(ManeuGuest.objects.filter(phone=code).all().values_list('id', flat=True))
-        print(guest)
+
         if request.GET.get('text') == "Order":
-            for i in guest:
-                data.extend(ManeuOrder.objects.filter(guest_id=i).order_by('-time').all().values('id', 'time'))
+            data.extend(ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif request.GET.get('text') == "Report":
-            data.extend(ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time' ,'content'))
+            id = []
+            time = []
+            OD_VA = []
+            OS_VA = []
+            OD_SPH = []
+            OS_SPH = []
+            OD_CYL = []
+            OS_CYL = []
+            OD_AL = []
+            OS_AL = []
+            report = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all()
+            for i in report:
+                id.append(i.id)
+                time.append(i.time)
+                content = json.loads(i.content)
+                print(content)
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif request.GET.get('text') == "Service":
-            for i in guest:
-                data.extend(ManeuService.objects.filter(guest_id=i).order_by('-time').all().values('id', 'time'))
+            data.extend(ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
 
     return JsonResponse({'status': False, 'message': '', 'content': {}})
