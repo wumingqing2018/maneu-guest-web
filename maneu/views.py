@@ -16,6 +16,8 @@ from maneu.models import *
 def index(request):
     return render(request, 'index.html')
 
+def test(request):
+
 
 def login(request):
     call = is_call(request.GET.get('call'))
