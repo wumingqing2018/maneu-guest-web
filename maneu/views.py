@@ -115,11 +115,19 @@ def get_list(request):
             OS_AL = []
             report = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all()
             for i in report:
+                content = json.loads(i.content)
                 id.append(i.id)
                 time.append(i.time)
-                content = json.loads(i.content)
-                print(content)
-            return JsonResponse({'status': True, 'message': '', 'content': data})
+                OD_AL.append(content['OD']['CYL'])
+                OS_AL.append(content['OS']['AL'])
+                OD_VA.append(content['OD']['VA'])
+                OS_VA.append(content['OS']['VA'])
+                OD_SPH.append(content['OD']['SPH'])
+                OS_SPH.append(content['OS']['SPH'])
+                OD_CYL.append(content['OD']['CYL'])
+                OS_CYL.append(content['OS']['CYL'])
+
+            return JsonResponse({'status': True, 'message': '', 'content': {'id':id, 'time':time, 'OD_VA': OD_VA, 'OS_VA': OS_VA, 'OD_SPH': OD_SPH, 'OS_SPH': OS_SPH, 'OD_CYL': OD_CYL, 'OS_CYL': OS_CYL, 'OD_AL': OD_AL, 'OS_AL': OS_AL }})
         elif request.GET.get('text') == "Service":
             data.extend(ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
