@@ -1,8 +1,6 @@
 import json
 import os
 import random
-from importlib.resources import contents
-from os import lseek
 
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
