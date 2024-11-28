@@ -96,7 +96,7 @@ def get_list(request):
     data = []
 
     if code:
-        guest = ManeuGuest.objects.filter(phone=code).all().values_list('id')
+        guest = ManeuGuest.objects.filter(phone=code).all().values_list('id', flat=True)
         print(guest)
         if request.GET.get('text') == "Order":
             for i in guest:
