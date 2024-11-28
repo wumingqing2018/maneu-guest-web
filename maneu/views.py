@@ -117,17 +117,46 @@ def get_list(request):
             for i in report:
                 content = json.loads(i.content)
                 id.append(i.id)
-                time.append(i.time)
-                OD_AL.append(float(content['OD']['CYL']))
-                OS_AL.append(float(content['OS']['AL']))
-                OD_VA.append(float(content['OD']['VA']))
-                OS_VA.append(float(content['OS']['VA']))
-                OD_SPH.append(float(content['OD']['SPH']))
-                OS_SPH.append(float(content['OS']['SPH']))
-                OD_CYL.append(float(content['OD']['CYL']))
-                OS_CYL.append(float(content['OS']['CYL']))
+                time.append(str(i.time))
+                if content['OD']['AL']:
+                    OD_AL.append(float(content['OD']['AL']))
+                else:
+                    OD_AL.append(0.0)
+                if content['OD']['VA']:
+                    OD_VA.append(float(content['OD']['VA']))
+                else:
+                    OD_VA.append(0.0)
+                if content['OD']['SPH']:
+                    OD_SPH.append(float(content['OD']['SPH']))
+                else:
+                    OD_SPH.append(0.0)
+                if content['OD']['CYL']:
+                    OD_CYL.append(float(content['OD']['CYL']))
+                else:
+                    OD_CYL.append(0.0)
 
-            return JsonResponse({'status': True, 'message': '', 'content': {'id':id, 'time':time, 'OD_VA': OD_VA, 'OS_VA': OS_VA, 'OD_SPH': OD_SPH, 'OS_SPH': OS_SPH, 'OD_CYL': OD_CYL, 'OS_CYL': OS_CYL, 'OD_AL': OD_AL, 'OS_AL': OS_AL }})
+                if content['OS']['AL']:
+                    OS_AL.append(float(content['OS']['AL']))
+                else:
+                    OS_AL.append(0.0)
+                if content['OS']['VA']:
+                    OS_VA.append(float(content['OS']['VA']))
+                else:
+                    OS_VA.append(0.0)
+                if content['OS']['SPH']:
+                    OS_SPH.append(float(content['OS']['SPH']))
+                else:
+                    OS_SPH.append(0.0)
+                if content['OS']['CYL']:
+                    OS_CYL.append(float(content['OS']['CYL']))
+                else:
+                    OS_CYL.append(0.0)
+
+
+            return JsonResponse({'status': True, 'message': '',
+                                 'content': {'id': id, 'time': time, 'OD_VA': OD_VA, 'OS_VA': OS_VA, 'OD_SPH': OD_SPH,
+                                             'OS_SPH': OS_SPH, 'OD_CYL': OD_CYL, 'OS_CYL': OS_CYL, 'OD_AL': OD_AL,
+                                             'OS_AL': OS_AL}})
         elif request.GET.get('text') == "Service":
             data.extend(ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
@@ -180,7 +209,6 @@ def get_visual(request):
                 else:
                     OS.append(0)
 
-        return JsonResponse({'status': True, 'message': '', 'content': {'OD':OD, 'OS':OS, 'time':time}})
-
+        return JsonResponse({'status': True, 'message': '', 'content': {'OD': OD, 'OS': OS, 'time': time}})
 
     return JsonResponse({'status': False, 'message': '', 'content': {}})
