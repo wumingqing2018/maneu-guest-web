@@ -103,7 +103,7 @@ def get_list(request):
                 data.extend(ManeuOrder.objects.filter(guest_id=i).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif request.GET.get('text') == "Report":
-            data.extend(ManeuReport.objects.filter(guest_id=guest).order_by('-time').all().values('id', 'time' ,'content'))
+            data.extend(ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time' ,'content'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif request.GET.get('text') == "Service":
             for i in guest:
