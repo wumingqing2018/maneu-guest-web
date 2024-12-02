@@ -95,15 +95,16 @@ def get_index(request):
 
 def get_list(request):
     code = is_call(request.GET.get('code'))
+    text = is_call(request.GET.get('text'))
     data = []
 
     if code:
         guest = list(ManeuGuest.objects.filter(phone=code).all().values_list('id', flat=True))
 
-        if request.GET.get('text') == "Order":
+        if text == "100001":
             data.extend(ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
-        elif request.GET.get('text') == "Report":
+        elif text == "100002":
             id = []
             time = []
             OD_VA = []
@@ -153,7 +154,7 @@ def get_list(request):
                 else:
                     OS_CYL.append(0.0)
             return JsonResponse({'status': True, 'message': '', 'content': {'id': id, 'time': time, 'OD_VA': OD_VA, 'OS_VA': OS_VA, 'OD_SPH': OD_SPH,'OS_SPH': OS_SPH, 'OD_CYL': OD_CYL, 'OS_CYL': OS_CYL, 'OD_AL': OD_AL,'OS_AL': OS_AL}})
-        elif request.GET.get('text') == "Service":
+        elif text == "100003":
             data.extend(ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
 
