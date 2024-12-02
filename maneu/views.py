@@ -118,7 +118,7 @@ def get_list(request):
             for i in report:
                 content = json.loads(i.content)
                 id.append(i.id)
-                time.append(i.time.strftime("%Y-%M-%D"))
+                time.append(i.time.strftime("%Y-%m-%d"))
                 if content['OD']['AL']:
                     OD_AL.append(float(content['OD']['AL']))
                 else:
