@@ -95,7 +95,7 @@ def get_index(request):
 
 def get_list(request):
     code = is_call(request.GET.get('code'))
-    text = is_call(request.GET.get('text'))
+    text = is_code(request.GET.get('text'))
     data = []
 
     if code:
