@@ -125,9 +125,9 @@ def get_list(request):
                 content = json.loads(i.content)
                 id.append(i.id)
                 AL.append(24)
-                VA.append(0.00)
-                CYL.append(0.00)
-                SPH.append(0.00)
+                VA.append(1.00)
+                CYL.append(0)
+                SPH.append(0)
 
                 time.append(i.time.strftime("%Y-%m-%d"))
                 if content['OD']['AL']:
