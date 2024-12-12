@@ -179,8 +179,8 @@ def get_detail(request):
             store = ManeuGuest.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
         elif request.GET.get('text') == "100005":
-            store = ManeuAdmin.objects.filter(id=code).first()
-            content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
+            data = ManeuAdmin.objects.filter(id=code).first()
+            content = {'status': True, 'message': '100000', 'admin_id': data.admin_id, 'content': json.loads(data.content)}
         elif request.GET.get('text') == "Service":
             data = ManeuService.objects.filter(guest_id=code).order_by('-time').first().values('time', 'content')
             content = {'status': True, 'message': '100000', 'content': data}
