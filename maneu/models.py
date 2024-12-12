@@ -2,6 +2,25 @@ import uuid
 from django.db import models
 
 
+class ManeuAdmin(models.Model):
+    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
+    username = models.CharField(max_length=36)
+    password = models.CharField(max_length=36)
+    nickname = models.CharField(max_length=36)
+    email = models.CharField(max_length=36)
+    phone = models.CharField(max_length=36)
+    level = models.CharField(max_length=36)
+    state = models.CharField(max_length=36)
+    time = models.DateTimeField(blank=True, null=True)
+    content = models.CharField(max_length=512, blank=True, null=True)
+    location = models.CharField(max_length=512, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'maneu_admin'
+        unique_together = (('id', 'username'),)
+
+
 class ManeuGuest(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
     admin_id = models.CharField(max_length=36, blank=True, null=True)

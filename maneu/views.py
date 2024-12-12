@@ -163,17 +163,24 @@ def get_list(request):
 
 def get_detail(request):
     code = is_uuid(request.GET.get('code'))
+    text = is_code(request.GET.get('text'))
 
-    if code:
+    if code and text:
         if request.GET.get('text') == "Order":
             order = ManeuOrder.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': model_to_dict(order)}
         elif request.GET.get('text') == "Store":
             store = ManeuStore.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
-        elif request.GET.get('text') == "Report":
+        elif request.GET.get('text') == "100003":
             store = ManeuReport.objects.filter(id=code).first()
-            content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
+            content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
+        elif request.GET.get('text') == "100004":
+            store = ManeuGuest.objects.filter(id=code).first()
+            content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
+        elif request.GET.get('text') == "100005":
+            store = ManeuAdmin.objects.filter(id=code).first()
+            content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
         elif request.GET.get('text') == "Service":
             data = ManeuService.objects.filter(guest_id=code).order_by('-time').first().values('time', 'content')
             content = {'status': True, 'message': '100000', 'content': data}
