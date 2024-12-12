@@ -107,18 +107,27 @@ def get_list(request):
         elif text == "100002":
             id = []
             time = []
-            OD_VA = []
-            OS_VA = []
-            OD_SPH = []
-            OS_SPH = []
-            OD_CYL = []
-            OS_CYL = []
+            AL = []
             OD_AL = []
             OS_AL = []
+            VA = []
+            OD_VA = []
+            OS_VA = []
+            CYL = []
+            OD_CYL = []
+            OS_CYL = []
+            SPH = []
+            OD_SPH = []
+            OS_SPH = []
             report = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all()
             for i in report:
                 content = json.loads(i.content)
                 id.append(i.id)
+                AL.append(24)
+                VA.append(0.00)
+                CYL.append(0.00)
+                SPH.append(0.00)
+
                 time.append(i.time.strftime("%Y-%m-%d"))
                 if content['OD']['AL']:
                     OD_AL.append(float(content['OD']['AL']))
@@ -174,7 +183,7 @@ def get_detail(request):
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
         elif request.GET.get('text') == "100003":
             data = ManeuReport.objects.filter(id=code).first()
-            content = {'status': True, 'message': '100000', 'data': model_to_dict(data), 'content': json.loads(data.content)}
+            content = {'status': True, 'message': '100000', 'time': data.time.strftime("%Y-%m-%d"), 'content': json.loads(data.content)}
         elif request.GET.get('text') == "100004":
             store = ManeuGuest.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
