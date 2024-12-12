@@ -184,7 +184,7 @@ def get_detail(request):
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
         elif request.GET.get('text') == "100003":
             data = ManeuReport.objects.filter(id=code).first()
-            content = {'status': True, 'message': '100000', 'time': data.time.strftime("%Y-%m-%d"), 'content': json.loads(data.content)}
+            content = {'status': True, 'message': '100000', 'admin_id': data.admin_id, 'name': data.name, 'phone': data.phone, 'time': data.time.strftime("%Y-%m-%d"), 'content': json.loads(data.content)}
         elif request.GET.get('text') == "100004":
             store = ManeuGuest.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
