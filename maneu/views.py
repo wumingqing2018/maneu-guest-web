@@ -105,6 +105,7 @@ def get_list(request):
             data.extend(ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif text == "100002":
+            content = {}
             id = []
             time = []
             AL = []
@@ -162,7 +163,7 @@ def get_list(request):
                     OS_CYL.append(float(content['OS']['CYL']))
                 else:
                     OS_CYL.append(0.0)
-            return JsonResponse({'status': True, 'message': '', 'content': {'id': id, 'time': time, 'OD_VA': OD_VA, 'OS_VA': OS_VA, 'OD_SPH': OD_SPH,'OS_SPH': OS_SPH, 'OD_CYL': OD_CYL, 'OS_CYL': OS_CYL, 'OD_AL': OD_AL,'OS_AL': OS_AL}})
+            return JsonResponse({'status': True, 'message': '', 'content': {'id': id, 'time': time, 'AL': AL, 'VA': VA, 'SPH': SPH, 'CYL': CYL, 'OD_VA': OD_VA, 'OS_VA': OS_VA, 'OD_SPH': OD_SPH,'OS_SPH': OS_SPH, 'OD_CYL': OD_CYL, 'OS_CYL': OS_CYL, 'OD_AL': OD_AL,'OS_AL': OS_AL}})
         elif text == "100003":
             data.extend(ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
