@@ -76,7 +76,7 @@ def sendsms(request):
 def get_index(request):
     data = [{
         "index": 'https://maneu.online/static/img/3.gif',
-        "data": 'https://maneu.online/static/img/3.gif',
+        "data": 'https://maneu.online/static/img/gif2.jpg',
     }, {
         "index": 'https://maneu.online/static/img/1mcjs.jpg',
         "data": 'https://maneu.online/static/img/2mcjs.jpg',
@@ -200,29 +200,3 @@ def get_detail(request):
         content = {'status': False, 'message': '100001', 'content': {}}
 
     return JsonResponse(content)
-
-
-def get_visual(request):
-    code = is_call(request.GET.get('code'))
-    OD = []
-    OS = []
-    time = []
-    if code:
-        guest = ManeuGuest.objects.filter(phone=code).all()
-        for i in guest:
-            report_list = ManeuReport.objects.filter(guest_id=i.id).order_by('-time').all()
-            for report in report_list:
-                time.append(str(report.time))
-                content = json.loads(report.content)
-                if content['OD']['SPH']:
-                    OD.append(int(content['OD']['SPH']))
-                else:
-                    OD.append(0)
-                if content['OS']['SPH']:
-                    OS.append(int(content['OS']['SPH']))
-                else:
-                    OS.append(0)
-
-        return JsonResponse({'status': True, 'message': '', 'content': {'OD': OD, 'OS': OS, 'time': time}})
-
-    return JsonResponse({'status': False, 'message': '', 'content': {}})
