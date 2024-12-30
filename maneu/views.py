@@ -105,65 +105,57 @@ def get_list(request):
             data.extend(ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif text == "100002":
-            content = {}
-            id = []
-            time = []
-            AL = []
-            OD_AL = []
-            OS_AL = []
-            VA = []
-            OD_VA = []
-            OS_VA = []
-            CYL = []
-            OD_CYL = []
-            OS_CYL = []
-            SPH = []
-            OD_SPH = []
-            OS_SPH = []
+            data = {'id': [], 'time': [], 'AL': [], 'VA': [], 'SPH': [], 'CYL': [], 'OD_VA': [], 'OS_VA': [], 'OD_SPH': [],'OS_SPH': [], 'OD_CYL': [], 'OS_CYL': [], 'OD_AL': [],'OS_AL': []}
+
             report = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all()
             for i in report:
-                content = json.loads(i.content)
-                id.append(i.id)
-                AL.append(24)
-                VA.append(1.00)
-                CYL.append(0)
-                SPH.append(0)
+                try:
+                    content = json.loads(i.content)
+                    data['time'].append(i.time.strftime("%Y-%m-%d"))
+                    data['id'].append(i.id)
+                    data['AL'].append(24)
+                    data['VA'].append(1.00)
+                    data['CYL'].append(0)
+                    data['SPH'].append(0)
+                except:
+                    continue
 
-                time.append(i.time.strftime("%Y-%m-%d"))
-                if content['OD']['AL']:
-                    OD_AL.append(float(content['OD']['AL']))
-                else:
-                    OD_AL.append(0.0)
-                if content['OD']['VA']:
-                    OD_VA.append(float(content['OD']['VA']))
-                else:
-                    OD_VA.append(0.0)
-                if content['OD']['SPH']:
-                    OD_SPH.append(float(content['OD']['SPH']))
-                else:
-                    OD_SPH.append(0.0)
-                if content['OD']['CYL']:
-                    OD_CYL.append(float(content['OD']['CYL']))
-                else:
-                    OD_CYL.append(0.0)
 
-                if content['OS']['AL']:
-                    OS_AL.append(float(content['OS']['AL']))
-                else:
-                    OS_AL.append(0.0)
-                if content['OS']['VA']:
-                    OS_VA.append(float(content['OS']['VA']))
-                else:
-                    OS_VA.append(0.0)
-                if content['OS']['SPH']:
-                    OS_SPH.append(float(content['OS']['SPH']))
-                else:
-                    OS_SPH.append(0.0)
-                if content['OS']['CYL']:
-                    OS_CYL.append(float(content['OS']['CYL']))
-                else:
-                    OS_CYL.append(0.0)
-            return JsonResponse({'status': True, 'message': '', 'content': {'id': id, 'time': time, 'AL': AL, 'VA': VA, 'SPH': SPH, 'CYL': CYL, 'OD_VA': OD_VA, 'OS_VA': OS_VA, 'OD_SPH': OD_SPH,'OS_SPH': OS_SPH, 'OD_CYL': OD_CYL, 'OS_CYL': OS_CYL, 'OD_AL': OD_AL,'OS_AL': OS_AL}})
+                try:
+                    data['OD_AL'].append(format(float(content['OD']['AL']), '.2f'))
+                except:
+                    data['OD_AL'].append(0.00)
+                try:
+                    data['OD_VA'].append(format(float(content['OD']['AL']), '.2f'))
+                except:
+                    data['OD_VA'].append(0.00)
+                try:
+                    data['OD_SPH'].append(format(float(content['OD']['AL']), '.2f'))
+                except:
+                    data['OD_SPH'].append(0.00)
+                try:
+                    data['OD_CYL'].append(format(float(content['OD']['AL']), '.2f'))
+                except:
+                    data['OD_CYL'].append(0.00)
+
+
+                try:
+                    data['OS_AL'].append(format(float(content['OS']['AL']), '.2f'))
+                except:
+                    data['OS_AL'].append(0.00)
+                try:
+                    data['OS_VA'].append(format(float(content['OS']['AL']), '.2f'))
+                except:
+                    data['OS_VA'].append(0.00)
+                try:
+                    data['OS_SPH'].append(format(float(content['OS']['AL']), '.2f'))
+                except:
+                    data['OS_SPH'].append(0.00)
+                try:
+                    data['OS_CYL'].append(format(float(content['OS']['AL']), '.2f'))
+                except:
+                    data['OS_CYL'].append(0.00)
+            return JsonResponse({'status': True, 'message': '', 'content': data})
         elif text == "100003":
             data.extend(ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
