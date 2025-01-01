@@ -16,10 +16,6 @@ from maneu.models import *
 def index(request):
     return render(request, 'index.html')
 
-def test(request):
-    return render(request, 'test.html')
-
-
 def login(request):
     call = is_call(request.GET.get('call'))
     code = is_code(request.GET.get('code'))
