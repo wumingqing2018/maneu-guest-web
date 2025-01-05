@@ -98,7 +98,7 @@ def get_list(request):
         guest = list(ManeuGuest.objects.filter(phone=code).all().values_list('id', flat=True))
 
         if text == "100001":
-            data.extend(ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
+            data.extend(ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time', 'phone', 'remark', 'content'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif text == "100002":
             data = {'id': [], 'time': [], 'AL': [], 'VA': [], 'SPH': [], 'CYL': [], 'OD_VA': [], 'OS_VA': [], 'OD_SPH': [],'OS_SPH': [], 'OD_CYL': [], 'OS_CYL': [], 'OD_AL': [],'OS_AL': []}

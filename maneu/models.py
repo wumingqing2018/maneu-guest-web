@@ -49,6 +49,7 @@ class ManeuOrder(models.Model):
     name = models.CharField(max_length=36)
     phone = models.CharField(max_length=36)
     remark = models.CharField(max_length=512)
+    content = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
