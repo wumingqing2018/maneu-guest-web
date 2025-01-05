@@ -164,10 +164,10 @@ def get_detail(request):
     text = is_code(request.GET.get('text'))
 
     if code and text:
-        if request.GET.get('text') == "Order":
+        if request.GET.get('text') == "100001":
             order = ManeuOrder.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': model_to_dict(order)}
-        elif request.GET.get('text') == "Store":
+        elif request.GET.get('text') == "100002":
             store = ManeuStore.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
         elif request.GET.get('text') == "100003":
@@ -179,7 +179,7 @@ def get_detail(request):
         elif request.GET.get('text') == "100005":
             data = ManeuAdmin.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': model_to_dict(data)}
-        elif request.GET.get('text') == "Service":
+        elif request.GET.get('text') == "100006":
             data = ManeuService.objects.filter(guest_id=code).order_by('-time').first().values('time', 'content')
             content = {'status': True, 'message': '100000', 'content': data}
         else:
