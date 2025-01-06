@@ -174,7 +174,7 @@ def get_detail(request):
                             'name': order.name,
                             'phone': order.phone,
                             'remark': order.remark,
-                            'content': order.content,
+                            'content': json.loads(order.content),
                             }
                 content = {'status': True, 'message': '100000', 'content': content}
             except Exception as e:
