@@ -165,14 +165,26 @@ def get_detail(request):
 
     if code and text:
         if request.GET.get('text') == "100001":
-            order = ManeuOrder.objects.filter(id=code).first()
-            content = {'status': True, 'message': '100000', 'content': model_to_dict(order)}
+            try:
+                order = ManeuOrder.objects.filter(id=code).first()
+                content =  {'admin_id': order.admin_id,
+                            'guest_id': order.guest_id,
+                            'report_id': order.report_id,
+                            'time': order.time.strftime("%Y-%m-%d %H:%M:%s"),
+                            'name': order.name,
+                            'phone': order.phone,
+                            'remark': order.remark,
+                            'content': order.content,
+                            }
+                content = {'status': True, 'message': '100000', 'content': content}
+            except Exception as e:
+                content = {'status': False, 'message': str(e), 'content': {}}
         elif request.GET.get('text') == "100002":
             store = ManeuStore.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
         elif request.GET.get('text') == "100003":
             data = ManeuReport.objects.filter(id=code).first()
-            content = {'status': True, 'message': '100000', 'admin_id': data.admin_id, 'name': data.name, 'phone': data.phone, 'time': data.time.strftime("%Y-%m-%d"), 'content': json.loads(data.content)}
+            content = {'status': True, 'message': '100000', 'admin_id': data.admin_id, 'name': data.name, 'phone': data.phone, 'time': data.time.strftime("%Y-%m-%d %H:%M:%s"), 'content': json.loads(data.content)}
         elif request.GET.get('text') == "100004":
             store = ManeuGuest.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
