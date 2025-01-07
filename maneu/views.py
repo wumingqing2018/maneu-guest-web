@@ -16,6 +16,7 @@ from maneu.models import *
 def index(request):
     return render(request, 'index.html')
 
+
 def login(request):
     call = is_call(request.GET.get('call'))
     code = is_code(request.GET.get('code'))
@@ -72,20 +73,19 @@ def sendsms(request):
 def get_index(request):
     data = [{
         "index": 'https://maneu.online/static/img/3.gif',
-        "data": ['https://maneu.online/static/img/3.gif',
-                 'https://maneu.online/static/img/gif2.jpg'],
+        "data": 'https://maneu.online/static/img/3.gif',
     }, {
         "index": 'https://maneu.online/static/img/1mcjs.jpg',
-        "data": ['https://maneu.online/static/img/2mcjs.jpg'],
+        "data": 'https://maneu.online/static/img/2mcjs.jpg',
     }, {
         "index": 'https://maneu.online/static/img/1xzy.jpg',
-        "data": ['https://maneu.online/static/img/2xzy.jpg'],
+        "data": 'https://maneu.online/static/img/2xzy.jpg',
     }, {
         "index": 'https://maneu.online/static/img/1yqs.jpg',
-        "data": ['https://maneu.online/static/img/2yqs.jpg'],
+        "data": 'https://maneu.online/static/img/2yqs.jpg',
     }, {
         "index": 'https://maneu.online/static/img/1njj.jpg',
-        "data": ['https://maneu.online/static/img/2njj.jpg'],
+        "data": 'https://maneu.online/static/img/2njj.jpg',
     }]
     return JsonResponse({'status': True, 'message': '', 'content': data})
 
@@ -99,10 +99,13 @@ def get_list(request):
         guest = list(ManeuGuest.objects.filter(phone=code).all().values_list('id', flat=True))
 
         if text == "100001":
-            data.extend(ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time', 'phone', 'remark'))
+            data.extend(
+                ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time', 'phone',
+                                                                                             'remark'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif text == "100002":
-            data = {'id': [], 'time': [], 'AL': [], 'VA': [], 'SPH': [], 'CYL': [], 'OD_VA': [], 'OS_VA': [], 'OD_SPH': [],'OS_SPH': [], 'OD_CYL': [], 'OS_CYL': [], 'OD_AL': [],'OS_AL': []}
+            data = {'id': [], 'time': [], 'AL': [], 'VA': [], 'SPH': [], 'CYL': [], 'OD_VA': [], 'OS_VA': [],
+                    'OD_SPH': [], 'OS_SPH': [], 'OD_CYL': [], 'OS_CYL': [], 'OD_AL': [], 'OS_AL': []}
 
             report = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all()
             for i in report:
@@ -116,7 +119,6 @@ def get_list(request):
                     data['SPH'].append(0)
                 except:
                     continue
-
 
                 try:
                     data['OD_AL'].append(format(float(content['OD']['AL']), '.2f'))
@@ -134,7 +136,6 @@ def get_list(request):
                     data['OD_CYL'].append(format(float(content['OD']['AL']), '.2f'))
                 except:
                     data['OD_CYL'].append(0.00)
-
 
                 try:
                     data['OS_AL'].append(format(float(content['OS']['AL']), '.2f'))
@@ -168,15 +169,15 @@ def get_detail(request):
         if request.GET.get('text') == "100001":
             try:
                 order = ManeuOrder.objects.filter(id=code).first()
-                data =  {'admin_id': order.admin_id,
-                         'guest_id': order.guest_id,
-                         'report_id': order.report_id,
-                         'time': order.time.strftime("%Y-%m-%d %H:%M"),
-                         'name': order.name,
-                         'phone': order.phone,
-                         'remark': order.remark,
-                         'content': json.loads(order.content),
-                         }
+                data = {'admin_id': order.admin_id,
+                        'guest_id': order.guest_id,
+                        'report_id': order.report_id,
+                        'time': order.time.strftime("%Y-%m-%d %H:%M"),
+                        'name': order.name,
+                        'phone': order.phone,
+                        'remark': order.remark,
+                        'content': json.loads(order.content),
+                        }
                 content = {'status': True, 'message': '100000', 'content': data}
             except Exception as e:
                 content = {'status': False, 'message': str(e), 'content': {}}
@@ -214,7 +215,7 @@ def get_detail(request):
             data = {'location': admin.location,
                     'nickname': admin.nickname,
                     'content': admin.content,
-                    'phone': admin.phone,}
+                    'phone': admin.phone, }
             content = {'status': True, 'message': '100000', 'content': model_to_dict(data)}
         elif request.GET.get('text') == "100006":
             try:
