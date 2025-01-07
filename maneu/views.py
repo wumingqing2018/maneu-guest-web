@@ -169,14 +169,14 @@ def get_detail(request):
             try:
                 order = ManeuOrder.objects.filter(id=code).first()
                 data =  {'admin_id': order.admin_id,
-                            'guest_id': order.guest_id,
-                            'report_id': order.report_id,
-                            'time': order.time.strftime("%Y-%m-%d %H:%M"),
-                            'name': order.name,
-                            'phone': order.phone,
-                            'remark': order.remark,
-                            'content': json.loads(order.content),
-                            }
+                         'guest_id': order.guest_id,
+                         'report_id': order.report_id,
+                         'time': order.time.strftime("%Y-%m-%d %H:%M"),
+                         'name': order.name,
+                         'phone': order.phone,
+                         'remark': order.remark,
+                         'content': json.loads(order.content),
+                         }
                 content = {'status': True, 'message': '100000', 'content': data}
             except Exception as e:
                 content = {'status': False, 'message': str(e), 'content': {}}
@@ -187,16 +187,28 @@ def get_detail(request):
             try:
                 report = ManeuReport.objects.filter(id=code).first()
                 data = {'admin_id': report.admin_id,
-                           'name': report.name,
-                           'phone': report.phone,
-                           'time': report.time.strftime("%Y-%m-%d %H:%M"),
-                           'content': json.loads(report.content)
-                           }
+                        'name': report.name,
+                        'phone': report.phone,
+                        'time': report.time.strftime("%Y-%m-%d %H:%M"),
+                        'content': json.loads(report.content)
+                        }
                 content = {'status': True, 'message': '100000', 'content': data}
             except Exception as e:
                 content = {'status': False, 'message': str(e), 'content': {}}
         elif request.GET.get('text') == "100004":
-            store = ManeuGuest.objects.filter(id=code).first()
+            guest = ManeuGuest.objects.filter(id=code).first()
+            data = {
+                'time': guest.time,
+            'name': guest.name,
+            phone = models.CharField(max_length=255, blank=True, null=True)
+            remark = models.TextField(blank=True, null=True)
+            sex = models.CharField(max_length=36, blank=True, null=True)
+            age = models.CharField(max_length=36, blank=True, null=True)
+            dfh = models.CharField(max_length=36, blank=True, null=True)
+            ot = models.CharField(max_length=36, blank=True, null=True)
+            em = models.CharField(max_length=36, blank=True, null=True)
+
+            }
             content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
         elif request.GET.get('text') == "100005":
             data = ManeuAdmin.objects.filter(id=code).first()
