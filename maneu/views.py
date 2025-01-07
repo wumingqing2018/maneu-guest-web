@@ -60,7 +60,7 @@ def sendsms(request):
             if response['Code'] == 'OK':
                 content = {'status': True, 'message': '100000', 'content': {}}
             else:
-                content = {'status': False, 'message': '短息发送失败', 'content': {}}
+                content = {'status': False, 'message': '短信发送失败，今日次数用完了', 'content': {}}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
@@ -72,19 +72,20 @@ def sendsms(request):
 def get_index(request):
     data = [{
         "index": 'https://maneu.online/static/img/3.gif',
-        "data": 'https://maneu.online/static/img/gif2.jpg',
+        "data": ['https://maneu.online/static/img/3.gif',
+                 'https://maneu.online/static/img/gif2.jpg'],
     }, {
         "index": 'https://maneu.online/static/img/1mcjs.jpg',
-        "data": 'https://maneu.online/static/img/2mcjs.jpg',
+        "data": ['https://maneu.online/static/img/2mcjs.jpg'],
     }, {
         "index": 'https://maneu.online/static/img/1xzy.jpg',
-        "data": 'https://maneu.online/static/img/2xzy.jpg',
+        "data": ['https://maneu.online/static/img/2xzy.jpg'],
     }, {
         "index": 'https://maneu.online/static/img/1yqs.jpg',
-        "data": 'https://maneu.online/static/img/2yqs.jpg',
+        "data": ['https://maneu.online/static/img/2yqs.jpg'],
     }, {
         "index": 'https://maneu.online/static/img/1njj.jpg',
-        "data": 'https://maneu.online/static/img/2njj.jpg',
+        "data": ['https://maneu.online/static/img/2njj.jpg'],
     }]
     return JsonResponse({'status': True, 'message': '', 'content': data})
 
@@ -167,7 +168,7 @@ def get_detail(request):
         if request.GET.get('text') == "100001":
             try:
                 order = ManeuOrder.objects.filter(id=code).first()
-                content =  {'admin_id': order.admin_id,
+                data =  {'admin_id': order.admin_id,
                             'guest_id': order.guest_id,
                             'report_id': order.report_id,
                             'time': order.time.strftime("%Y-%m-%d %H:%M"),
@@ -176,7 +177,7 @@ def get_detail(request):
                             'remark': order.remark,
                             'content': json.loads(order.content),
                             }
-                content = {'status': True, 'message': '100000', 'content': content}
+                content = {'status': True, 'message': '100000', 'content': data}
             except Exception as e:
                 content = {'status': False, 'message': str(e), 'content': {}}
         elif request.GET.get('text') == "100002":
@@ -185,13 +186,13 @@ def get_detail(request):
         elif request.GET.get('text') == "100003":
             try:
                 report = ManeuReport.objects.filter(id=code).first()
-                content = {'admin_id': report.admin_id,
+                data = {'admin_id': report.admin_id,
                            'name': report.name,
                            'phone': report.phone,
-                           'time': report.time.strftime("%Y-%m-%d %H:%M:%s"),
+                           'time': report.time.strftime("%Y-%m-%d %H:%M"),
                            'content': json.loads(report.content)
                            }
-                content = {'status': True, 'message': '100000', 'content': content}
+                content = {'status': True, 'message': '100000', 'content': data}
             except Exception as e:
                 content = {'status': False, 'message': str(e), 'content': {}}
         elif request.GET.get('text') == "100004":
@@ -201,8 +202,17 @@ def get_detail(request):
             data = ManeuAdmin.objects.filter(id=code).first()
             content = {'status': True, 'message': '100000', 'content': model_to_dict(data)}
         elif request.GET.get('text') == "100006":
-            data = ManeuService.objects.filter(guest_id=code).order_by('-time').first().values('time', 'content')
-            content = {'status': True, 'message': '100000', 'content': data}
+            try:
+                service = ManeuService.objects.filter(guest_id=code).order_by('-time').first()
+                data = {
+                    'time': service.time,
+                    'name': service.name,
+                    'phone': service.phone,
+                    'remark': service.remark,
+                }
+                content = {'status': True, 'message': '100000', 'content': data}
+            except Exception as e:
+                content = {'status': False, 'message': str(e), 'content': {}}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
