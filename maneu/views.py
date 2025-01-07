@@ -73,7 +73,7 @@ def sendsms(request):
 def get_index(request):
     data = [{
         "index": 'https://maneu.online/static/img/3.gif',
-        "data": 'https://maneu.online/static/img/3.gif',
+        "data": 'https://maneu.online/static/img/gif2.jpg',
     }, {
         "index": 'https://maneu.online/static/img/1mcjs.jpg',
         "data": 'https://maneu.online/static/img/2mcjs.jpg',
