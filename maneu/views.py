@@ -199,19 +199,22 @@ def get_detail(request):
             guest = ManeuGuest.objects.filter(id=code).first()
             data = {
                 'time': guest.time,
-            'name': guest.name,
-            phone = models.CharField(max_length=255, blank=True, null=True)
-            remark = models.TextField(blank=True, null=True)
-            sex = models.CharField(max_length=36, blank=True, null=True)
-            age = models.CharField(max_length=36, blank=True, null=True)
-            dfh = models.CharField(max_length=36, blank=True, null=True)
-            ot = models.CharField(max_length=36, blank=True, null=True)
-            em = models.CharField(max_length=36, blank=True, null=True)
-
+                'name': guest.name,
+                'phone': guest.phone,
+                'remark': guest.remark,
+                'sex': guest.sex,
+                'age': guest.age,
+                'dfh': guest.dfh,
+                'ot': guest.ot,
+                'em': guest.em,
             }
-            content = {'status': True, 'message': '100000', 'content': model_to_dict(store)}
+            content = {'status': True, 'message': '100000', 'content': data}
         elif request.GET.get('text') == "100005":
-            data = ManeuAdmin.objects.filter(id=code).first()
+            admin = ManeuAdmin.objects.filter(id=code).first()
+            data = {'location': admin.location,
+                    'nickname': admin.nickname,
+                    'content': admin.content,
+                    'phone': admin.phone,}
             content = {'status': True, 'message': '100000', 'content': model_to_dict(data)}
         elif request.GET.get('text') == "100006":
             try:
