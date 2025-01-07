@@ -218,7 +218,7 @@ def get_detail(request):
             content = {'status': True, 'message': '100000', 'content': model_to_dict(data)}
         elif request.GET.get('text') == "100006":
             try:
-                service = ManeuService.objects.filter(guest_id=code).order_by('-time').first()
+                service = ManeuService.objects.filter(guest_id=code).first()
                 data = {
                     'time': service.time,
                     'name': service.name,
