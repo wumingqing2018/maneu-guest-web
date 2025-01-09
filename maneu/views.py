@@ -216,7 +216,7 @@ def get_detail(request):
                     'nickname': admin.nickname,
                     'content': admin.content,
                     'phone': admin.phone, }
-            content = {'status': True, 'message': '100000', 'content': model_to_dict(data)}
+            content = {'status': True, 'message': '100000', 'content': data}
         elif request.GET.get('text') == "100006":
             try:
                 service = ManeuService.objects.filter(guest_id=code).first()
