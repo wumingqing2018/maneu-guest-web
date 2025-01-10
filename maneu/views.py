@@ -100,8 +100,7 @@ def get_list(request):
 
         if text == "100001":
             data.extend(
-                ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time', 'phone',
-                                                                                             'remark'))
+                ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif text == "100002":
             data = {'id': [], 'time': [], 'AL': [], 'VA': [], 'SPH': [], 'CYL': [], 'OD_VA': [], 'OS_VA': [],
@@ -182,8 +181,11 @@ def get_detail(request):
             except Exception as e:
                 content = {'status': False, 'message': str(e), 'content': {}}
         elif request.GET.get('text') == "100002":
-            store = ManeuStore.objects.filter(id=code).first()
-            content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
+            try:
+                store = ManeuStore.objects.filter(id=code).first()
+                content = {'status': True, 'message': '100000', 'content': json.loads(store.content)}
+            except Exception as e:
+                content = {'status': False, 'message': str(e), 'content': {}}
         elif request.GET.get('text') == "100003":
             try:
                 report = ManeuReport.objects.filter(id=code).first()
@@ -215,7 +217,8 @@ def get_detail(request):
             data = {'location': admin.location,
                     'nickname': admin.nickname,
                     'content': admin.content,
-                    'phone': admin.phone, }
+                    'phone': admin.phone
+                    }
             content = {'status': True, 'message': '100000', 'content': data}
         elif request.GET.get('text') == "100006":
             try:
