@@ -99,8 +99,7 @@ def get_list(request):
         guest = list(ManeuGuest.objects.filter(phone=code).all().values_list('id', flat=True))
 
         if text == "100001":
-            data.extend(
-                ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark'))
+            data.extend(ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
         elif text == "100002":
             data = {'id': [], 'time': [], 'AL': [], 'VA': [], 'SPH': [], 'CYL': [], 'OD_VA': [], 'OS_VA': [],
@@ -120,36 +119,36 @@ def get_list(request):
                     continue
 
                 try:
-                    data['OD_AL'].append(format(float(content['OD']['AL']), '.2f'))
+                    data['OD_AL'].append(content['OD']['AL'])
                 except:
                     data['OD_AL'].append(0.00)
                 try:
-                    data['OD_VA'].append(format(float(content['OD']['AL']), '.2f'))
+                    data['OD_VA'].append(content['OD']['AL'])
                 except:
                     data['OD_VA'].append(0.00)
                 try:
-                    data['OD_SPH'].append(format(float(content['OD']['AL']), '.2f'))
+                    data['OD_SPH'].append(content['OD']['AL'])
                 except:
                     data['OD_SPH'].append(0.00)
                 try:
-                    data['OD_CYL'].append(format(float(content['OD']['AL']), '.2f'))
+                    data['OD_CYL'].append(content['OD']['AL'])
                 except:
                     data['OD_CYL'].append(0.00)
 
                 try:
-                    data['OS_AL'].append(format(float(content['OS']['AL']), '.2f'))
+                    data['OS_AL'].append(content['OS']['AL'])
                 except:
                     data['OS_AL'].append(0.00)
                 try:
-                    data['OS_VA'].append(format(float(content['OS']['AL']), '.2f'))
+                    data['OS_VA'].append(content['OS']['AL'])
                 except:
                     data['OS_VA'].append(0.00)
                 try:
-                    data['OS_SPH'].append(format(float(content['OS']['AL']), '.2f'))
+                    data['OS_SPH'].append(content['OS']['AL'])
                 except:
                     data['OS_SPH'].append(0.00)
                 try:
-                    data['OS_CYL'].append(format(float(content['OS']['AL']), '.2f'))
+                    data['OS_CYL'].append(content['OS']['AL'])
                 except:
                     data['OS_CYL'].append(0.00)
             return JsonResponse({'status': True, 'message': '', 'content': data})
