@@ -5,7 +5,6 @@ import random
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
-from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import render
 
@@ -93,65 +92,16 @@ def get_index(request):
 def get_list(request):
     code = is_call(request.GET.get('code'))
     text = is_code(request.GET.get('text'))
-    data = []
 
     if code:
         guest = list(ManeuGuest.objects.filter(phone=code).all().values_list('id', flat=True))
 
         if text == "100001":
-            data.extend(ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark'))
-            return JsonResponse({'status': True, 'message': '', 'content': data})
+            data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+            return JsonResponse({'status': True, 'message': '', 'content': list(data)})
         elif text == "100002":
-            data = {'id': [], 'time': [], 'AL': [], 'VA': [], 'SPH': [], 'CYL': [], 'OD_VA': [], 'OS_VA': [],
-                    'OD_SPH': [], 'OS_SPH': [], 'OD_CYL': [], 'OS_CYL': [], 'OD_AL': [], 'OS_AL': []}
-
-            report = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all()
-            for i in report:
-                try:
-                    content = json.loads(i.content)
-                    data['time'].append(i.time.strftime("%Y-%m-%d"))
-                    data['id'].append(i.id)
-                    data['AL'].append(24)
-                    data['VA'].append(1.00)
-                    data['CYL'].append(0)
-                    data['SPH'].append(0)
-                except:
-                    continue
-
-                try:
-                    data['OD_AL'].append(content['OD']['AL'])
-                except:
-                    data['OD_AL'].append(0.00)
-                try:
-                    data['OD_VA'].append(content['OD']['AL'])
-                except:
-                    data['OD_VA'].append(0.00)
-                try:
-                    data['OD_SPH'].append(content['OD']['AL'])
-                except:
-                    data['OD_SPH'].append(0.00)
-                try:
-                    data['OD_CYL'].append(content['OD']['AL'])
-                except:
-                    data['OD_CYL'].append(0.00)
-
-                try:
-                    data['OS_AL'].append(content['OS']['AL'])
-                except:
-                    data['OS_AL'].append(0.00)
-                try:
-                    data['OS_VA'].append(content['OS']['AL'])
-                except:
-                    data['OS_VA'].append(0.00)
-                try:
-                    data['OS_SPH'].append(content['OS']['AL'])
-                except:
-                    data['OS_SPH'].append(0.00)
-                try:
-                    data['OS_CYL'].append(content['OS']['AL'])
-                except:
-                    data['OS_CYL'].append(0.00)
-            return JsonResponse({'status': True, 'message': '', 'content': data})
+            data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+            return JsonResponse({'status': True, 'message': '', 'content': list(data)})
         elif text == "100003":
             data.extend(ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
             return JsonResponse({'status': True, 'message': '', 'content': data})
