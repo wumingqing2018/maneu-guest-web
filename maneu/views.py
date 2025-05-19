@@ -1,14 +1,10 @@
 import json
-import os
-import random
 
-from aliyunsdkcore.auth.credentials import AccessKeyCredential
-from aliyunsdkcore.client import AcsClient
-from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from common.verify import *
+from common import common
+from common import verify
 from maneu.models import *
 
 
@@ -17,14 +13,13 @@ def index(request):
 
 
 def login(request):
-    call = is_call(request.GET.get('call'))
-    code = is_code(request.GET.get('code'))
+    call = verify.is_call(request.GET.get('call'))
+    code = verify.is_code(request.GET.get('code'))
 
     if call and code:
         data = ManeuGuest.objects.filter(phone=call, remark=code).first()
         if data:
-            content = {'status': True, 'message': '100000',
-                       'content': {'call': data.phone, 'name': data.name, 'id': data.phone}}
+            content = {'status': True, 'message': '100000', 'content': {'call': data.phone, 'name': data.name, 'id': data.phone}}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
@@ -34,29 +29,14 @@ def login(request):
 
 
 def sendsms(request):
-    call = is_call(request.GET.get('code'))
+    call = verify.is_call(request.GET.get('code'))
 
     if call:
-        random_num = random.randint(100000, 999999)
-        data = ManeuGuest.objects.filter(phone=call).update(remark=random_num)
+        code = common.randint()
+        data = ManeuGuest.objects.filter(phone=call).update(remark=code)
+
         if data:
-            # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.
-            credentials = AccessKeyCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'],
-                                              os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'])
-            # use STS Token
-            # credentials = StsTokenCredential(os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID'], os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET'], os.environ['ALIBABA_CLOUD_SECURITY_TOKEN'])
-            client = AcsClient(region_id='cn-shenzhen', credential=credentials)
-
-            request = SendSmsRequest()
-            request.set_accept_format('json')
-            request.set_SignName("徕可")
-            request.set_TemplateCode("SMS_471990239")
-            request.set_PhoneNumbers(call)
-            request.set_TemplateParam({'code': random_num})
-
-            response = client.do_action_with_exception(request)
-            response = eval(response)
-
+            response = common.sendsms(call, code)
             if response['Code'] == 'OK':
                 content = {'status': True, 'message': '100000', 'content': {}}
             else:
@@ -90,8 +70,8 @@ def get_index(request):
 
 
 def get_list(request):
-    code = is_call(request.GET.get('code'))
-    text = is_code(request.GET.get('text'))
+    code = verify.is_call(request.GET.get('code'))
+    text = verify.is_code(request.GET.get('text'))
 
     if code:
         guest = list(ManeuGuest.objects.filter(phone=code).all().values_list('id', flat=True))
@@ -110,8 +90,8 @@ def get_list(request):
 
 
 def get_detail(request):
-    code = is_uuid(request.GET.get('code'))
-    text = is_code(request.GET.get('text'))
+    code = verify.is_uuid(request.GET.get('code'))
+    text = verify.is_code(request.GET.get('text'))
 
     if code and text:
         if request.GET.get('text') == "100001":
