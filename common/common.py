@@ -1,10 +1,24 @@
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
-import random, os
+import random, os, secrets
+
+
+def getip(request):
+    if request.META.get('HTTP_X_FORWARDED_FOR'):
+        return request.META.get("HTTP_X_FORWARDED_FOR")
+    else:
+        return None
+
 
 def randint():
     return random.randint(100000, 999999)
+
+
+def generate_random_32hex():
+    """生成32位随机十六进制字符串（安全加密级别）"""
+    return secrets.token_hex(16)  # 16字节=32位十六进制
+
 
 def sendsms(call, code):
     # Please ensure that the environment variables ALIBABA_CLOUD_ACCESS_KEY_ID and ALIBABA_CLOUD_ACCESS_KEY_SECRET are set.

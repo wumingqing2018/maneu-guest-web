@@ -83,7 +83,7 @@ def get_list(request):
             data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data)})
         elif text == "100003":
-            data.extend(ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time'))
+            data = ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time')
             return JsonResponse({'status': True, 'message': '', 'content': data})
 
     return JsonResponse({'status': False, 'message': '', 'content': {}})

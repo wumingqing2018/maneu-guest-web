@@ -1,24 +1,62 @@
-.mothod {
-    margin-top: 5%;
+html{
+    min-height: 100%;
+}
+body {
+    position: relative;
+    min-height: 100vh; /* 确保容器至少占满整个视口高度 */
+    background-color: #f9f9f9;
+}
+
+footer {
+    text-align: center;
+    margin-bottom: 2%;
+    position: absolute;
+    bottom: 0;
+    width: 100%; /* 根据需要调整宽度 */
+    padding: 10px 0;
     text-align: center;
 }
 
-h4 {
+footer > a {
+    margin: 5%;
     color: #FFC048;
+}
+
+.blue {
+    display: flex;
+    flex-direction: column;
     background: #003153;
 }
 
 p {
     color: #FFC048;
-    background: #003153;
+    display: block;
 }
 
-a {
+span {
+    font-size: 10px;
     color: #FFC048;
-    background: #003153;
+    display: block;
 }
 
-body {
-    background: #003153;
-    height: 100%;
+span.banner {
+    font-size: 10px;
+    color: black;
+    display: block;
+}
+
+hr {
+    color: white;
+}
+
+h3 {
+    color: #FFC048;
+}
+
+h4 {
+    color: #FFC048;
+}
+
+h5 {
+    color: #FFC048;
 }
