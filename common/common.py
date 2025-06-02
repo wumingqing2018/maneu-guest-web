@@ -1,7 +1,15 @@
 from aliyunsdkcore.auth.credentials import AccessKeyCredential
 from aliyunsdkcore.client import AcsClient
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
-import random, os, secrets
+import random, os, secrets, time
+
+
+def current_time():
+    """
+    返回当前时间
+    格式: Y-M-D H:M:S
+    """
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 
 def getip(request):

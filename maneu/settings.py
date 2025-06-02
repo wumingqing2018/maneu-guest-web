@@ -82,7 +82,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': 3306,
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': '214772680',
     }
 }
 
@@ -122,9 +122,6 @@ https:#docs.djangoproject.com/en/3.0/howto/static-files/
 STATIC_URL = '/static/'
 STATIC_ROOT = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-MEDIA_URL = "/excel/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "/static/excel/")
-
 """
 session config
 """

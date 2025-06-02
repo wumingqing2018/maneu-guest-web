@@ -167,3 +167,22 @@ def get_detail(request):
         content = {'status': False, 'message': '100001', 'content': {}}
 
     return JsonResponse(content)
+
+
+def get_verify(request):
+    code = verify.is_uuid(request.GET.get('code'))
+    if code:
+        Order = ManeuOrder.objects.filter(id=code).first()
+        if Order:
+            if ManeuVerify.objects.create(order_id=Order.id, time=common.current_time()):
+                data = ManeuVerify.objects.filter(order_id=Order.id).all().values('id', 'time', 'name', 'call')
+                code = common.generate_random_32hex()
+                content = {'status': True, 'message': '', 'content': {'data': list(data), 'code': code}}
+            else:
+                content = {'status': False, 'message': '', 'content': {}}
+        else:
+            content = {'status': False, 'message': '', 'content': {}}
+    else:
+        content = {'status': False, 'message': '', 'content': {}}
+    return JsonResponse(content)
+
