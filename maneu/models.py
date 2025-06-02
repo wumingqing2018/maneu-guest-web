@@ -102,9 +102,9 @@ class ManeuVerify(models.Model):
     guest_id = models.CharField(max_length=36, blank=True, null=True)
     order_id = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
-    call = models.CharField(max_length=255, blank=True, null=True)
-    local = models.TextField(blank=True, null=True)
+    name = models.CharField(max_length=36, blank=True, null=True)
+    call = models.CharField(max_length=36, blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
     content = models.TextField(blank=True, null=True)
 
     class Meta:
