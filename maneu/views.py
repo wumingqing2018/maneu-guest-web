@@ -17,9 +17,12 @@ def login(request):
     code = verify.is_code(request.GET.get('code'))
 
     if call and code:
-        data = ManeuGuest.objects.filter(phone=call, remark=code).first()
-        if data:
-            content = {'status': True, 'message': '100000', 'content': {'call': data.phone, 'name': data.name, 'id': data.phone}}
+        guest = ManeuGuest.objects.filter(phone=call, remark=code).first()
+        if guest:
+            token = common.generate_random_32hex()
+            request.session['token'] = token
+            request.session['guest_id'] = guest.id
+            content = {'status': True, 'message': '100000', 'content': {'call': guest.phone, 'name': guest.name, 'token': token}}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
@@ -85,8 +88,10 @@ def get_list(request):
         elif text == "100003":
             data = ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time')
             return JsonResponse({'status': True, 'message': '', 'content': data})
-
-    return JsonResponse({'status': False, 'message': '', 'content': {}})
+        else:
+            return JsonResponse({'status': False, 'message': '', 'content': {}})
+    else:
+        return JsonResponse({'status': False, 'message': '', 'content': {}})
 
 
 def get_detail(request):
@@ -171,18 +176,23 @@ def get_detail(request):
 
 def get_verify(request):
     code = verify.is_uuid(request.GET.get('code'))
-    if code:
-        Order = ManeuOrder.objects.filter(id=code).first()
-        if Order:
-            if ManeuVerify.objects.create(order_id=Order.id, time=common.current_time()):
-                data = ManeuVerify.objects.filter(order_id=Order.id).all().values('id', 'time', 'name', 'call')
-                code = common.generate_random_32hex()
-                content = {'status': True, 'message': '', 'content': {'data': list(data), 'code': code}}
+    token = verify.is_token(request.GET.get('token'))
+    if code and token:
+        if token == request.session['token']:
+            token = common.generate_random_32hex()
+            request.session['token'] = token
+            Order = ManeuOrder.objects.filter(id=code).first()
+            if Order:
+                if ManeuVerify.objects.create(order_id=Order.id, time=common.current_time()):
+                    data = ManeuVerify.objects.filter(order_id=Order.id).all().values('time')
+                    content = {'status': True, 'message': '', 'content': {'data': list(data), 'token': token}}
+                else:
+                    content = {'status': False, 'message': '查询失败', 'content': {'data': [], 'token': token}}
             else:
-                content = {'status': False, 'message': '', 'content': {}}
+                content = {'status': False, 'message': '不存在订单', 'content': {'data': [], 'token': token}}
         else:
-            content = {'status': False, 'message': '', 'content': {}}
+            content = {'status': False, 'message': '非法格式', 'content': {}}
     else:
-        content = {'status': False, 'message': '', 'content': {}}
+        content = {'status': False, 'message': '非法格式', 'content': {}}
     return JsonResponse(content)
 
