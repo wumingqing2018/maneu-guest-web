@@ -175,13 +175,13 @@ def get_detail(request):
 
 
 def get_verify(request):
-    code = verify.is_uuid(request.GET.get('code'))
+    order_id = verify.is_uuid(request.GET.get('order_id'))
     token = verify.is_token(request.GET.get('token'))
-    if code and token:
+    if order_id and token:
         if token == request.session['token']:
             token = common.generate_random_32hex()
             request.session['token'] = token
-            Order = ManeuOrder.objects.filter(id=code).first()
+            Order = ManeuOrder.objects.filter(id=order_id).first()
             if Order:
                 if ManeuVerify.objects.create(order_id=Order.id, time=common.current_time()):
                     data = ManeuVerify.objects.filter(order_id=Order.id).all().values('time')
