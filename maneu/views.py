@@ -22,7 +22,10 @@ def login(request):
             token = common.generate_random_32hex()
             request.session['token'] = token
             request.session['guest_id'] = guest.id
-            content = {'status': True, 'message': '100000', 'content': {'call': guest.phone, 'name': guest.name, 'token': token}}
+            request.session['guest_name'] = guest.name
+            request.session['guest_call'] = guest.phone
+
+            content = {'status': True, 'message': '100000', 'content': token}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
