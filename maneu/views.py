@@ -21,9 +21,8 @@ def login(request):
     if call and code:
         token = common.generate_random_32hex()
         guest = ManeuGuest.objects.filter(phone=call).update(remark=token)
-        print(guest)
         if guest != 0:
-            content = {'status': True, 'message': '100000', 'content': {}, 'code':token}
+            content = {'status': True, 'message': '100000', 'content': {}, 'token':token}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
@@ -82,19 +81,19 @@ def get_list(request):
         guest = list(ManeuGuest.objects.filter(remark=token).values_list('id', flat=True))
         if text == "100001":
             remark = common.generate_random_32hex()
-            guest = ManeuGuest.objects.filter(remark=token).update(remark=remark)
+            guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
-            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': remark})
+            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100002":
             remark = common.generate_random_32hex()
-            guest = ManeuGuest.objects.filter(remark=token).update(remark=remark)
+            guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
-            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': remark})
+            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100003":
             remark = common.generate_random_32hex()
-            guest = ManeuGuest.objects.filter(remark=token).update(remark=remark)
+            guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             data = ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time')
-            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': token})
+            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
 
         else:
             return JsonResponse({'status': False, 'message': '', 'content': {}})
