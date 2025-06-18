@@ -25,7 +25,7 @@ def login(request):
             request.session['guest_name'] = guest.name
             request.session['guest_call'] = guest.phone
 
-            content = {'status': True, 'message': '100000', 'content': token}
+            content = {'status': True, 'message': '100000', 'content': request.session['token']}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
