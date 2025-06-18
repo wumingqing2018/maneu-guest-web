@@ -19,8 +19,7 @@ def login(request):
     if call and code:
         guest = ManeuGuest.objects.filter(phone=call, remark=code).first()
         if guest:
-            token = common.generate_random_32hex()
-            request.session['token'] = token
+            request.session['token'] = common.generate_random_32hex()
             request.session['guest_id'] = guest.id
             request.session['guest_name'] = guest.name
             request.session['guest_call'] = guest.phone
