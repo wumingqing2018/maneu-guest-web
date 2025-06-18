@@ -133,7 +133,7 @@ SESSION_COOKIE_PATH = "/"
 # Session的cookie保存的域名（默认）
 SESSION_COOKIE_DOMAIN = None
 # 是否Https传输cookie（默认）
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
 # 是否Session的cookie只支持http传输（默认）
 SESSION_COOKIE_HTTPONLY = True
 # Session的cookie失效日期（2周）（默认）
