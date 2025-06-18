@@ -100,7 +100,7 @@ def get_list(request):
         else:
             return JsonResponse({'status': False, 'message': '', 'content': {}})
     else:
-        return JsonResponse({'status': False, 'message': request.session.get('token'), 'content': {}})
+        return JsonResponse({'status': False, 'message': 'token is null', 'content': {}})
 
 
 def get_detail(request):
