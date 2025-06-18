@@ -1,7 +1,9 @@
 import json
+from os import remove
 
 from django.http import JsonResponse
 from django.shortcuts import render
+from pycparser.ply.yacc import token
 
 from common import common
 from common import verify
@@ -17,14 +19,11 @@ def login(request):
     code = verify.is_code(request.GET.get('code'))
 
     if call and code:
-        guest = ManeuGuest.objects.filter(phone=call).first()
-        if guest:
-            request.session['token'] = common.generate_random_32hex()
-            request.session['guest_id'] = guest.id
-            request.session['guest_name'] = guest.name
-            request.session['guest_call'] = guest.phone
-
-            content = {'status': True, 'message': '100000', 'content': request.session.get('token')}
+        token = common.generate_random_32hex()
+        guest = ManeuGuest.objects.filter(phone=call).update(remark=token)
+        print(guest)
+        if guest != 0:
+            content = {'status': True, 'message': '100000', 'content': {}, 'code':token}
         else:
             content = {'status': False, 'message': '100002', 'content': {}}
     else:
@@ -38,7 +37,7 @@ def sendsms(request):
 
     if call:
         code = common.randint()
-        data = ManeuGuest.objects.filter(phone=call).update(remark=code)
+        data = ManeuGuest.objects.filter(phone=call).all().update(remark=code)
 
         if data:
             response = common.sendsms(call, code)
@@ -77,24 +76,23 @@ def get_index(request):
 def get_list(request):
     token = verify.is_token(request.GET.get('token'))
     text = verify.is_code(request.GET.get('text'))
-    print(type(request.session.get('token')), request.session.get('token'), dict(request.session))
 
-    if token == request.session.get('token'):
-        guest = list(ManeuGuest.objects.filter(phone=request.session['guest_id']).all().values_list('id', flat=True))
-
+    if token and text:
+        token = common.generate_random_32hex()
+        guest = list(ManeuGuest.objects.filter(remark=token).values_list('id', flat=True))
         if text == "100001":
-            token = common.generate_random_32hex()
-            request.session['token'] = token
+            remark = common.generate_random_32hex()
+            guest = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
-            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': token})
+            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': remark})
         elif text == "100002":
-            token = common.generate_random_32hex()
-            request.session['token'] = token
+            remark = common.generate_random_32hex()
+            guest = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
-            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': token})
+            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': remark})
         elif text == "100003":
-            token = common.generate_random_32hex()
-            request.session['token'] = token
+            remark = common.generate_random_32hex()
+            guest = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             data = ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': token})
 
