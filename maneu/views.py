@@ -77,7 +77,6 @@ def get_list(request):
     text = verify.is_code(request.GET.get('text'))
 
     if token and text:
-        token = common.generate_random_32hex()
         guest = list(ManeuGuest.objects.filter(remark=token).values_list('id', flat=True))
         if text == "100001":
             remark = common.generate_random_32hex()
