@@ -17,7 +17,7 @@ def login(request):
     code = verify.is_code(request.GET.get('code'))
 
     if call and code:
-        guest = ManeuGuest.objects.filter(phone=call, remark=code).first()
+        guest = ManeuGuest.objects.filter(phone=call).first()
         if guest:
             request.session['token'] = common.generate_random_32hex()
             request.session['guest_id'] = guest.id
