@@ -85,16 +85,12 @@ def get_list(request):
         if text == "100001":
             token = common.generate_random_32hex()
             request.session['token'] = token
-            data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time',
-                                                                                                'phone', 'remark',
-                                                                                                'content')
+            data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': token})
         elif text == "100002":
             token = common.generate_random_32hex()
             request.session['token'] = token
-            data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time',
-                                                                                                 'phone', 'remark',
-                                                                                                 'content')
+            data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': token})
         elif text == "100003":
             token = common.generate_random_32hex()
@@ -105,7 +101,7 @@ def get_list(request):
         else:
             return JsonResponse({'status': False, 'message': '', 'content': {}})
     else:
-        return JsonResponse({'status': False, 'message': '', 'content': {}})
+        return JsonResponse({'status': False, 'message': request.session.get('token'), 'content': {}})
 
 
 def get_detail(request):
