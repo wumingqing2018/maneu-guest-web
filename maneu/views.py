@@ -79,18 +79,22 @@ def get_list(request):
     token = verify.is_token(request.GET.get('token'))
     text = verify.is_code(request.GET.get('text'))
 
-    if token == request.session['token']:
+    if token == request.session.get('token'):
         guest = list(ManeuGuest.objects.filter(phone=request.session['guest_id']).all().values_list('id', flat=True))
 
         if text == "100001":
             token = common.generate_random_32hex()
             request.session['token'] = token
-            data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+            data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time',
+                                                                                                'phone', 'remark',
+                                                                                                'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': token})
         elif text == "100002":
             token = common.generate_random_32hex()
             request.session['token'] = token
-            data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+            data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time',
+                                                                                                 'phone', 'remark',
+                                                                                                 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'code': token})
         elif text == "100003":
             token = common.generate_random_32hex()
@@ -109,7 +113,7 @@ def get_detail(request):
     text = verify.is_code(request.GET.get('text'))
     token = verify.is_token(request.GET.get('token'))
 
-    if code and text and token == request.session['token']:
+    if code and text and token == request.session.get('token'):
         if request.GET.get('text') == "100001":
             try:
                 order = ManeuOrder.objects.filter(id=code).first()
@@ -200,22 +204,20 @@ def get_detail(request):
 def get_verify(request):
     order_id = verify.is_uuid(request.GET.get('order_id'))
     token = verify.is_token(request.GET.get('token'))
-    if order_id and token:
-        if token == request.session['token']:
-            token = common.generate_random_32hex()
-            request.session['token'] = token
-            Order = ManeuOrder.objects.filter(id=order_id).first()
-            if Order:
-                if ManeuVerify.objects.create(order_id=Order.id, time=common.current_time()):
-                    data = ManeuVerify.objects.filter(order_id=Order.id).all().values('time')
-                    content = {'status': True, 'message': '', 'content': {'data': list(data), 'token': token}}
-                else:
-                    content = {'status': False, 'message': '查询失败', 'content': {'data': [], 'token': token}}
+    if order_id and token == request.session.get('token'):
+
+        token = common.generate_random_32hex()
+        request.session['token'] = token
+        Order = ManeuOrder.objects.filter(id=order_id).first()
+        if Order:
+            if ManeuVerify.objects.create(order_id=Order.id, time=common.current_time()):
+                data = ManeuVerify.objects.filter(order_id=Order.id).all().values('time')
+                content = {'status': True, 'message': '', 'content': {'data': list(data), 'token': token}}
             else:
-                content = {'status': False, 'message': '不存在订单', 'content': {'data': [], 'token': token}}
+                content = {'status': False, 'message': '查询失败', 'content': {'data': [], 'token': token}}
         else:
-            content = {'status': False, 'message': '非法格式', 'content': {}}
+            content = {'status': False, 'message': '不存在订单', 'content': {'data': [], 'token': token}}
+
     else:
         content = {'status': False, 'message': '非法格式', 'content': {}}
     return JsonResponse(content)
-
