@@ -77,6 +77,7 @@ def get_index(request):
 def get_list(request):
     token = verify.is_token(request.GET.get('token'))
     text = verify.is_code(request.GET.get('text'))
+    print(type(request.session.get('token')), request.session.get('token'))
 
     if token == request.session.get('token'):
         guest = list(ManeuGuest.objects.filter(phone=request.session['guest_id']).all().values_list('id', flat=True))
