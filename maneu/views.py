@@ -33,6 +33,7 @@ def login_wx(request):
     if code:
         data_token = ManeuAdmin.objects.filter().first()
         phone = common.get_phone_number(code, data_token.content)
+        print(phone)
         if phone['status']==200:
             token = common.generate_random_32hex()
             guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
