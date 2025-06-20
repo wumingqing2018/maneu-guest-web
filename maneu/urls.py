@@ -20,6 +20,7 @@ from maneu import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login, name='login'),
+    path('login_wx/', views.login_wx, name='login_wx'),
     path('sendsms/', views.sendsms, name='sendsms'),
     path('get_list/', views.get_list, name='get_list'),
     path('get_index/', views.get_index, name='get_index'),

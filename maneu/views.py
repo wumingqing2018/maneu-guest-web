@@ -28,6 +28,34 @@ def login(request):
 
     return JsonResponse(content)
 
+def login_wx(request):
+    code = verify.is_token2(request.GET.get('code'))
+    if code:
+        data_token = ManeuAdmin.objects.filter().first()
+        phone = common.get_phone_number(code, data_token.content)
+        if phone['status']==200:
+            token = common.generate_random_32hex()
+            guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
+            if guest != 0:
+                content = {'status': True, 'message': '100000', 'content': {}, 'token': token}
+            else:
+                content = {'status': False, 'message': '100002', 'content': {}, 'token': ''}
+        elif phone['status']==401:
+            data_token = common.get_miniprogram_token()['access_token']
+            ManeuAdmin.objects.all().update(content=data_token)
+            phone = common.get_phone_number(code, data_token)
+            token = common.generate_random_32hex()
+            guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
+            if guest != 0:
+                content = {'status': True, 'message': '100000', 'content': {}, 'token': token}
+            else:
+                content = {'status': False, 'message': '100002', 'content': {}, 'token': ''}
+        else:
+            content = {'status': False, 'message': '100003', 'content': {'error': phone['message']}, 'token': ''}
+    else:
+        content = {'status': False, 'message': '100001', 'content': {}, 'token': ''}
+
+    return JsonResponse(content)
 
 def sendsms(request):
     call = verify.is_call(request.GET.get('code'))

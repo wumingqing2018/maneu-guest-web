@@ -77,6 +77,13 @@ def is_token(code):
     else:
         return None
 
+def is_token2(code):
+    pattern = re.compile(r'^[0-9a-fA-F]{64}$')
+    if pattern.match(code) is not None:
+        return str(code)
+    else:
+        return None
+
 def is_uuid(code):
     pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
     if pattern.match(code) is not None:
