@@ -1,9 +1,7 @@
 import json
-from os import remove
 
 from django.http import JsonResponse
 from django.shortcuts import render
-from pycparser.ply.yacc import token
 
 from common import common
 from common import verify
@@ -22,7 +20,7 @@ def login(request):
         token = common.generate_random_32hex()
         guest = ManeuGuest.objects.filter(phone=call).update(remark=token)
         if guest != 0:
-            content = {'status': True, 'message': '100000', 'content': {}, 'token':token}
+            content = {'status': True, 'message': '100000', 'content': {}, 'token': token}
         else:
             content = {'status': False, 'message': '100002', 'content': {}, 'token': ''}
     else:
@@ -78,25 +76,25 @@ def get_list(request):
 
     if token and text:
         guest = list(ManeuGuest.objects.filter(remark=token).values_list('id', flat=True))
-        if len(guest)!=0:
+        if len(guest) != 0:
+            remark = common.generate_random_32hex()
+            guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             if text == "100001":
-                remark = common.generate_random_32hex()
-                guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
-                data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+                data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name',
+                                                                                                    'time', 'phone',
+                                                                                                    'remark', 'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100002":
-                remark = common.generate_random_32hex()
-                guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
-                data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+                data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name',
+                                                                                                     'time', 'phone',
+                                                                                                     'remark',
+                                                                                                     'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100003":
-                remark = common.generate_random_32hex()
-                guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
                 data = ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
-
             else:
-                return JsonResponse({'status': False, 'message': '', 'content': {}, 'token': ''})
+                return JsonResponse({'status': False, 'message': '', 'content': {}, 'token': remark})
         else:
             return JsonResponse({'status': False, 'message': '', 'content': {}, 'token': ''})
     else:
@@ -110,7 +108,7 @@ def get_detail(request):
 
     if code and text:
         guest = list(ManeuGuest.objects.filter(remark=token).values_list('id', flat=True))
-        if len(guest)!=0:
+        if len(guest) != 0:
             remark = common.generate_random_32hex()
             guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             if request.GET.get('text') == "100001":
@@ -127,13 +125,14 @@ def get_detail(request):
                             }
                     content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
                 except Exception as e:
-                    content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
+                    content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
             elif request.GET.get('text') == "100002":
                 try:
                     store = ManeuStore.objects.filter(id=code).first()
-                    content = {'status': True, 'message': '100000', 'content': json.loads(store.content), 'token': remark}
+                    content = {'status': True, 'message': '100000', 'content': json.loads(store.content),
+                               'token': remark}
                 except Exception as e:
-                    content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
+                    content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
             elif request.GET.get('text') == "100003":
                 try:
                     report = ManeuReport.objects.filter(id=code).first()
@@ -145,7 +144,7 @@ def get_detail(request):
                             }
                     content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
                 except Exception as e:
-                    content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
+                    content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
             elif request.GET.get('text') == "100004":
                 guest = ManeuGuest.objects.filter(id=code).first()
                 data = {
@@ -179,9 +178,9 @@ def get_detail(request):
                     }
                     content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
                 except Exception as e:
-                    content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
+                    content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
             else:
-                content = {'status': False, 'message': '100003', 'content': {}, 'token': ''}
+                content = {'status': False, 'message': '100003', 'content': {}, 'token': remark}
         else:
             content = {'status': False, 'message': '100002', 'content': {}, 'token': ''}
     else:
