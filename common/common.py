@@ -18,13 +18,9 @@ def get_phone_number(code, data_token):
     payload = {"code": code}
     response = requests.post(url, json=payload).json()
     if response['errcode'] == 0:
-        return {'status': 200, 'message': response['phone_info']['phoneNumber']}
-    elif response['errcode'] == 40001:
-        return {'status': 401, 'message': response['errmsg']}
-    elif response['errcode'] == 40029:
-        return {'status': 429, 'message': response['errmsg']}
+        return {'status': True, 'message': response['phone_info']['phoneNumber']}
     else:
-        return {'status': 500, 'message': response['errmsg']}
+        return {'status': False, 'message': response['errmsg']}
     return response  # 返回手机号
 
 
