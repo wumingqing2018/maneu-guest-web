@@ -125,16 +125,12 @@ def get_detail(request):
                             'remark': order.remark,
                             'content': json.loads(order.content),
                             }
-                    token = common.generate_random_32hex()
-                    request.session['token'] = token
                     content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
                 except Exception as e:
                     content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
             elif request.GET.get('text') == "100002":
                 try:
                     store = ManeuStore.objects.filter(id=code).first()
-                    token = common.generate_random_32hex()
-                    request.session['token'] = token
                     content = {'status': True, 'message': '100000', 'content': json.loads(store.content), 'token': remark}
                 except Exception as e:
                     content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
@@ -147,8 +143,6 @@ def get_detail(request):
                             'time': report.time.strftime("%Y-%m-%d %H:%M"),
                             'content': json.loads(report.content)
                             }
-                    token = common.generate_random_32hex()
-                    request.session['token'] = token
                     content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
                 except Exception as e:
                     content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
@@ -165,8 +159,6 @@ def get_detail(request):
                     'ot': guest.ot,
                     'em': guest.em,
                 }
-                token = common.generate_random_32hex()
-                request.session['token'] = token
                 content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
             elif request.GET.get('text') == "100005":
                 admin = ManeuAdmin.objects.filter(id=code).first()
@@ -175,8 +167,6 @@ def get_detail(request):
                         'content': admin.content,
                         'phone': admin.phone
                         }
-                token = common.generate_random_32hex()
-                request.session['token'] = token
                 content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
             elif request.GET.get('text') == "100006":
                 try:
@@ -187,8 +177,6 @@ def get_detail(request):
                         'phone': service.phone,
                         'remark': service.remark,
                     }
-                    token = common.generate_random_32hex()
-                    request.session['token'] = token
                     content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
                 except Exception as e:
                     content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
