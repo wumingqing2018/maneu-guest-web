@@ -110,9 +110,7 @@ def get_list(request):
             remark = common.generate_random_32hex()
             guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             if text == "100001":
-                data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name',
-                                                                                                    'time', 'phone',
-                                                                                                    'remark', 'content')
+                data = ManeuOrder.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100002":
                 data = ManeuReport.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'name',
@@ -123,12 +121,15 @@ def get_list(request):
             elif text == "100003":
                 data = ManeuService.objects.filter(guest_id__in=guest).order_by('-time').all().values('id', 'time')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
+            elif text == "100004":
+                data = ManeuGuest.objects.filter(guest_id__in=guest[0]).order_by('-time').first()
+
             else:
-                return JsonResponse({'status': False, 'message': '', 'content': {}, 'token': remark})
+                return JsonResponse({'status': False, 'message': '错误参数', 'content': {}, 'token': remark})
         else:
-            return JsonResponse({'status': False, 'message': '', 'content': {}, 'token': ''})
+            return JsonResponse({'status': False, 'message': '请重新登录', 'content': {}, 'token': ''})
     else:
-        return JsonResponse({'status': False, 'message': 'token is null', 'content': {}, 'token': ''})
+        return JsonResponse({'status': False, 'message': '缺少参数', 'content': {}, 'token': ''})
 
 
 def get_detail(request):
