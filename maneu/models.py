@@ -98,7 +98,7 @@ class ManeuStore(models.Model):
 
 
 class ManeuVerify(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
+    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4, editable=False)
     guest_id = models.CharField(max_length=36, blank=True, null=True)
     order_id = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
