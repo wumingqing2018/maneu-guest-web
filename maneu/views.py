@@ -212,10 +212,13 @@ def get_detail(request):
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100007":
-                    ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, phone=guest.phone,
-                                               time=common.current_time())
-                    data = list(ManeuVerify.objects.filter(phone=guest.phone).all().values('time'))
-                    content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
+                    try:
+                        ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, phone=guest.phone,
+                                                   time=common.current_time())
+                        data = ManeuVerify.objects.filter(phone=guest.phone).order_by('-time').all().values('time')
+                        content = {'status': True, 'message': '100000', 'content': list(data), 'token': remark}
+                    except Exception as e:
+                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 else:
                     content = {'status': False, 'message': '100001', 'content': {}, 'token': remark}
             else:
