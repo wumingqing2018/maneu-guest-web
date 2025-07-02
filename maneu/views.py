@@ -213,7 +213,7 @@ def get_detail(request):
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100007":
                     try:
-                        ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, phone=guest.phone,
+                        ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, call=guest.phone,
                                                    time=common.current_time())
                         data = ManeuVerify.objects.filter(phone=guest.phone).order_by('-time').all().values('time')
                         content = {'status': True, 'message': '100000', 'content': list(data), 'token': remark}
