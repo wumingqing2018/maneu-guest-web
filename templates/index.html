@@ -3,13 +3,11 @@
 <html lang="en">
 
 <head>
-    
     <title>徕可</title>
     <link href="{% static 'img/maneu/logo.svg' %}" rel="icon">
-    <link href="{% static 'css/maneu/base.css' %}" rel="stylesheet">
 
     <!-- 新 Bootstrap5 核心 CSS 文件 -->
-    <link crossorigin="anonymous" 
+    <link crossorigin="anonymous"
           href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/cerulean/bootstrap.min.css"
           integrity="sha512-3n/Isj9MCqCc1wf/QfjLigco9sx9xr9m3TqgxstJrSxmwZ05qjl4owbfkioZ0y3w8fNWcVLnJGHfVqKF/L1Qsw=="
           referrerpolicy="no-referrer" rel="stylesheet"/>
@@ -24,24 +22,22 @@
     <script crossorgin="anonymous"
             integrity="sha512-MXe5EK5gyK+fbhwQy/dukwz9fw71HZcsM4KsyDBDTvMyjymkiO0M5qqU0lF4vqLI4VnKf1+DIKf1GM6RFkO8PA=="
             referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
 </head>
-
-<body style="background-color: #003153">
+ 
+<body style="background-color: #003153; height: 100%">
 <div class="container">
     <div class="content row justify-content-center">
-        <div class="header">
-            <img alt="Cinque Terre" class="col-md-2 col-6 img-responsive"
-                 src="{% static 'img/maneu/logo.svg' %}">
+        <div style="padding-top: 4%; text-align: center;">
+            <img alt="Cinque Terre" class="img-responsive" style="width: 200px" src="{% static 'img/maneu/logo.svg' %}">
             <h4 style="color: #FFC048">徕可</h4>
         </div>
-        <div class="body">
+        <div style="padding-top: 4%; text-align: center;">
             <h4 style="color: #FFC048">官方授权许可正品</h4>
-            <p>Officially licensed products</p>
+            <p style="color: #FFC048">Officially licensed products</p>
         </div>
-        <div class="body">
-            <img src="{% static 'img/qrcode.jpg' %}" class="col-md-2 col-6 img-responsive" alt="Cinque Terre">
-            <p>微信扫码查看订单</p>
+        <div style="padding-top: 4%; text-align: center;">
+            <img alt="Cinque Terre" class="img-responsive" style="width: 200px" src="{% static 'img/maneu/code.jpg' %}">
+            <p style="color: #FFC048">微信扫码查看订单</p>
         </div>
     </div>
 </div>
@@ -49,6 +45,6 @@
 
 <footer class="fixed-bottom text-center">
     <div style="padding: 2%">
-            <a href="https://beian.miit.gov.cn" style="color: #FFC048">粤ICP备2023070483号</a>
+        <a href="https://beian.miit.gov.cn" style="color: #FFC048">粤ICP备2023070483号</a>
     </div>
 </footer>
