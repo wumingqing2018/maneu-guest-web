@@ -17,9 +17,9 @@ def login(request):
     code = verify.is_code(request.GET.get('code'))
 
     if call and code:
-        token = common.generate_random_32hex()
-        guest = ManeuGuest.objects.filter(phone=call).update(remark=token)
-        if guest != 0:
+        token = uuid.uuid4()
+        guest = ManeuGuest.objects.filter(phone=call).first().update(remark=token)
+        if guest:
             content = {'status': True, 'message': '100000', 'content': {}, 'token': token}
         else:
             content = {'status': False, 'message': '100002', 'content': {}, 'token': ''}
@@ -36,7 +36,7 @@ def login_wx(request):
         phone = common.get_phone_number(code, data_token.content)
         print(phone)
         if phone['status']:
-            token = common.generate_random_32hex()
+            token = uuid.uuid4()
             guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
             if guest != 0:
                 content = {'status': True, 'message': '100000', 'content': {}, 'token': token}
@@ -47,7 +47,7 @@ def login_wx(request):
             ManeuAdmin.objects.all().update(content=data_token)
             phone = common.get_phone_number(code, data_token)
             if phone['status']:
-                token = common.generate_random_32hex()
+                token = uuid.uuid4()
                 guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
                 if guest != 0:
                     content = {'status': True, 'message': '100000', 'content': {}, 'token': token}
@@ -103,13 +103,13 @@ def get_index(request):
 
 
 def get_list(request):
-    token = verify.is_token(request.GET.get('token'))
+    token = verify.is_uuid(request.GET.get('token'))
     text = verify.is_code(request.GET.get('text'))
 
     if token and text:
         guest = ManeuGuest.objects.filter(remark=token).first()
         if guest:
-            remark = common.generate_random_32hex()
+            remark = uuid.uuid4()
             guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             if text == "100001":
                 data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time',
@@ -135,13 +135,13 @@ def get_list(request):
 def get_detail(request):
     code = verify.is_uuid(request.GET.get('code'))
     text = verify.is_code(request.GET.get('text'))
-    token = verify.is_token(request.GET.get('token'))
+    token = verify.is_uuid(request.GET.get('token'))
 
     if text:
         if code:
             guest = ManeuGuest.objects.filter(remark=token).first()
             if guest:
-                remark = common.generate_random_32hex()
+                remark = uuid.uuid4()
                 guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
                 if request.GET.get('text') == "100001":
                     try:
@@ -178,27 +178,33 @@ def get_detail(request):
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100004":
-                    guest = ManeuGuest.objects.filter(id=code).first()
-                    data = {
-                        'time': guest.time,
-                        'name': guest.name,
-                        'phone': guest.phone,
-                        'remark': guest.remark,
-                        'sex': guest.sex,
-                        'age': guest.age,
-                        'dfh': guest.dfh,
-                        'ot': guest.ot,
-                        'em': guest.em,
-                    }
-                    content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
+                    try:
+                        guest = ManeuGuest.objects.filter(id=code).first()
+                        data = {
+                            'time': guest.time,
+                            'name': guest.name,
+                            'phone': guest.phone,
+                            'remark': guest.remark,
+                            'sex': guest.sex,
+                            'age': guest.age,
+                            'dfh': guest.dfh,
+                            'ot': guest.ot,
+                            'em': guest.em,
+                        }
+                        content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
+                    except Exception as e:
+                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100005":
-                    admin = ManeuAdmin.objects.filter(id=code).first()
-                    data = {'location': admin.location,
-                            'nickname': admin.nickname,
-                            'content': admin.content,
-                            'phone': admin.phone
-                            }
-                    content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
+                    try:
+                        admin = ManeuAdmin.objects.filter(id=code).first()
+                        data = {'location': admin.location,
+                                'nickname': admin.nickname,
+                                'content': admin.content,
+                                'phone': admin.phone
+                                }
+                        content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
+                    except Exception as e:
+                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100006":
                     try:
                         service = ManeuService.objects.filter(guest_id=code).first()
@@ -213,9 +219,9 @@ def get_detail(request):
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100007":
                     try:
-                        ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, call=guest.phone,
+                        ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, phone=guest.phone,
                                                    time=common.current_time())
-                        data = ManeuVerify.objects.filter(call=guest.phone).order_by('-time').all().values('time')
+                        data = ManeuVerify.objects.filter(order_id=code).order_by('-time').all().values('time')
                         content = {'status': True, 'message': '100000', 'content': list(data), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
@@ -233,9 +239,9 @@ def get_detail(request):
 
 def get_verify(request):
     order_id = verify.is_uuid(request.GET.get('order_id'))
-    token = verify.is_token(request.GET.get('token'))
+    token = verify.is_uuid(request.GET.get('token'))
     if order_id and token == request.session.get('token'):
-        token = common.generate_random_32hex()
+        token = uuid.uuid4()
         request.session['token'] = token
         Order = ManeuOrder.objects.filter(id=order_id).first()
         if Order:
