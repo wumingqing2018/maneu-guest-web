@@ -230,7 +230,7 @@ def get_detail(request):
             else:
                 content = {'status': False, 'message': '100002', 'content': {}, 'token': ''}
         else:
-            content = {'status': False, 'message': '100003', 'content': {}, 'token': ''}
+            content = {'status': False, 'message': 'code is wrong'+request.GET.get('code'), 'content': {}, 'token': ''}
     else:
         content = {'status': False, 'message': '100004', 'content': {}, 'token': ''}
 
