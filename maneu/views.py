@@ -18,7 +18,7 @@ def login(request):
 
     if call and code:
         token = uuid.uuid4()
-        guest = ManeuGuest.objects.filter(phone=call).first().update(remark=token)
+        guest = ManeuGuest.objects.filter(phone=call).all().update(remark=token)
         if guest:
             content = {'status': True, 'message': '100000', 'content': {}, 'token': token}
         else:
