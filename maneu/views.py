@@ -113,12 +113,12 @@ def get_list(request):
             remark = uuid.uuid4()
             guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             if text == "100001":
-                data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time',
+                data = ManeuOrder.objects.filter(guest_id=guest.id).order_by('-time').all().values('id', 'name', 'time',
                                                                                                    'phone', 'remark',
                                                                                                    'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100002":
-                data = ManeuReport.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name',
+                data = ManeuReport.objects.filter(guest_id=guest.id).order_by('-time').all().values('id', 'name',
                                                                                                     'time', 'phone',
                                                                                                     'remark', 'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
@@ -134,7 +134,7 @@ def get_list(request):
 
 
 def get_detail(request):
-    code = verify.is_uuid(request.GET.get('code'))
+    code = verify.is_uuid(request.GET.get('code')+'1234')
     text = verify.is_code(request.GET.get('text'))
     token = verify.is_uuid(request.GET.get('token'))
 
