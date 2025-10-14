@@ -117,7 +117,7 @@ class ManeuBuffer(models.Model):
     admin_id = models.CharField(max_length=36, blank=True, null=True)
     guest_id = models.CharField(max_length=36, blank=True, null=True)
     name = models.CharField(max_length=36, blank=True, null=True)
-    phone = models.CharField(max_length=36, blank=True, null=True)
+    call = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
     remark = models.TextField(blank=True, null=True)
     content = models.TextField(blank=True, null=True)
