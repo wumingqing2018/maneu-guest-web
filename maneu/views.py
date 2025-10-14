@@ -118,8 +118,8 @@ def get_list(request):
                                                                                                    'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100002":
-                data = ManeuReport.objects.filter(guest_id=guest.id).order_by('-time').all().values('id', 'name',
-                                                                                                    'time', 'phone',
+                data = ManeuBuffer.objects.filter(guest_id=guest.id).order_by('-time').all().values('id', 'name',
+                                                                                                    'time', 'call',
                                                                                                     'remark', 'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100003":
@@ -168,10 +168,10 @@ def get_detail(request):
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100003":
                     try:
-                        report = ManeuReport.objects.filter(id=code).first()
+                        report = ManeuBuffer.objects.filter(id=code).first()
                         data = {'admin_id': report.admin_id,
                                 'name': report.name,
-                                'phone': report.phone,
+                                'call': report.phone,
                                 'time': report.time.strftime("%Y-%m-%d %H:%M"),
                                 'content': json.loads(report.content)
                                 }

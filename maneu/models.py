@@ -110,3 +110,18 @@ class ManeuVerify(models.Model):
     class Meta:
         managed = False
         db_table = 'maneu_verify'
+
+
+class ManeuBuffer(models.Model):
+    id = models.CharField(primary_key=True, max_length=36)
+    admin_id = models.CharField(max_length=36, blank=True, null=True)
+    guest_id = models.CharField(max_length=36, blank=True, null=True)
+    name = models.CharField(max_length=36, blank=True, null=True)
+    phone = models.CharField(max_length=36, blank=True, null=True)
+    time = models.DateTimeField(blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'maneu_buffer'
