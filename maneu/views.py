@@ -119,7 +119,7 @@ def get_list(request):
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100002":
                 data = ManeuBuffer.objects.filter(guest_id=guest.id).order_by('-time').all().values('id', 'name',
-                                                                                                    'time', 'call',
+                                                                                                    'time', 'phone',
                                                                                                     'remark', 'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100003":
