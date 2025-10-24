@@ -123,7 +123,7 @@ def get_list(request):
                                                                                                     'remark', 'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100003":
-                data = ManeuService.objects.filter(guess_id=guest.id).order_by('-time').all().values('id', 'time')
+                data = ManeuService.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'time')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             else:
                 return JsonResponse({'status': False, 'message': '错误参数', 'content': {}, 'token': remark})
