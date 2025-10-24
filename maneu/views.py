@@ -146,8 +146,8 @@ def get_detail(request):
                 guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
                 if request.GET.get('text') == "100001":
                     try:
-                        order = ManeuOrder.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '100000', 'content': model_to_dict(order), 'token': remark}
+                        data = ManeuOrder.objects.filter(id=code).first()
+                        content = {'status': True, 'message': '100000', 'content': model_to_dict(data), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100002":
@@ -159,48 +159,26 @@ def get_detail(request):
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100003":
                     try:
-                        report = ManeuBuffer.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '100000', 'content': model_to_dict(report), 'token': remark}
+                        data = ManeuBuffer.objects.filter(id=code).first()
+                        content = {'status': True, 'message': '100000', 'content': model_to_dict(data), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100004":
                     try:
-                        guest = ManeuGuest.objects.filter(id=code).first()
-                        data = {
-                            'time': guest.time,
-                            'name': guest.name,
-                            'phone': guest.phone,
-                            'remark': guest.remark,
-                            'sex': guest.sex,
-                            'age': guest.age,
-                            'dfh': guest.dfh,
-                            'ot': guest.ot,
-                            'em': guest.em,
-                        }
-                        content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
+                        data = ManeuGuest.objects.filter(id=code).first()
+                        content = {'status': True, 'message': '100000', 'content': model_to_dict(data), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100005":
                     try:
-                        admin = ManeuAdmin.objects.filter(id=code).first()
-                        data = {'location': admin.location,
-                                'nickname': admin.nickname,
-                                'content': admin.content,
-                                'phone': admin.phone
-                                }
-                        content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
+                        data = ManeuAdmin.objects.filter(id=code).first()
+                        content = {'status': True, 'message': '100000', 'content': model_to_dict(data), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100006":
                     try:
-                        service = ManeuService.objects.filter(guest_id=code).first()
-                        data = {
-                            'time': service.time,
-                            'name': service.name,
-                            'phone': service.phone,
-                            'remark': service.remark,
-                        }
-                        content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
+                        data = ManeuService.objects.filter(guest_id=code).first()
+                        content = {'status': True, 'message': '100000', 'content': model_to_dict(data), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100007":
