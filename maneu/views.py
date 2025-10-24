@@ -109,7 +109,7 @@ def get_list(request):
 
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
-        remark = uuid.uuid4()
+        remark = str(uuid.uuid4())
         print(request.session.get('remark'))
         guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
         request.session['mark'] = remark
