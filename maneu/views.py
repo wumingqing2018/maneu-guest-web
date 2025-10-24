@@ -147,16 +147,7 @@ def get_detail(request):
                 if request.GET.get('text') == "100001":
                     try:
                         order = ManeuOrder.objects.filter(id=code).first()
-                        data = {'admin_id': order.admin_id,
-                                'guest_id': order.guest_id,
-                                'report_id': order.report_id,
-                                'time': order.time.strftime("%Y-%m-%d %H:%M"),
-                                'name': order.name,
-                                'phone': order.phone,
-                                'remark': order.remark,
-                                'content': json.loads(order.content),
-                                }
-                        content = {'status': True, 'message': '100000', 'content': data, 'token': remark}
+                        content = {'status': True, 'message': '100000', 'content': model_to_dict(order), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100002":
