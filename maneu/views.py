@@ -113,12 +113,12 @@ def get_list(request):
             remark = uuid.uuid4()
             guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
             if text == "100001":
-                data = ManeuOrder.objects.filter(guest_id=guest.id).order_by('-time').all().values('id', 'name', 'time',
+                data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time',
                                                                                                    'phone', 'remark',
                                                                                                    'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
             elif text == "100002":
-                data = ManeuBuffer.objects.filter(guest_id=guest.id).order_by('-time').all().values('id', 'name',
+                data = ManeuBuffer.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name',
                                                                                                     'time', 'phone',
                                                                                                     'remark', 'content')
                 return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
@@ -146,7 +146,7 @@ def get_detail(request):
                 guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
                 if request.GET.get('text') == "100001":
                     try:
-                        order = ManeuOrder.objects.filter(id=code, guest_id=guest.id).first()
+                        order = ManeuOrder.objects.filter(id=code, phone=guest.phone).first()
                         data = {'admin_id': order.admin_id,
                                 'guest_id': order.guest_id,
                                 'report_id': order.report_id,
