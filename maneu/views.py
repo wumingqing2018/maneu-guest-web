@@ -124,11 +124,9 @@ def get_list(request):
             data = ManeuService.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'time')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         else:
-            content = {'status': False, 'message': 'text is wrong' + request.GET.get('text'), 'content': {},
-                       'token': ''}
+            content = {'status': False, 'message': 'text is wrong' + request.GET.get('text'), 'content': {}, 'token': ''}
     else:
-        content = {'status': False, 'message': 'mark is wrong' + request.GET.get('token'), 'content': {},
-                   'token': ''}
+        content = {'status': False, 'message': 'mark is wrong' + request.GET.get('token'), 'content': {}, 'token': ''}
 
     return JsonResponse(content)
 
@@ -169,7 +167,7 @@ def get_detail(request):
                 elif request.GET.get('text') == "100003":
                     try:
                         report = ManeuBuffer.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '100000', 'content': report, 'token': remark}
+                        content = {'status': True, 'message': '100000', 'content': dict(report), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100004":
@@ -223,11 +221,13 @@ def get_detail(request):
                 else:
                     content = {'status': False, 'message': '100001', 'content': {}, 'token': remark}
             else:
-                content = {'status': False, 'message': 'mark is wrong'+request.GET.get('token'), 'content': {}, 'token': ''}
+                content = {'status': False, 'message': 'mark is wrong' + request.GET.get('token'), 'content': {},
+                           'token': ''}
         else:
-            content = {'status': False, 'message': 'code is wrong'+request.GET.get('code'), 'content': {}, 'token': ''}
+            content = {'status': False, 'message': 'code is wrong' + request.GET.get('code'), 'content': {},
+                       'token': ''}
     else:
-        content = {'status': False, 'message': 'text is wrong'+request.GET.get('text'), 'content': {}, 'token': ''}
+        content = {'status': False, 'message': 'text is wrong' + request.GET.get('text'), 'content': {}, 'token': ''}
 
     return JsonResponse(content)
 
