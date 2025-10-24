@@ -6,6 +6,7 @@ from django.shortcuts import render
 from common import common
 from common import verify
 from maneu.models import *
+from django.forms.models import model_to_dict
 
 
 def index(request):
@@ -168,7 +169,7 @@ def get_detail(request):
                 elif request.GET.get('text') == "100003":
                     try:
                         report = ManeuBuffer.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '100000', 'content': dict(report), 'token': remark}
+                        content = {'status': True, 'message': '100000', 'content': model_to_dict(report), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100004":
