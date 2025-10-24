@@ -229,11 +229,11 @@ def get_detail(request):
                 else:
                     content = {'status': False, 'message': '100001', 'content': {}, 'token': remark}
             else:
-                content = {'status': False, 'message': '100002', 'content': {}, 'token': ''}
+                content = {'status': False, 'message': 'mark is wrong'+request.GET.get('token'), 'content': {}, 'token': ''}
         else:
             content = {'status': False, 'message': 'code is wrong'+request.GET.get('code'), 'content': {}, 'token': ''}
     else:
-        content = {'status': False, 'message': '100004', 'content': {}, 'token': ''}
+        content = {'status': False, 'message': 'text is wrong'+request.GET.get('text'), 'content': {}, 'token': ''}
 
     return JsonResponse(content)
 
