@@ -10,10 +10,6 @@ from django.forms.models import model_to_dict
 
 
 def index(request):
-    ManeuGuest.objects.filter(admin_id="36483774080401481140071775853431").update(admin_id='60fdfea6-2d3f-11ed-b7f2-00163e02ac92')
-    ManeuOrder.objects.filter(admin_id="36483774080401481140071775853431").update(admin_id='60fdfea6-2d3f-11ed-b7f2-00163e02ac92')
-    ManeuBuffer.objects.filter(admin_id="36483774080401481140071775853431").update(admin_id='60fdfea6-2d3f-11ed-b7f2-00163e02ac92')
-
     return render(request, 'index.html')
 
 
@@ -114,7 +110,10 @@ def get_list(request):
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
         remark = uuid.uuid4()
+        print(request.session.get('remark'))
         guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
+        request.session['mark'] = remark
+
         if text == "100001":
             data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time',
                                                                                                'phone', 'remark',
