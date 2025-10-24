@@ -134,7 +134,7 @@ def get_list(request):
 
 
 def get_detail(request):
-    code = verify.is_uuid(request.GET.get('code')+'1234')
+    code = verify.is_uuid(request.GET.get('code'))
     text = verify.is_code(request.GET.get('text'))
     token = verify.is_uuid(request.GET.get('token'))
 
@@ -146,7 +146,7 @@ def get_detail(request):
                 guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
                 if request.GET.get('text') == "100001":
                     try:
-                        order = ManeuOrder.objects.filter(id=code, phone=guest.phone).first()
+                        order = ManeuOrder.objects.filter(id=code).first()
                         data = {'admin_id': order.admin_id,
                                 'guest_id': order.guest_id,
                                 'report_id': order.report_id,
