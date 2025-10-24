@@ -139,6 +139,7 @@ def get_detail(request):
     if text:
         if code:
             guest = ManeuGuest.objects.filter(remark=token).first()
+            print(guest)
             if guest:
                 remark = uuid.uuid4()
                 guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
