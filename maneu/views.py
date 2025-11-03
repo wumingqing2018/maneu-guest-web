@@ -110,9 +110,7 @@ def get_list(request):
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
         remark = str(uuid.uuid4())
-        print('session', request.session.get('remark'))
         guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
-        request.session['remark'] = remark
 
         if text == "100001":
             data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time',
@@ -120,12 +118,12 @@ def get_list(request):
                                                                                                'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100002":
-            data = ManeuBuffer.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name',
+            data = ManeuReport.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name',
                                                                                                 'time', 'phone',
                                                                                                 'remark', 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100003":
-            data = ManeuService.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'time')
+            data = ManeuService.objects.filter(phone=guest.phone).order_by('-time').all()
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         else:
             content = {'status': False, 'message': 'text is wrong' + request.GET.get('text'), 'content': {}, 'token': ''}
@@ -161,7 +159,7 @@ def get_detail(request):
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100003":
                     try:
-                        data = ManeuBuffer.objects.filter(id=code).first()
+                        data = ManeuReport.objects.filter(id=code).first()
                         content = {'status': True, 'message': '100000', 'content': model_to_dict(data), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
