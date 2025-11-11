@@ -173,7 +173,7 @@ def get_detail(request):
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100006":
                     try:
-                        data = ManeuService.objects.filter(guest_id=code).first()
+                        data = ManeuRepair.objects.filter(guest_id=code).first()
                         content = {'status': True, 'message': '100000', 'content': model_to_dict(data), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
