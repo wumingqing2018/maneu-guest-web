@@ -63,7 +63,7 @@ class ManeuOrder(models.Model):
 
 
 class ManeuRepair(models.Model):
-    id = models.CharField(max_length=36, blank=True, null=True)
+    id = models.CharField(primary_key=True, max_length=36)
     admin_id = models.CharField(max_length=36, blank=True, null=True)
     guest_id = models.CharField(max_length=36, blank=True, null=True)
     order_id = models.CharField(max_length=36, blank=True, null=True)
