@@ -6,11 +6,10 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-import uuid
 
 
 class ManeuAdmin(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
+    id = models.CharField(primary_key=True, max_length=36)  # The composite primary key (id, username) found, that is not supported. The first column is selected.
     username = models.CharField(max_length=36)
     password = models.CharField(max_length=36)
     nickname = models.CharField(max_length=36)
@@ -29,7 +28,7 @@ class ManeuAdmin(models.Model):
 
 
 class ManeuGuest(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
+    id = models.CharField(primary_key=True, max_length=36)
     admin_id = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -47,7 +46,7 @@ class ManeuGuest(models.Model):
 
 
 class ManeuOrder(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
+    id = models.CharField(primary_key=True, max_length=36)
     admin_id = models.CharField(max_length=36)
     guest_id = models.CharField(max_length=36)
     store_id = models.CharField(max_length=36)
@@ -63,8 +62,24 @@ class ManeuOrder(models.Model):
         db_table = 'maneu_order'
 
 
+class ManeuRepair(models.Model):
+    id = models.CharField(max_length=36, blank=True, null=True)
+    admin_id = models.CharField(max_length=36, blank=True, null=True)
+    guest_id = models.CharField(max_length=36, blank=True, null=True)
+    order_id = models.CharField(max_length=36, blank=True, null=True)
+    name = models.CharField(max_length=36, blank=True, null=True)
+    phone = models.CharField(max_length=36, blank=True, null=True)
+    time = models.DateTimeField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'maneu_repair'
+
+
 class ManeuReport(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
+    id = models.CharField(primary_key=True, max_length=36)
     admin_id = models.CharField(max_length=36, blank=True, null=True)
     guest_id = models.CharField(max_length=36, blank=True, null=True)
     phone = models.CharField(max_length=36, blank=True, null=True)
@@ -108,21 +123,8 @@ class ManeuReport(models.Model):
         db_table = 'maneu_report'
 
 
-class ManeuService(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
-    time = models.DateTimeField()
-    order_id = models.CharField(max_length=36, blank=True, null=True)
-    admin_id = models.CharField(max_length=36)
-    guess_id = models.CharField(max_length=36)
-    content = models.CharField(max_length=300, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'maneu_service'
-
-
 class ManeuStore(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
+    id = models.CharField(primary_key=True, max_length=36)
     time = models.DateTimeField(blank=True, null=True)
     order_id = models.CharField(max_length=36)
     admin_id = models.CharField(max_length=36)
@@ -134,33 +136,15 @@ class ManeuStore(models.Model):
         db_table = 'maneu_store'
 
 
-class ManeuUsers(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
-    nickname = models.CharField(max_length=36)
-    username = models.CharField(unique=True, max_length=36)
-    password = models.CharField(max_length=36)
-    email = models.CharField(max_length=36)
-    phone = models.CharField(max_length=36)
-    level = models.IntegerField()
-    state = models.IntegerField()
-    create_time = models.DateTimeField()
-    remark = models.CharField(max_length=255, blank=True, null=True)
-    localtion = models.CharField(max_length=128, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'maneu_users'
-
-
 class ManeuVerify(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid1, editable=False)
-    order_id = models.CharField(max_length=36, blank=True, null=True)
-    guest_id = models.CharField(max_length=36, blank=True, null=True)
+    id = models.CharField(primary_key=True, max_length=36)
+    order_id = models.CharField(max_length=36, db_collation='utf8mb3_bin', blank=True, null=True)
+    guest_id = models.CharField(max_length=36, db_collation='utf8mb3_bin', blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
-    name = models.CharField(max_length=36, blank=True, null=True)
-    call = models.CharField(max_length=36, blank=True, null=True)
-    remark = models.TextField(blank=True, null=True)
-    content = models.TextField(blank=True, null=True)
+    name = models.CharField(max_length=36, db_collation='utf8mb3_bin', blank=True, null=True)
+    call = models.CharField(max_length=36, db_collation='utf8mb3_bin', blank=True, null=True)
+    remark = models.TextField(db_collation='utf8mb3_bin', blank=True, null=True)
+    content = models.TextField(db_collation='utf8mb3_bin', blank=True, null=True)
 
     class Meta:
         managed = False

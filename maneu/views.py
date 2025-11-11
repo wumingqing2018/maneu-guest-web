@@ -7,7 +7,7 @@ from common import common
 from common import verify
 from maneu.models import *
 from django.forms.models import model_to_dict
-
+import uuid
 
 def index(request):
     return render(request, 'index.html')
@@ -119,7 +119,7 @@ def get_list(request):
             data = ManeuReport.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100003":
-            data = ManeuService.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+            data = ManeuRepair.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         else:
             content = {'status': False, 'message': 'text is wrong' + request.GET.get('text'), 'content': {}, 'token': ''}
