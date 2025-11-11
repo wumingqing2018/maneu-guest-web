@@ -138,13 +138,13 @@ class ManeuStore(models.Model):
 
 class ManeuVerify(models.Model):
     id = models.CharField(primary_key=True, max_length=36)
-    order_id = models.CharField(max_length=36, db_collation='utf8mb3_bin', blank=True, null=True)
-    guest_id = models.CharField(max_length=36, db_collation='utf8mb3_bin', blank=True, null=True)
+    order_id = models.CharField(max_length=36, blank=True, null=True)
+    guest_id = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
-    name = models.CharField(max_length=36, db_collation='utf8mb3_bin', blank=True, null=True)
-    call = models.CharField(max_length=36, db_collation='utf8mb3_bin', blank=True, null=True)
-    remark = models.TextField(db_collation='utf8mb3_bin', blank=True, null=True)
-    content = models.TextField(db_collation='utf8mb3_bin', blank=True, null=True)
+    name = models.CharField(max_length=36, blank=True, null=True)
+    call = models.CharField(max_length=36, blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
