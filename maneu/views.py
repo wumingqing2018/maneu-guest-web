@@ -113,17 +113,13 @@ def get_list(request):
         guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
 
         if text == "100001":
-            data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time',
-                                                                                               'phone', 'remark',
-                                                                                               'content')
+            data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100002":
-            data = ManeuReport.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name',
-                                                                                                'time', 'phone',
-                                                                                                'remark', 'content')
+            data = ManeuReport.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100003":
-            data = ManeuService.objects.filter(phone=guest.phone).order_by('-time').all()
+            data = ManeuService.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         else:
             content = {'status': False, 'message': 'text is wrong' + request.GET.get('text'), 'content': {}, 'token': ''}
