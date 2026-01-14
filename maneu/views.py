@@ -186,15 +186,13 @@ def get_detail(request):
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 else:
-                    content = {'status': False, 'message': '100001', 'content': {}, 'token': remark}
+                    content = {'status': False, 'message': 'text is wrong' + str(request.GET.get('text')), 'content': {}, 'token': ''}
             else:
-                content = {'status': False, 'message': 'mark is wrong' + request.GET.get('token'), 'content': {},
-                           'token': ''}
+                content = {'status': False, 'message': 'mark is wrong' + str(request.GET.get('token')), 'content': {}, 'token': ''}
         else:
-            content = {'status': False, 'message': 'code is wrong' + request.GET.get('code'), 'content': {},
-                       'token': ''}
+            content = {'status': False, 'message': 'code is wrong' + str(request.GET.get('code')), 'content': {}, 'token': ''}
     else:
-        content = {'status': False, 'message': 'text is wrong' + request.GET.get('text'), 'content': {}, 'token': ''}
+        content = {'status': False, 'message': 'text is wrong' + str(request.GET.get('text')), 'content': {}, 'token': ''}
 
     return JsonResponse(content)
 
