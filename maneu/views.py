@@ -104,8 +104,8 @@ def get_index(request):
 
 
 def get_list(request):
-    token = verify.is_uuid(request.GET.get('token'))
     text = verify.is_code(request.GET.get('text'))
+    token = verify.is_uuid(request.GET.get('token'))
 
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
@@ -113,13 +113,13 @@ def get_list(request):
         guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
 
         if text == "100001":
-            data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+            data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100002":
-            data = ManeuReport.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+            data = ManeuReport.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100003":
-            data = ManeuRepair.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark', 'content')
+            data = ManeuRepair.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         else:
             content = {'status': False, 'message': 'text is wrong' + request.GET.get('text'), 'content': {}, 'token': ''}
