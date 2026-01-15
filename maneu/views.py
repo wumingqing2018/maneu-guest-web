@@ -35,7 +35,6 @@ def login_wx(request):
     if code:
         data_token = ManeuAdmin.objects.filter().first()
         phone = common.get_phone_number(code, data_token.content)
-        print(phone)
         if phone['status']:
             token = uuid.uuid4()
             guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
@@ -64,11 +63,9 @@ def login_wx(request):
 
 def sendsms(request):
     call = verify.is_call(request.GET.get('code'))
-
     if call:
         code = common.randint()
         data = ManeuGuest.objects.filter(phone=call).all().update(remark=code)
-
         if data:
             response = common.sendsms(call, code)
             if response['Code'] == 'OK':
@@ -79,7 +76,6 @@ def sendsms(request):
             content = {'status': False, 'message': '100002', 'content': {}, 'token': ''}
     else:
         content = {'status': False, 'message': '100001', 'content': {}, 'token': ''}
-
     return JsonResponse(content)
 
 
@@ -149,8 +145,7 @@ def get_detail(request):
                 elif request.GET.get('text') == "100002":
                     try:
                         store = ManeuStore.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '100000', 'content': json.loads(store.content),
-                                   'token': remark}
+                        content = {'status': True, 'message': '100000', 'content': json.loads(store.content), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100003":
@@ -179,8 +174,7 @@ def get_detail(request):
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
                 elif request.GET.get('text') == "100007":
                     try:
-                        ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, call=guest.phone,
-                                                   time=common.current_time())
+                        ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, call=guest.phone, time=common.current_time())
                         data = ManeuVerify.objects.filter(order_id=code).order_by('-time').all().values('time')
                         content = {'status': True, 'message': '100000', 'content': list(data), 'token': remark}
                     except Exception as e:
