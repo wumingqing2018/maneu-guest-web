@@ -9,6 +9,7 @@ from maneu.models import *
 from django.forms.models import model_to_dict
 import uuid
 
+
 def index(request):
     return render(request, 'index.html')
 
@@ -109,10 +110,10 @@ def get_list(request):
         guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
 
         if text == "100001":
-            data = ManeuOrder.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
+            data = ManeuOrder.objects.filter(phone=guest.phone, status=3).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100002":
-            data = ManeuReport.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
+            data = ManeuReport.objects.filter(phone=guest.phone, status=2).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
             return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
         elif text == "100003":
             data = ManeuRepair.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')

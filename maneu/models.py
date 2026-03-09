@@ -52,6 +52,7 @@ class ManeuOrder(models.Model):
     guest_id = models.CharField(max_length=36)
     store_id = models.CharField(max_length=36)
     report_id = models.CharField(max_length=36)
+    status = models.CharField(db_column='status', max_length=36, blank=True, null=True)  # Field name made lowercase.
     time = models.DateTimeField()
     name = models.CharField(max_length=36)
     phone = models.CharField(max_length=36)
@@ -86,6 +87,7 @@ class ManeuReport(models.Model):
     phone = models.CharField(max_length=36, blank=True, null=True)
     name = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(db_column='status', max_length=36, blank=True, null=True)  # Field name made lowercase.
     plan = models.CharField(db_column='PLAN', max_length=36, blank=True, null=True)  # Field name made lowercase.
     pd = models.CharField(db_column='PD', max_length=36, blank=True, null=True)  # Field name made lowercase.
     od_al = models.CharField(db_column='OD_AL', max_length=36, blank=True, null=True)  # Field name made lowercase.
