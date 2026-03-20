@@ -193,20 +193,10 @@ def get_detail(request):
 
 
 def get_verify(request):
-    order_id = verify.is_uuid(request.GET.get('order_id'))
-    token = verify.is_uuid(request.GET.get('token'))
-    if order_id and token == request.session.get('token'):
-        token = uuid.uuid4()
-        request.session['token'] = token
-        Order = ManeuOrder.objects.filter(id=order_id).first()
-        if Order:
-            if ManeuVerify.objects.create(order_id=Order.id, time=common.current_time()):
-                data = ManeuVerify.objects.filter(order_id=Order.id).all().values('time')
-                content = {'status': True, 'message': '', 'content': {'data': list(data), 'token': token}}
-            else:
-                content = {'status': False, 'message': '查询失败', 'content': {'data': [], 'token': token}}
-        else:
-            content = {'status': False, 'message': '不存在订单', 'content': {'data': [], 'token': token}}
+    store_id = verify.is_uuid(request.GET.get('order_id'))
+    if store_id:
+        data = ManeuStore.objects.filter(id=store_id).first()
+        content = {'status': True, 'message': '100000', 'content': model_to_dict(data)}
     else:
         content = {'status': False, 'message': '非法格式', 'content': {}, 'token': ''}
     return JsonResponse(content)
