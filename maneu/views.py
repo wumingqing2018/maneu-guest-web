@@ -196,7 +196,9 @@ def get_verify(request):
     store_id = verify.is_uuid(request.GET.get('order_id'))
     if store_id:
         data = ManeuOrder.objects.filter(id=store_id).first()
-        content = {'status': True, 'message': '100000', 'content': model_to_dict(data)}
+        data_time = data.time
+        data_data = data.content
+        content = {'status': True, 'message': '100000', 'content': {'time': data_time, 'data': data_data}}
     else:
         content = {'status': False, 'message': '非法格式', 'content': {}, 'token': ''}
     return JsonResponse(content)
