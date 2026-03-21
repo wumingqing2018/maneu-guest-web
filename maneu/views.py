@@ -195,10 +195,13 @@ def get_detail(request):
 def get_verify(request):
     store_id = verify.is_uuid(request.GET.get('order_id'))
     if store_id:
-        data = ManeuOrder.objects.filter(id=store_id).first()
-        data_time = data.time
-        data_data = json.loads(data.content)
-        content = {'status': True, 'message': '100000', 'content': {'time': data_time, 'data': data_data}}
+        try:
+            data = ManeuOrder.objects.filter(id=store_id).first()
+            data_time = data.time
+            data_data = json.loads(data.content)
+            content = {'status': True, 'message': '100000', 'content': {'time': data_time, 'data': data_data}}
+        except Exception as e:
+            content = {'status': False, 'message': e, 'content': {}, 'token': ''}
     else:
         content = {'status': False, 'message': '非法格式', 'content': {}, 'token': ''}
     return JsonResponse(content)
