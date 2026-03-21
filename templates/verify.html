@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>徕可</title>
+    <link href="{% static 'img/maneu/logo.svg' %}" rel="icon">
+
+    <!-- 新 Bootstrap5 核心 CSS 文件 -->
+    <link crossorigin="anonymous"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/cerulean/bootstrap.min.css"
+          integrity="sha512-3n/Isj9MCqCc1wf/QfjLigco9sx9xr9m3TqgxstJrSxmwZ05qjl4owbfkioZ0y3w8fNWcVLnJGHfVqKF/L1Qsw=="
+          referrerpolicy="no-referrer" rel="stylesheet"/>
+    <!--  popper.min.js 用于弹窗、提示、下拉菜单 -->
+    <script crossorigin="anonymous"
+            integrity="sha512-TPh2Oxlg1zp+kz3nFA0C5vVC6leG/6mm1z9+mA81MI5eaUVqasPLO8Cuk4gMF4gUfP5etR73rgU/8PNMsSesoQ=="
+            referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
+    <!-- 最新的 Bootstrap5 核心 JavaScript 文件 -->
+    <script crossorigin="anonymous"
+            integrity="sha512-nKXmKvJyiGQy343jatQlzDprflyB5c+tKCzGP3Uq67v+lmzfnZUi/ZT+fc6ITZfSC5HhaBKUIvr/nTLCV+7F+Q=="
+            referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.min.js"></script>
+    <script crossorgin="anonymous"
+            integrity="sha512-MXe5EK5gyK+fbhwQy/dukwz9fw71HZcsM4KsyDBDTvMyjymkiO0M5qqU0lF4vqLI4VnKf1+DIKf1GM6RFkO8PA=="
+            referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+
+<body style="background-color: #003153">
+<div class="content row justify-content-center" style="background-color: #003153">
+    <div style="padding-top: 10%; text-align: center;">
+        <img alt="Cinque Terre" class="img-responsive" style="width: 60%" src="{% static 'img/maneu/logo.svg' %}">
+    </div>
+    <div style="padding-top: 10%; text-align: center;">
+        <h1 style="color: #FFC048">徕可官方授权许可正品</h1>
+        <h2 style="color: #FFC048">Officially licensed products</h2>
+    </div>
+    {% if status == True %}
+        <div style="padding-top: 10%; text-align: center;">
+            <h1 style="color: #FFC048">购买时间：{{ content.time }}</h1>
+        </div>
+        {% for i in content.data %}
+            <div style="padding-top: 5%; text-align: center;">
+                <h1 style="color: #FFC048">{{ i.arg10 }} {{ i.arg11 }} {{ i.arg12 }} {{ i.arg13 }} {{ i.arg14 }}</h1>
+                <h1 style="color: #FFC048">{{ i.arg20 }} {{ i.arg21 }} {{ i.arg22 }} {{ i.arg23 }} {{ i.arg24 }}</h1>
+                <h1 style="color: #FFC048">{{ i.arg30 }} {{ i.arg31 }} {{ i.arg32 }} {{ i.arg33 }} {{ i.arg34 }}</h1>
+                <h1 style="color: #FFC048">{{ i.arg40 }} {{ i.arg41 }} {{ i.arg42 }} {{ i.arg43 }} {{ i.arg44 }}</h1>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div style="padding-top: 10%; text-align: center;">
+            <h1 style="color: #FFC048">错误信息：{{ message }}</h1>
+        </div>
+    {% endif %}
+    <div style="padding-top: 10%; text-align: center;">
+        <img alt="Cinque Terre" class="img-responsive" style="width: 50%" src="{% static 'img/maneu/code.jpg' %}">
+    </div>
+    <div style="padding-top: 5%; text-align: center;">
+        <h1 style="color: #FFC048">微信扫码进入小程序了解更多</h1>
+    </div>
+</div>
+</body>
+
+<footer class="fixed-bottom text-center">
+    <div style="padding: 2%">
+        <a href="https://beian.miit.gov.cn" style="color: #FFC048">粤ICP备2023070483号</a>
+    </div>
+</footer>

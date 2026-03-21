@@ -14,6 +14,21 @@ def index(request):
     return render(request, 'index.html')
 
 
+def get_verify(request):
+    try:
+        store_id = verify.is_uuid(request.GET.get('order_id'))
+        if store_id:
+                data = ManeuOrder.objects.filter(id=store_id).first()
+                data_time = data.time
+                data_data = json.loads(data.content)
+                content = {'status': True, 'message': '100000', 'content': {'time': data_time, 'data': data_data}}
+        else:
+            content = {'status': False, 'message': '非法格式', 'content': {}, 'token': ''}
+    except Exception as e:
+        content = {'status': False, 'message': e, 'content': {}, 'token': ''}
+    return render(request, 'verify.html' , content)
+
+
 def login(request):
     call = verify.is_call(request.GET.get('call'))
     code = verify.is_code(request.GET.get('code'))
@@ -189,19 +204,4 @@ def get_detail(request):
     else:
         content = {'status': False, 'message': 'text is wrong' + str(request.GET.get('text')), 'content': {}, 'token': ''}
 
-    return JsonResponse(content)
-
-
-def get_verify(request):
-    store_id = verify.is_uuid(request.GET.get('order_id'))
-    if store_id:
-        try:
-            data = ManeuOrder.objects.filter(id=store_id).first()
-            data_time = data.time
-            data_data = json.loads(data.content)
-            content = {'status': True, 'message': '100000', 'content': {'time': data_time, 'data': data_data}}
-        except Exception as e:
-            content = {'status': False, 'message': e, 'content': {}, 'token': ''}
-    else:
-        content = {'status': False, 'message': '非法格式', 'content': {}, 'token': ''}
     return JsonResponse(content)
