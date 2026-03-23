@@ -34,11 +34,11 @@
         <h2 style="color: #FFC048">Officially licensed products</h2>
     </div>
     {% if status == True %}
-        <div style="padding-top: 10%; text-align: center;">
+        <div style="padding-top: 5%; padding-left: 20%; text-align: left;">
             <h1 style="color: #FFC048">购买时间：{{ content.time }}</h1>
         </div>
         {% for i in content.data %}
-            <div style="padding-top: 5%; text-align: left;">
+            <div style="padding-top: 5%; padding-left: 20%; text-align: left;">
                 <h1 style="color: #FFC048">{{ i.arg10 }} {{ i.arg11 }} {{ i.arg12 }} {{ i.arg13 }}</h1>
                 <h1 style="color: #FFC048">{{ i.arg20 }} {{ i.arg21 }} {{ i.arg22 }} {{ i.arg23 }}</h1>
                 <h1 style="color: #FFC048">{{ i.arg30 }} {{ i.arg31 }} {{ i.arg32 }} {{ i.arg33 }}</h1>
