@@ -4,7 +4,7 @@
     <body style="background-color: #003153; height: 100%">
 
     <div class="content row justify-content-center" style="background-color: #003153">
-        <div class="row" style="margin-top: 10%">
+        <div style="margin-top: 10%" class="row">
             <div class="col-3" style="text-align: right">
                 <img alt="Cinque Terre" class="img-responsive" style="width: 70%" src="{% static 'img/maneu/logo.svg' %}">
             </div>
@@ -14,41 +14,36 @@
             </div>
         </div>
 
-        {% if status == True %}
-            <div style="margin-top: 10%; background: white; border: 1px solid #ddd; border-radius: 24px; width: 90%;">
-                <div style="margin: 5%; text-align: center">
-                    <h1 style="color: black">购买时间：{{ content.time }}</h1>
-                </div>
+        <div style="margin-top: 10%; background: white; border: 1px solid #ddd; border-radius: 24px; width: 90%;">
+            <div style="margin: 5%; text-align: left">
+                <h1 style="color: black">购买时间：{{ content.time }}</h1>
+            </div>
 
-                {% for i in content.data %}
-                    {% if i.arg10 != '' and i.arg11 != '' and i.arg12 != '' and i.arg13 != '' %}
-                        <div style="margin-top: 5%; margin-left:3%; margin-right:3%; background: whitesmoke; border: 1px solid #ddd; border-radius: 24px;">
-                            <div style="margin: 3%;">
-                                <div class="row">
-                                    <h1 class="col-11" style="color: black">{{ i.arg10 }}</h1>
-                                    <h1 class="col-1" style="color: black">*1</h1>
-                                </div>
-                                <hr style="border-bottom: 3px solid #ddd;">
-                                <h2 style="color: black">{{ i.arg11 }}</h2>
-                                <h2 style="color: black">{{ i.arg12 }}</h2>
-                                <h2 style="color: black">{{ i.arg13 }}</h2>
+            {% for i in content.data %}
+                {% if i.arg10 != '' and i.arg11 != '' and i.arg12 != '' and i.arg13 != '' %}
+                    <div style="margin-top: 5%; margin-left:3%; margin-right:3%; background: whitesmoke; border: 1px solid #ddd; border-radius: 24px;">
+                        <div style="margin: 3%;">
+                            <div class="row">
+                                <h1 class="col-11" style="color: black">{{ i.arg10 }}</h1>
+                                <h1 class="col-1" style="color: black">*1</h1>
                             </div>
+                            <hr style="border-bottom: 3px solid #ddd;">
+                            <h2 style="color: black">{{ i.arg11 }}</h2>
+                            <h2 style="color: black">{{ i.arg12 }}</h2>
+                            <h2 style="color: black">{{ i.arg13 }}</h2>
                         </div>
-                    {% endif %}
-                {% endfor %}
-                <div style="margin: 5%; text-align: center">
-                    <img alt="Cinque Terre" class="img-responsive" style="width: 50%" src="{% static 'img/maneu/code.jpg' %}">
-                </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <div style="margin: 5%; text-align: center">
+                <img alt="Cinque Terre" class="img-responsive" style="width: 50%" src="{% static 'img/maneu/code.jpg' %}">
+            </div>
 
-                <div style="margin: 5%; text-align: center">
-                    <h1 style="color: black">微信扫码进入小程序了解更多</h1>
-                </div>
+            <div style="margin: 5%; text-align: center">
+                <h1 style="color: black">微信扫码进入小程序了解更多</h1>
             </div>
-        {% else %}
-            <div style="padding-top: 5%; padding-left: 20%; text-align: left;">
-                <h1 style="color: #FFC048">错误信息：{{ message }}</h1>
-            </div>
-        {% endif %}
+        </div>
     </div>
+
     </body>
 {% endblock %}
