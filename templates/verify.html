@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <body style="background-color: #003153; height: 100%">
+    <body style="background-color: #003153;">
 
-    <div class="content row justify-content-center" style="background-color: #003153">
-        <div style="margin-top: 10%" class="row">
+        <div style="margin-top: 9%; margin-bottom: 9%" class="row">
             <div class="col-3" style="text-align: right">
                 <img alt="Cinque Terre" class="img-responsive" style="width: 70%" src="{% static 'img/maneu/logo.svg' %}">
             </div>
@@ -14,14 +13,14 @@
             </div>
         </div>
 
-        <div style="margin-top: 10%; background: white; border: 1px solid #ddd; border-radius: 24px; width: 85%;">
-            <div style="margin: 5%; text-align: left">
+        <div style="margin: 6%; background: white; border: 1px solid #ddd; border-radius: 24px;">
+            <div style="margin: 6%; text-align: left">
                 <h1 style="color: black">购买时间：{{ content.time }}</h1>
             </div>
 
             {% for i in content.data %}
                 {% if i.arg10 != '' and i.arg11 != '' and i.arg12 != '' and i.arg13 != '' %}
-                    <div style="margin-top: 5%; margin-left:3%; margin-right:3%; background: whitesmoke; border: 1px solid #ddd; border-radius: 24px;">
+                    <div style="margin: 3%; background: whitesmoke; border: 1px solid #ddd; border-radius: 24px;">
                         <div style="margin: 3%;">
                             <div class="row">
                                 <h1 class="col-11" style="color: black">{{ i.arg10 }}</h1>
@@ -35,15 +34,14 @@
                     </div>
                 {% endif %}
             {% endfor %}
-            <div style="margin: 5%; text-align: center">
+            <div style="margin: 6%; text-align: center">
                 <img alt="Cinque Terre" class="img-responsive" style="width: 50%" src="{% static 'img/maneu/code.jpg' %}">
             </div>
 
-            <div style="margin: 5%; text-align: center">
+            <div style="margin: 6%; text-align: center">
                 <h1 style="color: black">微信扫码进入小程序了解更多</h1>
             </div>
         </div>
-    </div>
 
     </body>
 {% endblock %}
