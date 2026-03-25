@@ -17,7 +17,7 @@
         <div style="margin: 6%; text-align: left">
             <h1 style="color: black">购买时间：{{ content.time }}</h1>
         </div>
-        {% if status %}
+        {% if status == true %}
             {% for i in content.data %}
                 {% if i.arg10 != '' and i.arg11 != '' and i.arg12 != '' and i.arg13 != '' %}
                     <div style="margin: 3%; background: whitesmoke; border: 1px solid #ddd; border-radius: 24px;">
@@ -35,10 +35,8 @@
                 {% endif %}
             {% endfor %}
         {% else %}
-            <div style="margin: 3%; background: whitesmoke; border: 1px solid #ddd; border-radius: 24px;">
-                <div style="margin: 3%;">
-                    <h1 style="color: black">错误信息：{{ message }}</h1>
-                </div>
+            <div style="margin: 6%; text-align: left">
+                <h1 style="color: black">错误信息：{{ message }}</h1>
             </div>
         {% endif %}
 
