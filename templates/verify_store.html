@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <body style="background-color: #003153;">
 
-    <div class="row" style="margin: 9%">
+    <div class="row" style="margin: 6%">
         <div class="col-auto" style="text-align: left; width: 20%;">
             <img alt="Cinque Terre" class="img-responsive" src="{% static 'img/maneu/logo.svg' %}">
         </div>
@@ -20,16 +19,51 @@
 
         <div style="margin: 3%; background: whitesmoke; border: 1px solid #ddd; border-radius: 24px;">
             <div style="margin: 3%;">
-                <div class="row">
-                    <h1 class="col-auto" style="color: black">近视管理系列</h1>
-                    <h1 class="col-auto" style="color: black">-</h1>
-                    <h1 class="col-auto" style="color: black">星状元</h1>
-                    <h1 class="col-auto" style="color: black;">*1</h1>
+                <div class="row" style="margin: 3%;">
+                    <h1 class="col-11" style="color: black">近视管理系列 - 星状元</h1>
+                    <h1 class="col-1" style="color: black;">*1</h1>
                 </div>
-                <hr style="border-bottom: 3px solid #ddd;">
-                <h2 style="color: black">{{ i.arg11 }}</h2>
-                <h2 style="color: black">{{ i.arg12 }}</h2>
-                <h2 style="color: black">{{ i.arg13 }}</h2>
+                <div>
+                    <hr style="border-bottom: 3px solid #ddd;">
+                </div>
+                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">品牌：近视管理系列</h2>
+                </div>
+                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">型号：星状元</h2>
+                </div>
+                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">参数：参数</h2>
+                </div>
+                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">球镜：1.00</h2>
+                </div>
+                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">柱镜：1.00</h2>
+                </div>
+                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">棱镜：1.00</h2>
+                </div>
+                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">下加光：1.00</h2>
+                </div>
+                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">基底取向：1.00</h2>
+                </div>
+                                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">瞳距：60</h2>
+                </div>
+                                <div class="row" style="margin: 3%;">
+                    <h2 style="color: black">加工：通用</h2>
+                </div>
+
+                <div>
+                    <hr style="border-bottom: 3px solid #ddd;">
+                </div>
+                <div class="row" style="margin: 3%;">
+                    <h1 class="col-11" style="color: black">价格</h1>
+                    <h1 class="col-1" style="color: black;">100</h1>
+                </div>
             </div>
         </div>
 
@@ -43,5 +77,4 @@
         </div>
     </div>
 
-    </body>
 {% endblock %}
