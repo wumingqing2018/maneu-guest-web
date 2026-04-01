@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+    <div class="container" style="margin: auto;">
+        <div class="row" style="margin: 4%;">
+            <div class="col-auto" style="text-align: left; width: 25%;">
+                <img alt="Cinque Terre" class="img-responsive" src="{% static 'img/maneu/logo.svg' %}">
+            </div>
+            <div class="col-auto" style="text-align: left;">
+                <h1 style="color: #FFC048">徕可官方授权许可正品</h1>
+                <h2 style="color: #FFC048">Officially licensed products</h2>
+            </div>
+        </div>
+
+        <div style="margin: 6%; background: white; border: 1px solid #ddd; border-radius: 24px;">
+
+            <div style="padding: 6%; text-align: center">
+                <img alt="Cinque Terre" class="img-responsive" style="width: 50%"
+                     src="{% static 'img/maneu/code.jpg' %}">
+            </div>
+
+            <div style="padding: 6%; text-align: center">
+                <h1 style="color: black">微信扫码进入小程序了解更多</h1>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block javascript %}
+    <script>
+        let windowW = window.innerWidth
+        let windowH = window.innerHeight
+        let min = Math.min(windowW, windowH)
+
+        if (min === windowW) {
+            windowH = windowW * 2.1
+        }
+
+        if (min === windowH) {
+            windowW = windowH / 2.1
+        }
+
+        console.log(windowW, windowH)
+        document.getElementsByClassName("container").width = windowW
+        document.getElementsByClassName("container").height = windowH
+    </script>
+{% endblock %}

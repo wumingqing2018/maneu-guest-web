@@ -26,4 +26,5 @@ urlpatterns = [
     path('get_index/', views.get_index, name='get_index'),
     path('get_detail/', views.get_detail, name='get_detail'),
     path('get_verify/', views.get_verify, name='get_verify'),
+    path('verify_store/', views.verify_store, name='verify_store'),
 ]

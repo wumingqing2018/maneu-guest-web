@@ -11,7 +11,14 @@ import uuid
 
 
 def index(request):
-    return render(request, 'index.html')
+    if verify.is_mobile(request.META.get("HTTP_USER_AGENT")):
+        return render(request, 'index_P.html')
+    else:
+        return render(request, 'index_C.html')
+
+
+def verify_store(request):
+    return render(request, 'verify_store.html')
 
 
 def get_verify(request):
@@ -26,6 +33,7 @@ def get_verify(request):
             content = {'status': False, 'message': '非法格式', 'content': {}, 'token': ''}
     except Exception as e:
         content = {'status': False, 'message': e, 'content': {}, 'token': ''}
+    print(content)
     return render(request, 'verify.html' , content)
 
 
