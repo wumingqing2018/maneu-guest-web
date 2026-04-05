@@ -18,23 +18,22 @@ def index(request):
 
 
 def get_verify(request):
-    try:
+    order_id = verify.is_uuid(request.GET.get('order_id'))
+    if order_id:
 
 
-        order_id = verify.is_uuid(request.GET.get('order_id'))
-        if order_id:
+        try:
             data = ManeuOrder.objects.filter(id=order_id).first()
             data_time = data.time
             data_data = json.loads(data.content)
             content = {'status': True, 'message': '100000', 'content': {'time': data_time, 'data': data_data}}
-        else:
-            content = {'status': False, 'message': '非法格式', 'content': {}, 'token': ''}
+        except Exception as e:
+            content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
 
 
-    except Exception as e:
-        content = {'status': False, 'message': e, 'content': {}, 'token': ''}
-    print(content)
-    return render(request, 'verify.html' , content)
+    else:
+        content = {'status': False, 'message': '非法格式', 'content': {}, 'token': ''}
+    return render(request, 'verify_order.html', content)
 
 
 
@@ -49,12 +48,11 @@ def verify_store(request):
             data_data = json.loads(data.content)
             content = {'status': True, 'message': '100000', 'content': {'time': data_time, 'data': data_data}}
         except Exception as e:
-            content = {'status': False, 'message': e, 'content': {}, 'token': ''}
+            content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
 
 
     else:
         content = {'status': False, 'message': '非法格式', 'content': {}, 'token': ''}
-    print(content)
     return render(request, 'verify_store.html', content)
 
 
