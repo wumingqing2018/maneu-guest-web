@@ -17,7 +17,7 @@ def index(request):
         return render(request, 'index_C.html')
 
 
-def get_verify(request):
+def verify_order(request):
     order_id = verify.is_uuid(request.GET.get('order_id'))
     if order_id:
 
