@@ -22,86 +22,94 @@
         <div style="margin: 3%; text-align: left">
             <h1 style="color: black">购买时间：{{ content.time }}</h1>
         </div>
+        {% if status == True %}
 
-        {% for data in content.data %}
-            <div style="margin: 3%; background: whitesmoke; border: 1px solid #ddd; border-radius: 24px;">
-                <div style="margin: 3%;">
-                    <div class="row" style="margin: 3%;">
-                        <h1 class="col-11" style="color: black">{{ data.brand }} - {{ data.model }}</h1>
-                        <h1 class="col-1" style="color: black;">*1</h1>
-                    </div>
-                    <div>
-                        <hr style="border-bottom: 3px solid #ddd;">
-                    </div>
-                    <div class="row" style="margin: 3%;">
-                        <h2 style="color: black">类别：{{ data.class }}</h2>
-                    </div>
-                    <div class="row" style="margin: 3%;">
-                        <h2 style="color: black">品牌：{{ data.brand }}</h2>
-                    </div>
-                    <div class="row" style="margin: 3%;">
-                        <h2 style="color: black">型号：{{ data.model }}</h2>
-                    </div>
-                    <div class="row" style="margin: 3%;">
-                        <h2 style="color: black">参数：{{ data.parameters }}</h2>
-                    </div>
+            {% for data in content.data %}
+                <div style="margin: 3%; background: whitesmoke; border: 1px solid #ddd; border-radius: 24px;">
+                    <div style="margin: 3%;">
+                        <div class="row" style="margin: 3%;">
+                            <h1 class="col-11" style="color: black">{{ data.brand }} - {{ data.model }}</h1>
+                            <h1 class="col-1" style="color: black;">*1</h1>
+                        </div>
+                        <div>
+                            <hr style="border-bottom: 3px solid #ddd;">
+                        </div>
+                        <div class="row" style="margin: 3%;">
+                            <h2 style="color: black">类别：{{ data.class }}</h2>
+                        </div>
+                        <div class="row" style="margin: 3%;">
+                            <h2 style="color: black">品牌：{{ data.brand }}</h2>
+                        </div>
+                        <div class="row" style="margin: 3%;">
+                            <h2 style="color: black">型号：{{ data.model }}</h2>
+                        </div>
+                        <div class="row" style="margin: 3%;">
+                            <h2 style="color: black">参数：{{ data.parameters }}</h2>
+                        </div>
 
-                    {% if data.arg00 != '' or data.arg01 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg00 }}：{{ data.arg01 }}</h2>
-                        </div>
-                    {% endif %}
+                        {% if data.arg00 != '' or data.arg01 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg00 }}：{{ data.arg01 }}</h2>
+                            </div>
+                        {% endif %}
 
-                    {% if data.arg10 != '' or data.arg11 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg10 }}：{{ data.arg11 }}</h2>
-                        </div>
-                    {% endif %}
-                    {% if data.arg20 != '' or data.arg21 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg20 }}：{{ data.arg21 }}</h2>
-                        </div>
-                    {% endif %}
-                    {% if data.arg30 != '' or data.arg31 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg30 }}：{{ data.arg31 }}</h2>
-                        </div>
-                    {% endif %}
-                    {% if data.arg40 != '' or data.arg41 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg40 }}：{{ data.arg41 }}</h2>
-                        </div>
-                    {% endif %}
-                    {% if data.arg50 != '' or data.arg51 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg50 }}：{{ data.arg51 }}</h2>
-                        </div>
-                    {% endif %}
-                    {% if data.arg60 != '' or data.arg61 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg60 }}：{{ data.arg61 }}</h2>
-                        </div>
-                    {% endif %}
-                    {% if data.arg70 != '' or data.arg71 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg70 }}：{{ data.arg71 }}</h2>
-                        </div>
-                    {% endif %}
-                    {% if data.arg80 != '' or data.arg81 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg80 }}：{{ data.arg81 }}</h2>
-                        </div>
-                    {% endif %}
-                    {% if data.arg90 != '' or data.arg91 != '' %}
-                        <div class="row" style="margin: 3%;">
-                            <h2 style="color: black">{{ data.arg90 }}：{{ data.arg91 }}</h2>
-                        </div>
-                    {% endif %}
+                        {% if data.arg10 != '' or data.arg11 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg10 }}：{{ data.arg11 }}</h2>
+                            </div>
+                        {% endif %}
+                        {% if data.arg20 != '' or data.arg21 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg20 }}：{{ data.arg21 }}</h2>
+                            </div>
+                        {% endif %}
+                        {% if data.arg30 != '' or data.arg31 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg30 }}：{{ data.arg31 }}</h2>
+                            </div>
+                        {% endif %}
+                        {% if data.arg40 != '' or data.arg41 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg40 }}：{{ data.arg41 }}</h2>
+                            </div>
+                        {% endif %}
+                        {% if data.arg50 != '' or data.arg51 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg50 }}：{{ data.arg51 }}</h2>
+                            </div>
+                        {% endif %}
+                        {% if data.arg60 != '' or data.arg61 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg60 }}：{{ data.arg61 }}</h2>
+                            </div>
+                        {% endif %}
+                        {% if data.arg70 != '' or data.arg71 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg70 }}：{{ data.arg71 }}</h2>
+                            </div>
+                        {% endif %}
+                        {% if data.arg80 != '' or data.arg81 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg80 }}：{{ data.arg81 }}</h2>
+                            </div>
+                        {% endif %}
+                        {% if data.arg90 != '' or data.arg91 != '' %}
+                            <div class="row" style="margin: 3%;">
+                                <h2 style="color: black">{{ data.arg90 }}：{{ data.arg91 }}</h2>
+                            </div>
+                        {% endif %}
 
+                    </div>
                 </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
 
+        {% else %}
+
+            <div style="margin: 6%; text-align: left">
+                <h1 style="color: black">错误信息：{{ message }}</h1>
+            </div>
+
+        {% endif %}
         <div style="margin: 3%; text-align: center">
             <img alt="Cinque Terre" class="img-responsive" style="width: 50%" src="{% static 'img/maneu/code.jpg' %}">
         </div>

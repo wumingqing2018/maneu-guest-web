@@ -18,12 +18,12 @@ def index(request):
 
 
 def verify_order(request):
-    order_id = verify.is_uuid(request.GET.get('order_id'))
-    if order_id:
+    index_id = verify.is_uuid(request.GET.get('index_id'))
+    if index_id:
 
 
         try:
-            data = ManeuOrder.objects.filter(id=order_id).first()
+            data = ManeuOrder.objects.filter(id=index_id).first()
             data_time = data.time
             data_data = json.loads(data.content)
             content = {'status': True, 'message': '100000', 'content': {'time': data_time, 'data': data_data}}
@@ -38,12 +38,12 @@ def verify_order(request):
 
 
 def verify_store(request):
-    store_id = verify.is_uuid(request.GET.get('store_id'))
-    if store_id:
+    index_id = verify.is_uuid(request.GET.get('index_id'))
+    if index_id:
 
 
         try:
-            data = ManeuStore.objects.filter(id=store_id).first()
+            data = ManeuStore.objects.filter(id=index_id).first()
             data_time = data.time
             data_data = json.loads(data.content)
             content = {'status': True, 'message': '100000', 'content': {'time': data_time, 'data': data_data}}
