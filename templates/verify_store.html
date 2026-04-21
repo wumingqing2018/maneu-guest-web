@@ -29,10 +29,10 @@
                         {% for key, val in data.items %}
                             {% if forloop.first %}
                                 <div class="row" style="margin: 3%;">
-                                    <div class="col-2" style="text-align: right;">
+                                    <div class="col-auto" style="text-align: right;">
                                         <h1 style="color: black">{{ key }}</h1>
                                     </div>
-                                    <div class="col-1" style="text-align: center;">
+                                    <div class="col-auto" style="text-align: center;">
                                         <h1 style="color: black">-</h1>
                                     </div>
                                     <div class="col-auto" style="text-align: left;">
@@ -41,16 +41,14 @@
                                 </div>
                                 <hr style="border-bottom: 3px solid #ddd;">
                             {% else %}
-                                {% if key != '' and val != '' %}
                                     <div class="row" style="margin: 3%;">
-                                        <div class="col-2" style="text-align: right;">
+                                        <div class="col-auto" style="text-align: right;">
                                             <h2 style="color: black">{{ key }}</h2>
                                         </div>
                                         <div class="col-auto" style="text-align: left;">
                                             <h2 style="color: black">{{ val }}</h2>
                                         </div>
                                     </div>
-                                {% endif %}
                             {% endif %}
                         {% endfor %}
                     </div>
