@@ -1,0 +1,509 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>徕可 · 官方授权验证</title>
+    <link rel="icon" href="{% static 'img/maneu/logo.svg' %}">
+
+    <!-- Bootstrap 5 + Bootswatch Cerulean 主题 -->
+    <link crossorigin="anonymous"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/cerulean/bootstrap.min.css"
+          integrity="sha512-3n/Isj9MCqCc1wf/QfjLigco9sx9xr9m3TqgxstJrSxmwZ05qjl4owbfkioZ0y3w8fNWcVLnJGHfVqKF/L1Qsw=="
+          referrerpolicy="no-referrer" rel="stylesheet"/>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <style>
+        :root {
+            --deep-blue: #003153;
+            --gold: #FFC048;
+            --gold-soft: #FFD580;
+            --gold-dark: #C8922A;
+            --surface: rgba(255, 255, 255, 0.06);
+            --surface-hover: rgba(255, 255, 255, 0.09);
+            --border-gold: rgba(255, 192, 72, 0.3);
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0BEC5;
+            --text-muted: #78909C;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+            --radius-lg: 28px;
+            --radius-md: 20px;
+            --radius-sm: 14px;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--deep-blue);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 精细的径向光晕背景 */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle at 50% 0%, rgba(255, 192, 72, 0.03) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .mobile-wrapper {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 28px 22px 20px;
+            width: 100%;
+            animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 品牌区域 */
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+        }
+
+        .brand-logo {
+            width: 72px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            flex-shrink: 0;
+        }
+
+        .brand-text h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin: 0;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .brand-text h2 {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: var(--gold-soft);
+            margin: 6px 0 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        /* 验证卡片 */
+        .verify-card {
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: var(--radius-lg);
+            padding: 28px 20px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+            transition: box-shadow 0.3s ease;
+            min-height: 200px;
+        }
+
+        /* 加载指示器 */
+        .loading-placeholder {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--gold);
+            animation: spin 0.6s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 状态标签 */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 22px;
+            backdrop-filter: blur(4px);
+            text-transform: uppercase;
+        }
+
+        .status-badge.success {
+            background: rgba(46, 204, 113, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(46, 204, 113, 0.35);
+        }
+
+        .status-badge.fail {
+            background: rgba(231, 76, 60, 0.12);
+            color: #F1948A;
+            border: 1px solid rgba(231, 76, 60, 0.35);
+        }
+
+        .time-section {
+            padding: 14px 18px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: var(--radius-sm);
+            margin-bottom: 28px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-weight: 500;
+        }
+
+        .time-section strong {
+            color: var(--gold);
+            font-weight: 600;
+            margin-left: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .fail-message {
+            background: rgba(231, 76, 60, 0.08);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 16px 18px;
+            color: #F1948A;
+            font-weight: 500;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        /* 产品条目 */
+        .product-item {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: var(--radius-md);
+            padding: 20px 16px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            position: relative;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .product-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .product-item:active {
+            background: rgba(0, 0, 0, 0.4);
+            transform: scale(0.985);
+        }
+
+        .product-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 192, 72, 0.2);
+        }
+
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.3px;
+        }
+
+        .product-qty {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .product-detail {
+            margin-top: 12px;
+        }
+
+        .product-detail p {
+            margin: 6px 0;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* 提示信息 */
+        .info-placeholder {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding: 20px 0;
+        }
+
+        /* 小程序引导区 */
+        .footer-guide {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 28px 20px 22px;
+            text-align: center;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 192, 72, 0.15);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .qrcode-img {
+            width: 140px;
+            max-width: 65%;
+            border-radius: 18px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            margin-bottom: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .qrcode-img:active {
+            transform: scale(0.96);
+        }
+
+        .guide-text {
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .guide-sub {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+        }
+
+        /* ICP备案 */
+        .footer-icp {
+            text-align: center;
+            padding: 10px 0 8px;
+            font-size: 0.7rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-icp a {
+            color: rgba(255, 192, 72, 0.55);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-icp a:active {
+            color: var(--gold);
+        }
+
+        /* 消除Bootstrap干扰 */
+        .row {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        .col-auto {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="mobile-wrapper">
+    <!-- 品牌区 -->
+    <div class="brand-section">
+        <img src="{% static 'img/maneu/logo.svg' %}" alt="徕可" class="brand-logo">
+        <div class="brand-text">
+            <h1>徕可官方授权许可正品</h1>
+            <h2>Officially Licensed Products</h2>
+        </div>
+    </div>
+
+    <!-- 验证卡片（内容由JS动态生成） -->
+    <div id="verify-card" class="verify-card"></div>
+
+    <!-- 小程序引导 -->
+    <div class="footer-guide">
+        <img src="{% static 'img/maneu/code.jpg' %}" alt="小程序码" class="qrcode-img">
+        <p class="guide-text">微信扫码进入小程序</p>
+        <p class="guide-sub">了解更多徕可官方授权信息</p>
+    </div>
+
+    <!-- ICP备案 -->
+    <div class="footer-icp">
+        <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener">粤ICP备2023070483号</a>
+    </div>
+</div>
+
+<script>
+    // 后端注入数据
+    let index_id = "{{ index_id|escapejs }}";
+    let verify_order_url = "{% url 'verify_order' %}";
+
+    $(document).ready(function () {
+        var $card = $('#verify-card');
+
+        // 如果没有提供 index_id，显示提示信息
+        if (!index_id || index_id.trim() === "") {
+            $card.html('<div class="info-placeholder">🔍 未提供订单号，请使用正确的链接访问</div>');
+            return;
+        }
+
+        // 显示加载状态
+        $card.html('<div class="loading-placeholder"><span class="spinner"></span> 正在验证授权信息...</div>');
+
+        // 发起 AJAX 请求
+        $.ajax({
+            url: verify_order_url,
+            method: "GET",
+            data: {index_id: index_id},
+            dataType: "json",
+            timeout: 10000,
+            success: function (res) {
+                renderVerifyResult(res);
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", status, error);
+                $card.html(`
+                    <div class="status-badge fail">请求失败</div>
+                    <div class="fail-message">网络错误或服务器无响应，请刷新页面后重试。</div>
+                `);
+            }
+        });
+
+        // 渲染验证结果 (XSS 安全)
+        function renderVerifyResult(data) {
+            $card.empty(); // 清空卡片
+
+            // 判断状态（兼容字符串和布尔）
+            var isSuccess = (data.status === true || data.status === "true");
+
+            if (isSuccess) {
+                // 成功状态
+                $card.append('<div class="status-badge success">正品验证通过</div>');
+                var timeStr = data.content && data.content.time ? escapeHtml(data.content.time) : '';
+                if (timeStr) {
+                    $card.append(`<div class="time-section">购买时间: <strong>${timeStr}</strong></div>`);
+                }
+
+                var productList = (data.content && data.content.data) ? data.content.data : [];
+                var hasValidProduct = false;
+
+                $.each(productList, function (idx, item) {
+                    // 检查是否有有效内容（非空且不是占位符“无”）
+                    var isValid = (item.arg10 && item.arg10 !== '无') ||
+                        (item.arg11 && item.arg11 !== '无') ||
+                        (item.arg12 && item.arg12 !== '无') ||
+                        (item.arg13 && item.arg13 !== '无') ||
+                        (item.arg14 && item.arg14 !== '无');
+                    if (!isValid) return;
+
+                    hasValidProduct = true;
+                    var $product = $('<div class="product-item"></div>');
+                    var productName = (item.arg10 && item.arg10 !== '无') ? escapeHtml(item.arg10) : '未命名商品';
+
+                    // 标题行
+                    $product.append(`
+                        <div class="product-title-row">
+                            <span class="product-name">${productName}</span>
+                            <span class="product-qty">×1</span>
+                        </div>
+                    `);
+
+                    // 详情列表 (arg11~arg14)
+                    var details = [];
+                    if (item.arg11 && item.arg11 !== '无') details.push(escapeHtml(item.arg11));
+                    if (item.arg12 && item.arg12 !== '无') details.push(escapeHtml(item.arg12));
+                    if (item.arg13 && item.arg13 !== '无') details.push(escapeHtml(item.arg13));
+                    if (item.arg14 && item.arg14 !== '无') details.push(escapeHtml(item.arg14));
+
+                    if (details.length > 0) {
+                        var $detail = $('<div class="product-detail"></div>');
+                        $.each(details, function (i, text) {
+                            $detail.append(`<p>${text}</p>`);
+                        });
+                        $product.append($detail);
+                    }
+
+                    $card.append($product);
+                });
+
+                if (!hasValidProduct) {
+                    $card.append('<div class="info-placeholder">暂无详细产品信息</div>');
+                }
+            } else {
+                // 失败状态
+                $card.append('<div class="status-badge fail">验证失败</div>');
+                var errMsg = data.message ? escapeHtml(data.message) : '未查询到授权信息，请核对购买渠道。';
+                $card.append(`<div class="fail-message">${errMsg}</div>`);
+            }
+        }
+
+        // 简单的 XSS 防护函数
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -19,6 +19,8 @@ from maneu import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('order/', views.order, name='order'),
+    path('store/', views.store, name='store'),
     path('login/', views.login, name='login'),
     path('login_wx/', views.login_wx, name='login_wx'),
     path('sendsms/', views.sendsms, name='sendsms'),

@@ -1,64 +1,12 @@
 import json
 
 from django.http import JsonResponse
-from django.shortcuts import render
 
 from common import common
 from common import verify
 from maneu.models import *
 from django.forms.models import model_to_dict
 import uuid
-
-
-def index(request):
-    index_id = request.GET.get('index_id')
-    return render(request, 'index.html', {'index_id': index_id})
-
-
-def order(request):
-    index_id = request.GET.get('index_id')
-    return render(request, 'order.html', {'index_id': index_id})
-
-
-def store(request):
-    index_id = request.GET.get('index_id')
-    return render(request, 'store.html', {'index_id': index_id})
-
-
-def verify_order(request):
-    index_id = verify.is_uuid(request.GET.get('index_id'))
-    if index_id:
-
-        try:
-            data = ManeuOrder.objects.filter(id=index_id).first()
-            data_time = data.time
-            data_data = json.loads(data.content)
-            content = {'status': True, 'message': '请求成功', 'content': {'time': data_time, 'data': data_data}}
-        except Exception as e:
-            content = {'status': 'false', 'message': str(e), 'content': {}, 'token': ''}
-
-
-    else:
-        content = {'status': 'false', 'message': '没有找到你的订单', 'content': {}, 'token': ''}
-    return JsonResponse(content)
-
-
-def verify_store(request):
-    index_id = verify.is_uuid(request.GET.get('index_id'))
-    if index_id:
-
-        try:
-            data = ManeuStore.objects.filter(id=index_id).first()
-            data_time = data.time
-            data_data = json.loads(data.content)
-            content = {'status': True, 'message': '请求成功', 'content': {'time': data_time, 'data': data_data}}
-        except Exception as e:
-            content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
-
-
-    else:
-        content = {'status': False, 'message': '请提交正确的参数', 'content': {}, 'token': ''}
-    return JsonResponse(content)
 
 
 def login(request):

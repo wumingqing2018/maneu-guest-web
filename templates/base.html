@@ -1,40 +1,29 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
-    <title>徕可</title>
-    <link href="{% static 'img/maneu/logo.svg' %}" rel="icon">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>徕可 · 官方授权正品</title>
+    <link rel="icon" href="{% static 'img/maneu/logo.svg' %}">
 
-    <!-- 新 Bootstrap5 核心 CSS 文件 -->
+    <!-- Bootstrap 5 + Bootswatch Cerulean -->
     <link crossorigin="anonymous"
           href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/cerulean/bootstrap.min.css"
           integrity="sha512-3n/Isj9MCqCc1wf/QfjLigco9sx9xr9m3TqgxstJrSxmwZ05qjl4owbfkioZ0y3w8fNWcVLnJGHfVqKF/L1Qsw=="
           referrerpolicy="no-referrer" rel="stylesheet"/>
 
-    <!--  popper.min.js 用于弹窗、提示、下拉菜单 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
-
-    <!-- 最新的 Bootstrap5 核心 JavaScript 文件 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.min.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 </head>
 
 
-<body style="background-color: #003153; height: 100%">
-
+{% block css %} {% endblock %}
 {% block content %} {% endblock %}
 {% block javascript %} {% endblock %}
-
-</body>
-
-
-<footer class="fixed-bottom text-center">
-    <div style="padding: 2%">
-        <h1><a href="https://beian.miit.gov.cn" style="color: #FFC048">粤ICP备2023070483号</a></h1>
-    </div>
-</footer>
 
 </html>
