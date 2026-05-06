@@ -394,7 +394,7 @@
     let verify_order_url = "{% url 'verify_order' %}";
 
     $(document).ready(function () {
-        var $card = $('#verify-card');
+        let $card = $('#verify-card');
 
         // 如果没有提供 index_id，显示提示信息
         if (!index_id || index_id.trim() === "") {
@@ -413,6 +413,7 @@
             dataType: "json",
             timeout: 10000,
             success: function (res) {
+                console.log(res)
                 renderVerifyResult(res);
             },
             error: function (xhr, status, error) {

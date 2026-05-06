@@ -16,17 +16,19 @@ Including another URLconf
 from django.urls import path
 
 from maneu import views
+from maneu import api
+
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('order/', views.order, name='order'),
-    path('store/', views.store, name='store'),
-    path('login/', views.login, name='login'),
-    path('login_wx/', views.login_wx, name='login_wx'),
-    path('sendsms/', views.sendsms, name='sendsms'),
+    path('verify_order/', views.verify_order, name='verify_order'),
+    path('verify_store/', views.verify_store, name='verify_store'),
+    path('login/', api.login, name='login'),
+    path('sendsms/', api.sendsms, name='sendsms'),
+    path('login_wx/', api.login_wx, name='login_wx'),
     path('get_list/', views.get_list, name='get_list'),
     path('get_index/', views.get_index, name='get_index'),
     path('get_detail/', views.get_detail, name='get_detail'),
-    path('verify_order/', views.verify_order, name='verify_order'),
-    path('verify_store/', views.verify_store, name='verify_store'),
+    path('order_verify/', api.order_verify, name='order_verify'),
+    path('store_verify/', api.store_verify, name='store_verify'),
 ]

@@ -9,6 +9,42 @@ from django.forms.models import model_to_dict
 import uuid
 
 
+def order_verify(request):
+    index_id = verify.is_uuid(request.GET.get('index_id'))
+    if index_id:
+
+        try:
+            data = ManeuStore.objects.filter(id=index_id).first()
+            data_time = data.time
+            data_data = json.loads(data.content)
+            content = {'status': True, 'message': '请求成功', 'content': {'time': data_time, 'data': data_data}}
+        except Exception as e:
+            content = {'status': 'false', 'message': str(e), 'content': {}, 'token': ''}
+
+
+    else:
+        content = {'status': 'false', 'message': '没有找到你的订单', 'content': {}, 'token': ''}
+    return JsonResponse(content)
+
+
+def store_verify(request):
+    index_id = verify.is_uuid(request.GET.get('index_id'))
+    if index_id:
+
+        try:
+            data = ManeuStore.objects.filter(id=index_id).first()
+            data_time = data.time
+            data_data = json.loads(data.content)
+            content = {'status': True, 'message': '请求成功', 'content': {'time': data_time, 'data': data_data}}
+        except Exception as e:
+            content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
+
+
+    else:
+        content = {'status': False, 'message': '请提交正确的参数', 'content': {}, 'token': ''}
+    return JsonResponse(content)
+
+
 def login(request):
     call = verify.is_call(request.GET.get('call'))
     code = verify.is_code(request.GET.get('code'))
@@ -92,11 +128,28 @@ def get_index(request):
         "index": 'https://maneu.online/static/img/1njj.jpg',
         "data": 'https://maneu.online/static/img/2njj.jpg',
     }]
-    return JsonResponse({'status': True, 'message': '', 'content': data})
+    return JsonResponse({'status': True, 'message': '', 'content': data, 'token': ''})
 
 
-def get_list(request):
-    text = verify.is_code(request.GET.get('text'))
+def order_list(request):
+    token = verify.is_uuid(request.GET.get('token'))
+    if token:
+
+        remark = str(uuid.uuid4())
+        guest = ManeuGuest.objects.filter(remark=token).first()
+        if ManeuGuest.objects.filter(remark=token).update(remark=remark) != 0:
+            data = ManeuOrder.objects.filter(phone=guest.phone, status=3).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
+            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
+        else:
+            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+
+    else:
+        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+
+    return JsonResponse(content)
+
+
+def report_list(request):
     token = verify.is_uuid(request.GET.get('token'))
 
     guest = ManeuGuest.objects.filter(remark=token).first()
@@ -104,84 +157,149 @@ def get_list(request):
         remark = str(uuid.uuid4())
         guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
 
-        if text == "100001":
-            data = ManeuOrder.objects.filter(phone=guest.phone, status=3).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
-            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
-        elif text == "100002":
-            data = ManeuReport.objects.filter(phone=guest.phone, status=2).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
-            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
-        elif text == "100003":
-            data = ManeuRepair.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
-            return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
-        else:
-            content = {'status': False, 'message': 'text is wrong' + request.GET.get('text'), 'content': {}, 'token': ''}
+        data = ManeuReport.objects.filter(phone=guest.phone, status=2).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
+        return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
+
     else:
-        content = {'status': False, 'message': 'mark is wrong' + request.GET.get('token'), 'content': {}, 'token': ''}
+        content = {'status': False, 'message': '请重新登录。', 'content': {}, 'token': ''}
 
     return JsonResponse(content)
 
 
-def get_detail(request):
-    code = verify.is_uuid(request.GET.get('code'))
-    text = verify.is_code(request.GET.get('text'))
+def store_list(request):
     token = verify.is_uuid(request.GET.get('token'))
 
-    if text:
-        if code:
-            guest = ManeuGuest.objects.filter(remark=token).first()
-            if guest:
-                remark = uuid.uuid4()
-                guest1 = ManeuGuest.objects.filter(remark=token).update(remark=remark)
-                if request.GET.get('text') == "100001":
-                    try:
-                        data = ManeuOrder.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-                    except Exception as e:
-                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-                elif request.GET.get('text') == "100002":
-                    try:
-                        store = ManeuStore.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '请求成功', 'content': json.loads(store.content), 'token': remark}
-                    except Exception as e:
-                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-                elif request.GET.get('text') == "100003":
-                    try:
-                        data = ManeuReport.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-                    except Exception as e:
-                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-                elif request.GET.get('text') == "100004":
-                    try:
-                        data = ManeuGuest.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-                    except Exception as e:
-                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-                elif request.GET.get('text') == "100005":
-                    try:
-                        data = ManeuAdmin.objects.filter(id=code).first()
-                        content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-                    except Exception as e:
-                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-                elif request.GET.get('text') == "100006":
-                    try:
-                        data = ManeuRepair.objects.filter(guest_id=code).first()
-                        content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-                    except Exception as e:
-                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-                elif request.GET.get('text') == "100007":
-                    try:
-                        ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, call=guest.phone, time=common.current_time())
-                        data = ManeuVerify.objects.filter(order_id=code).order_by('-time').all().values('time')
-                        content = {'status': True, 'message': '请求成功', 'content': list(data), 'token': remark}
-                    except Exception as e:
-                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-                else:
-                    content = {'status': False, 'message': 'text is wrong' + str(request.GET.get('text')), 'content': {}, 'token': ''}
-            else:
-                content = {'status': False, 'message': 'mark is wrong' + str(request.GET.get('token')), 'content': {}, 'token': ''}
-        else:
-            content = {'status': False, 'message': 'code is wrong' + str(request.GET.get('code')), 'content': {}, 'token': ''}
+    guest = ManeuGuest.objects.filter(remark=token).first()
+    if guest:
+        remark = str(uuid.uuid4())
+        guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
+
+        data = ManeuStore.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
+        return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
+
     else:
-        content = {'status': False, 'message': 'text is wrong' + str(request.GET.get('text')), 'content': {}, 'token': ''}
+        content = {'status': False, 'message': '请重新登录。', 'content': {}, 'token': ''}
+
+    return JsonResponse(content)
+
+
+def repair_list(request):
+    token = verify.is_uuid(request.GET.get('token'))
+
+    guest = ManeuGuest.objects.filter(remark=token).first()
+    if guest:
+        remark = str(uuid.uuid4())
+        guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
+
+        data = ManeuRepair.objects.filter(phone=guest.phone).order_by('-time').all().values('id', 'name', 'time', 'phone', 'remark')
+        return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
+
+    else:
+        content = {'status': False, 'message': '请重新登录。', 'content': {}, 'token': ''}
+
+    return JsonResponse(content)
+
+
+def order_detail(request):
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
+
+    if code or mark:
+        remark = uuid.uuid4()
+        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
+        if guest != 0:
+            try:
+                data = ManeuOrder.objects.filter(id=code).first()
+                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
+            except Exception as e:
+                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
+        else:
+            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+    else:
+        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+
+    return JsonResponse(content)
+
+
+def store_detail(request):
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
+
+    if code or mark:
+        remark = uuid.uuid4()
+        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
+        if guest != 0:
+            try:
+                data = ManeuStore.objects.filter(id=code).first()
+                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
+            except Exception as e:
+                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
+        else:
+            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+    else:
+        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+
+    return JsonResponse(content)
+
+
+def guest_detail(request):
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
+
+    if code or mark:
+        remark = uuid.uuid4()
+        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
+        if guest != 0:
+            try:
+                data = ManeuGuest.objects.filter(id=code).first()
+                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
+            except Exception as e:
+                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
+        else:
+            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+    else:
+        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+
+    return JsonResponse(content)
+
+
+def report_detail(request):
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
+
+    if code or mark:
+        remark = uuid.uuid4()
+        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
+        if guest != 0:
+            try:
+                data = ManeuReport.objects.filter(id=code).first()
+                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
+            except Exception as e:
+                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
+        else:
+            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+    else:
+        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+
+    return JsonResponse(content)
+
+
+def repair_detail(request):
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
+
+    if code or mark:
+        remark = uuid.uuid4()
+        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
+        if guest != 0:
+            try:
+                data = ManeuRepair.objects.filter(id=code).first()
+                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
+            except Exception as e:
+                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
+        else:
+            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
+    else:
+        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
 
     return JsonResponse(content)
