@@ -391,7 +391,7 @@
 <script>
     // 后端注入数据
     let index_id = "{{ index_id|escapejs }}";
-    let verify_order_url = "{% url 'verify_order' %}";
+    let verify_order_url = "{% url 'order_verify' %}";
 
     $(document).ready(function () {
         let $card = $('#verify-card');

@@ -38,7 +38,7 @@
     <script>
         // 后端注入数据
         let index_id = "{{ index_id|escapejs }}";
-        let verify_order_url = "{% url 'verify_store' %}";
+        let verify_order_url = "{% url 'store_verify' %}";
         // XSS 防护函数
         function escapeHtml(str) {
             if (!str) return '';
