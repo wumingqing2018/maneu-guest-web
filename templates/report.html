@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block css %}
+    <link href="{% static 'css/store.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <body>
+
+    <div class="mobile-wrapper">
+        <!-- 品牌区 -->
+        <div class="brand-section">
+            <img src="{% static 'img/maneu/logo.svg' %}" alt="徕可" class="brand-logo">
+            <div class="brand-text">
+                <h1>徕可官方授权许可正品</h1>
+                <h2>Officially Licensed Products</h2>
+            </div>
+        </div>
+
+        <!-- 验证卡片（内容由JS动态生成） -->
+        <div id="verify-card" class="verify-card"></div>
+
+        <!-- 小程序引导 -->
+        <div class="footer-guide">
+            <img src="{% static 'img/maneu/code.jpg' %}" alt="小程序码" class="qrcode-img">
+            <p class="guide-text">微信扫码进入小程序</p>
+            <p class="guide-sub">了解更多徕可官方授权信息</p>
+        </div>
+
+        <!-- ICP备案 -->
+        <div class="footer-icp">
+            <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener">粤ICP备2023070483号</a>
+        </div>
+    </div>
+
+    </body>
+{% endblock %}
+{% block javascript %}
+    <script>
+        // 后端注入数据
+        let index_id = "{{ index_id|escapejs }}";
+        let report_verify_url = "{% url 'report_verify' %}";
+
+        // XSS 防护函数
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        $(document).ready(function () {
+            var $card = $('#verify-card');
+
+            if (!index_id || index_id.trim() === "") {
+                $card.html('<div class="info-placeholder"> 未提供订单号，请使用正确的链接访问</div>');
+                return;
+            }
+
+            $card.html('<div class="loading-placeholder"><span class="spinner"></span> 正在验证报告信息...</div>');
+
+            $.ajax({
+                url: report_verify_url,
+                method: "GET",
+                data: {index_id: index_id},
+                timeout: 10000,
+                success: function (res) {
+                    console.log(res);
+                    renderReport(res);
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", status, error);
+                    $card.html(`
+                    <div class="status-badge fail">请求失败</div>
+                    <div class="fail-message">网络错误或服务器无响应，请刷新页面后重试。</div>
+                `);
+                }
+            });
+
+            function addProp($grid, key, val) {
+                if (val !== undefined && val !== null && String(val).trim() !== '') {
+                    $grid.append(`
+                        <div class="prop-item">
+                            <span class="prop-key">${escapeHtml(key)}</span>
+                            <span class="prop-val">${escapeHtml(String(val))}</span>
+                        </div>
+                    `);
+                }
+            }
+
+            function renderReport(data) {
+                $card.empty();
+                var isSuccess = (data.status === true || data.status === 'true');
+                var content = data.content || {};
+
+                if (isSuccess && content) {
+                    $card.append('<div class="status-badge success"> 验光报告验证通过</div>');
+                    if (content.time) {
+                        $card.append(`<div class="time-section">验光时间 <strong>${escapeHtml(content.time)}</strong></div>`);
+                    }
+                    if (content.plan) {
+                        $card.append(`<div class="plan-info">处方类型：${escapeHtml(content.plan)}</div>`);
+                    }
+
+                    // 右眼 (OD)
+                    var $odBlock = $('<div class="product-item"></div>');
+                    $odBlock.append('<div class="first-property"><span class="first-key">右眼 (OD)</span></div>');
+                    var $odGrid = $('<div class="props-grid"></div>');
+                    addProp($odGrid, '球镜 (SPH)', content.od_sph);
+                    addProp($odGrid, '柱镜 (CYL)', content.od_cyl);
+                    addProp($odGrid, '轴位 (AX)', content.od_ax);
+                    addProp($odGrid, '视力 (VA)', content.od_va);
+                    $odBlock.append($odGrid);
+                    $card.append($odBlock);
+
+                    // 左眼 (OS)
+                    var $osBlock = $('<div class="product-item"></div>');
+                    $osBlock.append('<div class="first-property"><span class="first-key">左眼 (OS)</span></div>');
+                    var $osGrid = $('<div class="props-grid"></div>');
+                    addProp($osGrid, '球镜 (SPH)', content.os_sph);
+                    addProp($osGrid, '柱镜 (CYL)', content.os_cyl);
+                    addProp($osGrid, '轴位 (AX)', content.os_ax);
+                    addProp($osGrid, '视力 (VA)', content.os_va);
+                    $osBlock.append($osGrid);
+                    $card.append($osBlock);
+
+                } else {
+                    $card.append('<div class="status-badge fail"> 验证失败</div>');
+                    var message = data.message ? escapeHtml(data.message) : '未查询到验光报告信息。';
+                    $card.append(`<div class="fail-message">${message}</div>`);
+                }
+            }
+        });
+    </script>
+{% endblock %}

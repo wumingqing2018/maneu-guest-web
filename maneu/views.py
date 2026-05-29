@@ -25,6 +25,11 @@ def verify_store(request):
     return render(request, 'store.html', {'index_id': index_id})
 
 
+def verify_report(request):
+    index_id = request.GET.get('index_id')
+    return render(request, 'report.html', {'index_id': index_id})
+
+
 def login(request):
     call = verify.is_call(request.GET.get('call'))
     code = verify.is_code(request.GET.get('code'))

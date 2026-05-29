@@ -45,6 +45,22 @@ def store_verify(request):
     return JsonResponse(content)
 
 
+def report_verify(request):
+    index_id = verify.is_uuid(request.GET.get('index_id'))
+    if index_id:
+
+        try:
+            data = ManeuReport.objects.filter(id=index_id).first()
+            content = {'status': True, 'message': '请求成功', 'content': {'time': data.time, 'plan': data.plan, 'os_va': data.os_va, 'os_cyl': data.os_cyl, 'os_sph': data.os_sph, 'os_ax': data.os_ax, 'od_va': data.od_va, 'od_cyl': data.od_cyl, 'od_sph': data.od_sph, 'od_ax': data.od_ax}}
+        except Exception as e:
+            content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
+
+
+    else:
+        content = {'status': False, 'message': '请提交正确的参数', 'content': {}, 'token': ''}
+    return JsonResponse(content)
+
+
 def login(request):
     call = verify.is_call(request.GET.get('call'))
     code = verify.is_code(request.GET.get('code'))

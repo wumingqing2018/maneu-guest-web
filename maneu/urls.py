@@ -23,6 +23,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('verify_order/', views.verify_order, name='verify_order'),
     path('verify_store/', views.verify_store, name='verify_store'),
+    path('verify_report/', views.verify_report, name='verify_report'),
     path('login/', api.login, name='login'),
     path('sendsms/', api.sendsms, name='sendsms'),
     path('login_wx/', api.login_wx, name='login_wx'),
@@ -31,4 +32,6 @@ urlpatterns = [
     path('get_detail/', views.get_detail, name='get_detail'),
     path('order_verify/', api.order_verify, name='order_verify'),
     path('store_verify/', api.store_verify, name='store_verify'),
+    path('report_verify/', api.report_verify, name='report_verify'),
+
 ]

@@ -38,7 +38,7 @@
     <script>
         // 后端注入数据
         let index_id = "{{ index_id|escapejs }}";
-        let verify_order_url = "{% url 'store_verify' %}";
+        let store_verify_url = "{% url 'store_verify' %}";
         // XSS 防护函数
         function escapeHtml(str) {
             if (!str) return '';
@@ -63,7 +63,7 @@
             $card.html('<div class="loading-placeholder"><span class="spinner"></span> 正在验证授权信息...</div>');
 
             $.ajax({
-                url: verify_order_url,
+                url: store_verify_url,
                 method: "GET",
                 data: {index_id: index_id},
                 dataType: "json",
