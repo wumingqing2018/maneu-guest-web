@@ -1,0 +1,331 @@
+/* ============================================================
+   订单管理页面样式
+   基于全局 CSS 变量，仅定义当前页面专属样式
+   ============================================================ */
+
+/* 扩展全局变量以覆盖硬编码颜色 */
+:root {
+    --bg-hover: #f8f9fc;
+    --danger-color: #dc2626;
+    --danger-bg: #fef2f2;
+    --empty-icon: #cbd5e1;
+}
+
+/* 页面头部 */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--brand-color);
+    letter-spacing: -0.02em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-title i {
+    font-size: 2rem;
+    color: var(--brand-accent);
+}
+
+/* 新增按钮（胶囊风格） */
+.btn-add-record {
+    background: var(--brand-accent);
+    border: none;
+    color: #000;
+    font-weight: 600;
+    padding: 0.55rem 1.4rem;
+    border-radius: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-add-record:hover {
+    background: #e0a800;
+    color: #000;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* 筛选卡片 */
+.filter-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.filter-group {
+    flex: 1 1 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.filter-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+}
+
+.filter-group .input-group {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.filter-group .form-control,
+.filter-group .btn {
+    border-radius: 0;
+}
+
+.filter-group .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* 列表表头（桌面端可见） */
+.list-header {
+    display: flex;
+    padding: 0.8rem 1.2rem;
+    background: var(--brand-color-pale);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--brand-color);
+    letter-spacing: 0.03em;
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
+}
+
+.list-header .col-time {
+    flex: 0 0 160px;
+}
+
+.list-header .col-name {
+    flex: 0 0 100px;
+}
+
+.list-header .col-phone {
+    flex: 0 0 130px;
+}
+
+.list-header .col-remark {
+    flex: 1;
+}
+
+.list-header .col-actions {
+    flex: 0 0 140px;
+    text-align: right;
+}
+
+/* 列表项 */
+.store-list-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.2rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-top: none;
+    transition: all 0.2s ease;
+    gap: 0.2rem;
+    flex-wrap: wrap;
+}
+
+.store-list-item:last-child {
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.store-list-item:hover {
+    background: var(--bg-hover);
+    box-shadow: inset 4px 0 0 var(--brand-accent);
+}
+
+.store-list-item .col-time,
+.store-list-item .col-name,
+.store-list-item .col-phone,
+.store-list-item .col-remark,
+.store-list-item .col-actions {
+    display: flex;
+    align-items: center;
+}
+
+.store-list-item .col-time {
+    flex: 0 0 160px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.store-list-item .col-name {
+    flex: 0 0 100px;
+    font-weight: 600;
+}
+
+.store-list-item .col-phone {
+    flex: 0 0 130px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.store-list-item .col-remark {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 0.5rem;
+}
+
+.store-list-item .col-actions {
+    flex: 0 0 140px;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* 操作按钮（圆形图标） */
+.btn-action {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+    background: white;
+    color: var(--text-secondary);
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.btn-action:hover {
+    background: var(--brand-color-pale);
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+.btn-action.delete-btn:hover {
+    background: var(--danger-bg);
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+/* 移动端响应式（转为卡片布局） */
+@media (max-width: 768px) {
+    .list-header {
+        display: none;
+    }
+
+    .store-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+        position: relative;
+        padding: 1rem;
+    }
+
+    .store-list-item .col-time,
+    .store-list-item .col-name,
+    .store-list-item .col-phone,
+    .store-list-item .col-remark,
+    .store-list-item .col-actions {
+        flex: none;
+        width: 100%;
+    }
+
+    /* 时间行放在最上方，并显示为强调色 */
+    .store-list-item .col-time {
+        order: 1;
+        font-size: 0.75rem;
+        color: var(--brand-accent);
+        font-weight: 500;
+        border-bottom: 1px dashed var(--border-subtle);
+        padding-bottom: 0.4rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .store-list-item .col-name {
+        order: 2;
+    }
+
+    .store-list-item .col-phone {
+        order: 3;
+    }
+
+    .store-list-item .col-remark {
+        order: 4;
+    }
+
+    .store-list-item .col-actions {
+        order: 5;
+        justify-content: flex-start;
+        padding-top: 0.5rem;
+        border-top: 1px dashed var(--border-subtle);
+        margin-top: 0.3rem;
+    }
+
+    /* 移除原来的伪元素绝对定位（避免重叠） */
+    .store-list-item::before {
+        display: none;
+    }
+
+    .filter-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-add-record {
+        max-width: 100%;
+        justify-content: center;
+    }
+}
+
+/* 空状态与加载动画 */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.8rem;
+    color: var(--empty-icon);
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+}
+
+/* 关键词输入框校验样式 */
+.is-invalid {
+    border-color: var(--danger-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.25);
+}

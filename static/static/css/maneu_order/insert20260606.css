@@ -1,0 +1,183 @@
+/* ========== 订单新增页专属样式 ========== */
+/* 本页专用阴影（仅卡片悬停时使用，不覆盖全局 --shadow-md） */
+:root {
+    --card-hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* ========== 页面头部 ========== */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--brand-color);
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.page-title i {
+    font-size: 2rem;
+    color: var(--brand-accent);
+}
+
+
+.page-wrapper {
+    padding: 0 0.5rem;
+}
+
+.section-card {
+    background: var(--bg-surface); /* 原 --store-surface → 与 base 一致 */
+    border: 1px solid var(--border-subtle); /* 原 --store-border → 与 base 一致 */
+    border-radius: var(--radius-md); /* 原 --store-radius → 与 base 一致 */
+    padding: 1.5rem;
+    /* 阴影需比 base 的 --shadow-md 略柔和，保留局部定义 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
+    margin-bottom: 1.5rem;
+}
+
+.section-card:hover {
+    box-shadow: var(--shadow-md); /* 悬停时与 base 统一即可 */
+}
+
+.section-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--brand-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.02em;
+    border-bottom: 2px solid var(--brand-color-pale);
+    padding-bottom: 0.6rem;
+}
+
+.section-title i {
+    font-size: 1.3rem;
+    color: var(--brand-accent); /* 原 --store-accent 与 base 的 --brand-accent 相同 */
+}
+
+.btn-back-page {
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+}
+
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .action-bar {
+        flex-direction: column;
+    }
+
+    .action-bar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .section-card {
+        padding: 1rem 0.8rem;
+    }
+}
+
+@keyframes highlightFade {
+    0% {
+        background-color: var(--brand-color-pale);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+.btn-toggle {
+    background: transparent;
+    border: 1px solid var(--border-subtle); /* 原 --store-border */
+    color: var(--text-secondary); /* 原 --store-muted */
+    font-size: 0.85rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-toggle:hover {
+    background: var(--brand-color-pale);
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+.product-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.product-row input {
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.product-row input:focus {
+    border-color: var(--brand-accent);
+    box-shadow: 0 0 0 0.15rem rgba(255, 193, 7, 0.15);
+}
+
+.product-cat {
+    flex: 1;
+}
+
+.product-brand {
+    flex: 1;
+}
+
+.product-model {
+    flex: 1;
+}
+
+.product-param {
+    flex: 2.5;
+}
+
+.product-price {
+    flex: 0.8;
+}
+
+@media (max-width: 768px) {
+    .product-row {
+        flex-wrap: wrap;
+    }
+
+    .product-cat, .product-brand, .product-model, .product-price {
+        flex: 1 1 45%;
+    }
+
+    .product-param {
+        flex: 1 1 100%;
+    }
+}
+    

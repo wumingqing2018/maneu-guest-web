@@ -1,0 +1,256 @@
+/* 本页专用阴影（仅卡片悬停时使用，不覆盖全局 --shadow-md） */
+:root {
+    --card-hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* ========== 页面头部 ========== */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--brand-color);
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.page-title i {
+    font-size: 2rem;
+    color: var(--brand-accent);
+}
+
+
+/* ========== 复用 base 设计 tokens ========== */
+.page-wrapper {
+    padding: 0 0.5rem;
+}
+
+.section-card {
+    background: var(--bg-surface); /* 使用 base 中的白色 */
+    border: 1px solid var(--border-subtle); /* 使用 base 中的边框色 */
+    border-radius: var(--radius-md); /* 12px，与 base 一致 */
+    padding: 1.5rem;
+    box-shadow: var(--store-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--brand-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.02em;
+    border-bottom: 2px solid var(--brand-color-pale);
+    padding-bottom: 0.6rem;
+}
+
+.section-title i {
+    font-size: 1.3rem;
+    color: var(--brand-accent);
+}
+
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+/* 统一圆角胶囊按钮风格 */
+.btn-action-primary,
+.btn-save-guest,
+.btn-save-store,
+.btn-delete-record,
+.btn-back-page,
+.btn-toggle {
+    border-radius: 2rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.3rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-action-primary:hover,
+.btn-save-guest:hover,
+.btn-save-store:hover,
+.btn-delete-record:hover {
+    transform: translateY(-1px);
+}
+
+/* 个性化按钮颜色 */
+.btn-save-guest {
+    background: var(--brand-color);
+    border: none;
+    color: #fff;
+    padding: 0.45rem 1.2rem;
+}
+
+.btn-save-guest:hover {
+    opacity: 0.9;
+}
+
+.btn-save-store {
+    background: var(--brand-accent);
+    border: none;
+    color: #000;
+    padding: 0.45rem 1.2rem;
+}
+
+.btn-save-store:hover {
+    background: #f5a623;
+}
+
+.btn-delete-record {
+    background: transparent;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    padding: 0.45rem 1.2rem;
+}
+
+.btn-delete-record:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+.btn-qrcode {
+    background: #fff;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+}
+
+.btn-qrcode:hover {
+    background: var(--brand-color-pale);
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+.btn-back-page {
+    /* 使用 Bootstrap 轮廓样式，保留自定义圆角 */
+}
+
+.btn-toggle {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary); /* 替换为 base 的次级文本色 */
+    font-size: 0.85rem;
+    padding: 0.35rem 0.9rem;
+    transition: all 0.15s;
+}
+
+.btn-toggle:hover {
+    background: var(--brand-color-pale);
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+/* 状态标签（与 base 无关，保留） */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.status-loaded {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-empty {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-warning {
+    background: #fca5a5;
+    color: #bb2d3b;
+}
+
+/* 产品行布局 */
+.product-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.product-row input {
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.product-row input:focus {
+    border-color: var(--brand-accent);
+    box-shadow: 0 0 0 0.15rem rgba(255, 193, 7, 0.15);
+}
+
+.product-cat {
+    flex: 1;
+}
+
+.product-brand {
+    flex: 1;
+}
+
+.product-model {
+    flex: 1;
+}
+
+.product-param {
+    flex: 2.5;
+}
+
+.product-price {
+    flex: 0.8;
+}
+
+/* 响应式保持不变 */
+@media (max-width: 768px) {
+    .action-bar {
+        flex-direction: column;
+    }
+
+    .action-bar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .product-row {
+        flex-wrap: wrap;
+    }
+
+    .product-cat,
+    .product-brand,
+    .product-model,
+    .product-price {
+        flex: 1 1 45%;
+    }
+
+    .product-param {
+        flex: 1 1 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .section-card {
+        padding: 1rem 0.8rem;
+    }
+}

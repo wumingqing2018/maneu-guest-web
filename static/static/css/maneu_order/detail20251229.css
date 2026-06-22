@@ -1,0 +1,394 @@
+/* ========== 定制详情页专属样式 ========== */
+.page-wrapper {
+    padding: 0 0.5rem;
+}
+
+.section-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-smooth);
+}
+
+.section-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.section-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--brand-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.02em;
+    border-bottom: 2px solid var(--brand-color-pale);
+    padding-bottom: 0.6rem;
+}
+
+.section-title i {
+    font-size: 1.3rem;
+    color: var(--brand-accent);
+}
+
+/* 时间字段 */
+.single-field {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.single-field label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* 折叠切换按钮 */
+.btn-collapse-custom {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: 2rem;
+    padding: 0.35rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.btn-collapse-custom:hover {
+    background: var(--brand-color-pale);
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+.btn-collapse-custom i {
+    transition: transform var(--transition-fast);
+}
+
+/* 自定义键值对网格 */
+.custom-kv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.8rem;
+}
+
+.custom-kv-pair {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.custom-kv-pair input {
+    flex: 1;
+    border-radius: var(--radius-sm);
+}
+
+.custom-kv-pair .key-input {
+    max-width: 140px;
+    background: #f8fafc;
+    font-weight: 500;
+}
+
+/* 操作按钮区 */
+.action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.btn-action-primary {
+    border-radius: 2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.3rem;
+    transition: all 0.2s ease;
+}
+
+.btn-action-primary:hover {
+    transform: translateY(-1px);
+}
+
+.btn-save-guest {
+    background: var(--brand-color);
+    border-color: var(--brand-color);
+    color: #fff;
+}
+
+.btn-save-guest:hover {
+    background: var(--brand-color-light);
+    border-color: var(--brand-color-light);
+    color: #fff;
+}
+
+.btn-save-store {
+    background: var(--brand-accent);
+    border: none;
+    color: #000;
+}
+
+.btn-save-store:hover {
+    background: #f0a500;
+    color: #000;
+}
+
+.btn-delete-record {
+    background: #fff;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+}
+
+.btn-delete-record:hover {
+    background: #fef2f2;
+    border-color: #dc2626;
+    color: #b91c1c;
+}
+
+.btn-qrcode {
+    background: #fff;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+}
+
+.btn-qrcode:hover {
+    background: var(--brand-color-pale);
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+.btn-back-page {
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+}
+
+/* 状态徽标 */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.status-loaded {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-empty {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* 加载动画 */
+.loading-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    gap: 0.6rem;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .single-field {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .custom-kv-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-bar {
+        flex-direction: column;
+    }
+
+    .action-bar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .section-card {
+        padding: 1rem 0.8rem;
+    }
+}
+
+/* 过渡动画 */
+.fade-highlight {
+    animation: highlightFade 1.5s ease-out;
+}
+
+@keyframes highlightFade {
+    0% {
+        background-color: var(--brand-color-pale);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* 统一卡片样式（与参考代码的 form-card 一致，同时用于 section-card） */
+:root {
+    --store-accent: hsl(38, 92%, 55%);
+    --store-surface: #ffffff;
+    --store-border: #e8ecf1;
+    --store-text: #1e293b;
+    --store-muted: #64748b;
+    --store-radius: 12px;
+    --store-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.section-card {
+    background: var(--store-surface);
+    border: 1px solid var(--store-border);
+    border-radius: var(--store-radius);
+    padding: 1.5rem;
+    box-shadow: var(--store-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.btn-toggle {
+    background: transparent;
+    border: 1px solid var(--store-border);
+    color: var(--store-muted);
+    font-size: 0.85rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-toggle:hover {
+    background: var(--brand-color-pale);
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+.btn-save-guest {
+    background: var(--brand-color);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.45rem 1.2rem;
+    border-radius: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-save-guest:hover {
+    opacity: 0.9;
+}
+
+.btn-save-store {
+    background: var(--brand-accent);
+    border: none;
+    color: #000;
+    font-weight: 600;
+    padding: 0.45rem 1.2rem;
+    border-radius: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-save-store:hover {
+    background: #f5a623;
+}
+
+.btn-delete-record {
+    background: #dc3545;
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.45rem 1.2rem;
+    border-radius: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-delete-record:hover {
+    background: #bb2d3b;
+}
+
+.product-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.product-row input {
+    border: 1px solid var(--store-border);
+    border-radius: var(--store-radius);
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.product-row input:focus {
+    border-color: var(--brand-accent);
+    box-shadow: 0 0 0 0.15rem rgba(255, 193, 7, 0.15);
+}
+
+.product-cat {
+    flex: 1;
+}
+
+.product-brand {
+    flex: 1;
+}
+
+.product-model {
+    flex: 1;
+}
+
+.product-param {
+    flex: 2.5;
+}
+
+.product-price {
+    flex: 0.8;
+}
+
+@media (max-width: 768px) {
+    .product-row {
+        flex-wrap: wrap;
+    }
+
+    .product-cat, .product-brand, .product-model, .product-price {
+        flex: 1 1 45%;
+    }
+
+    .product-param {
+        flex: 1 1 100%;
+    }
+}

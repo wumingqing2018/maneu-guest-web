@@ -39,7 +39,7 @@ def getip(request):
         return None
 
 
-def randint():
+def get_random_code():
     return random.randint(100000, 999999)
 
 

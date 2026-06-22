@@ -1,13 +1,12 @@
 import json
+import uuid
 
-from django.http import JsonResponse
+from django.forms.models import model_to_dict
 from django.shortcuts import render
 
 from common import common
-from common import verify
+from common import verify_util
 from maneu.models import *
-from django.forms.models import model_to_dict
-import uuid
 
 
 def index(request):
@@ -31,8 +30,8 @@ def verify_report(request):
 
 
 def login(request):
-    call = verify.is_call(request.GET.get('call'))
-    code = verify.is_code(request.GET.get('code'))
+    call = verify_util.is_call(request.GET.get('call'))
+    code = verify_util.is_code(request.GET.get('code'))
 
     if call and code:
         token = uuid.uuid4()
@@ -48,7 +47,7 @@ def login(request):
 
 
 def login_wx(request):
-    code = verify.is_token2(request.GET.get('code'))
+    code = verify_util.is_token2(request.GET.get('code'))
     if code:
         data_token = ManeuAdmin.objects.filter().first()
         phone = common.get_phone_number(code, data_token.content)
@@ -78,8 +77,32 @@ def login_wx(request):
     return JsonResponse(content)
 
 
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from common.sendSMSForm import SendSMSForm
+
+@csrf_exempt  # 因为使用 JWT，无需 CSRF
+@require_http_methods(["POST"])  # 只允许 POST
 def sendsms(request):
-    call = verify.is_call(request.GET.get('code'))
+    form = SendSMSForm(request.POST)
+    if form.is_valid():
+        call = form.cleaned_data['call']
+        code = form.cleaned_data['code']  # 由表单 clean 生成的验证码
+
+        # 调用短信发送服务
+        response = common.sendsms(call=call, code=code)
+        if response.get('Code') == 'OK':
+            content = {'status': True,'message': '验证码已发送', 'content': {}}
+        else:
+            content = {'status': False, 'message': response["Message"], 'content': {}}
+    else:
+        content = {'status': False, 'message': form.errors.as_text(), 'content': {}}
+    return JsonResponse(content)
+
+def sendsms(request):
+    call = verify_util.is_call(request.GET.get('code'))
     if call:
         code = common.randint()
         data = ManeuGuest.objects.filter(phone=call).all().update(remark=code)
@@ -117,8 +140,8 @@ def get_index(request):
 
 
 def get_list(request):
-    text = verify.is_code(request.GET.get('text'))
-    token = verify.is_uuid(request.GET.get('token'))
+    text = verify_util.is_code(request.GET.get('text'))
+    token = verify_util.is_uuid(request.GET.get('token'))
 
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
@@ -143,9 +166,9 @@ def get_list(request):
 
 
 def get_detail(request):
-    code = verify.is_uuid(request.GET.get('code'))
-    text = verify.is_code(request.GET.get('text'))
-    token = verify.is_uuid(request.GET.get('token'))
+    code = verify_util.is_uuid(request.GET.get('code'))
+    text = verify_util.is_code(request.GET.get('text'))
+    token = verify_util.is_uuid(request.GET.get('token'))
 
     if text:
         if code:

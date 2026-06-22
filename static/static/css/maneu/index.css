@@ -1,0 +1,253 @@
+:root {
+    --deep-blue: #003153;
+    --gold: #FFC048;
+    --gold-soft: #FFD580;
+    --text-primary: #ffffff;
+    --text-secondary: #b0bec5;
+    --surface: rgba(255, 255, 255, 0.06);
+    --border-glow: rgba(255, 192, 72, 0.3);
+    --radius-card: 32px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: radial-gradient(circle at 50% 20%, #002a45 0%, #001a2e 60%, #000d1a 100%);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* 科技网格背景 */
+.tech-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(255, 192, 72, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 192, 72, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 浮动光点 */
+.glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(50px);
+    opacity: 0.07;
+    z-index: 0;
+    pointer-events: none;
+    animation: float 8s infinite alternate ease-in-out;
+}
+
+.glow-orb.orb-1 {
+    width: 250px;
+    height: 250px;
+    background: var(--gold);
+    top: -10%;
+    left: -10%;
+}
+
+.glow-orb.orb-2 {
+    width: 180px;
+    height: 180px;
+    background: #2ecc71;
+    bottom: -5%;
+    right: -5%;
+    animation-duration: 10s;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(30px, 20px);
+    }
+}
+
+/* 主内容区 */
+.main-content {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1.5rem;
+}
+
+.landing-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border-glow);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 192, 72, 0.08) inset;
+    text-align: center;
+    padding: 2.5rem 1.5rem 2rem;
+    transition: all 0.3s ease;
+    animation: cardEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardEntry {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.logo-container {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.logo-img {
+    width: 130px;
+    height: auto;
+    filter: drop-shadow(0 0 15px rgba(255, 192, 72, 0.4));
+    transition: transform 0.4s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.03);
+}
+
+.brand-name {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin: 0.5rem 0 0.2rem;
+    text-shadow: 0 0 10px rgba(255, 192, 72, 0.3);
+}
+
+.brand-sub {
+    font-size: 0.85rem;
+    font-weight: 300;
+    letter-spacing: 3px;
+    color: var(--gold-soft);
+    text-transform: uppercase;
+    margin-bottom: 1.8rem;
+}
+
+/* 信任徽章 —— 统一设计风格，可点击跳转登录 */
+.trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    padding: 0.4rem 1.5rem;
+    margin-bottom: 2rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.trust-badge:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 192, 72, 0.4);
+    color: #ffffff;
+}
+
+.trust-dot {
+    width: 8px;
+    height: 8px;
+    background: #2ecc71;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #2ecc71;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.qr-section {
+    margin-top: 0.5rem;
+}
+
+.qr-img {
+    width: 130px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.qr-img:active {
+    transform: scale(0.96);
+}
+
+.qr-hint {
+    color: var(--gold-soft);
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+.qr-sub-hint {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+/* 页脚 */
+.footer {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 1rem 1rem 1.5rem;
+    font-size: 0.7rem;
+    color: rgba(255, 192, 72, 0.5);
+}
+
+.footer a {
+    color: rgba(255, 192, 72, 0.6);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer a:hover {
+    color: var(--gold);
+}
+
+/* 移动端调整 */
+@media (max-width: 400px) {
+    .landing-card {
+        padding: 2rem 1.2rem 1.8rem;
+    }
+
+    .brand-name {
+        font-size: 1.8rem;
+    }
+}

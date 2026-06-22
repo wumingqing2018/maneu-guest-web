@@ -1,0 +1,81 @@
+/* ============================================================
+   可视化面板专用样式
+   依赖：基础样式表（base.css）中定义的全局 CSS 变量
+   说明：本文件只包含面板页面的独立样式，复用全局变量以保持视觉统一
+   ============================================================ */
+
+/* ---------- 1. 局部 CSS 变量 ---------- */
+:root {
+    --card-hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* ---------- 2. 页面头部 ---------- */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--brand-color);
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.page-title i {
+    font-size: 2rem;
+    color: var(--brand-accent);
+}
+
+/* ---------- 3. 图表卡片 ---------- */
+.chart-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-card .chart-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-card .chart-title i {
+    color: var(--brand-accent);
+    font-size: 1.2rem;
+}
+
+/* 图表容器尺寸 */
+.chart-container {
+    width: 100%;
+    height: 300px;
+}
+
+.chart-container-lg {
+    height: 350px;
+}
+
+/* 空数据提示 */
+.chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
