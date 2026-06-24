@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'maneu',
         'HOST': '127.0.0.1',
         'PORT': 3306,
-        'USER': 'maneu',
+        'USER': 'root',
         'PASSWORD': '214772680',
     }
 }
