@@ -62,7 +62,7 @@ def is_call(code):
         return None
 
 
-def is_code(code):
+def is_token_6(code):
     pattern = re.compile(r'^\d{6}$')
     if pattern.match(code) is not None:
         return str(code)
@@ -70,7 +70,7 @@ def is_code(code):
         return None
 
 
-def is_token(code):
+def is_token_32(code):
     pattern = re.compile(r'^[0-9a-fA-F]{32}$')
     if pattern.match(code) is not None:
         return str(code)
@@ -78,7 +78,7 @@ def is_token(code):
         return None
 
 
-def is_token2(code):
+def is_token_64(code):
     pattern = re.compile(r'^[0-9a-fA-F]{64}$')
     if pattern.match(code) is not None:
         return str(code)

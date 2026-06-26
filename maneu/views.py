@@ -3,8 +3,8 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from common import common
-from common import verify
+from common.util_common import *
+from common.util_verify import *
 from maneu.models import *
 from django.forms.models import model_to_dict
 import uuid
@@ -31,8 +31,8 @@ def verify_report(request):
 
 
 def login(request):
-    call = verify.is_call(request.GET.get('call'))
-    code = verify.is_code(request.GET.get('code'))
+    call =  is_call(request.GET.get('call'))
+    code =  is_token_6(request.GET.get('code'))
 
     if call and code:
         token = uuid.uuid4()
@@ -48,10 +48,10 @@ def login(request):
 
 
 def login_wx(request):
-    code = verify.is_token2(request.GET.get('code'))
+    code =  is_token_64(request.GET.get('code'))
     if code:
         data_token = ManeuAdmin.objects.filter().first()
-        phone = common.get_phone_number(code, data_token.content)
+        phone = get_phone_number(code, data_token.content)
         if phone['status']:
             token = uuid.uuid4()
             guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
@@ -60,9 +60,9 @@ def login_wx(request):
             else:
                 content = {'status': False, 'message': '请求失败', 'content': {}, 'token': ''}
         else:
-            data_token = common.get_miniprogram_token()['access_token']
+            data_token = get_miniprogram_token()['access_token']
             ManeuAdmin.objects.all().update(content=data_token)
-            phone = common.get_phone_number(code, data_token)
+            phone = get_phone_number(code, data_token)
             if phone['status']:
                 token = uuid.uuid4()
                 guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
@@ -79,12 +79,12 @@ def login_wx(request):
 
 
 def sendsms(request):
-    call = verify.is_call(request.GET.get('code'))
+    call =  is_call(request.GET.get('code'))
     if call:
-        code = common.randint()
+        code = randint()
         data = ManeuGuest.objects.filter(phone=call).all().update(remark=code)
         if data:
-            response = common.sendsms(call, code)
+            response = sendsms(call, code)
             if response['Code'] == 'OK':
                 content = {'status': True, 'message': '请求成功', 'content': {}, 'token': ''}
             else:
@@ -117,8 +117,8 @@ def get_index(request):
 
 
 def get_list(request):
-    text = verify.is_code(request.GET.get('text'))
-    token = verify.is_uuid(request.GET.get('token'))
+    text =  is_token_6(request.GET.get('text'))
+    token =  is_uuid(request.GET.get('token'))
 
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
@@ -143,9 +143,9 @@ def get_list(request):
 
 
 def get_detail(request):
-    code = verify.is_uuid(request.GET.get('code'))
-    text = verify.is_code(request.GET.get('text'))
-    token = verify.is_uuid(request.GET.get('token'))
+    code =  is_uuid(request.GET.get('code'))
+    text =  is_token_6(request.GET.get('text'))
+    token =  is_uuid(request.GET.get('token'))
 
     if text:
         if code:
@@ -189,15 +189,6 @@ def get_detail(request):
                         content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
                     except Exception as e:
                         content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-                elif request.GET.get('text') == "100007":
-                    try:
-                        ManeuVerify.objects.create(order_id=code, guest_id=guest.id, name=guest.name, call=guest.phone, time=common.current_time())
-                        data = ManeuVerify.objects.filter(order_id=code).order_by('-time').all().values('time')
-                        content = {'status': True, 'message': '请求成功', 'content': list(data), 'token': remark}
-                    except Exception as e:
-                        content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-                else:
-                    content = {'status': False, 'message': 'text is wrong' + str(request.GET.get('text')), 'content': {}, 'token': ''}
             else:
                 content = {'status': False, 'message': 'mark is wrong' + str(request.GET.get('token')), 'content': {}, 'token': ''}
         else:
