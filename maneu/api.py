@@ -116,7 +116,7 @@ def login_wx(request):
 def sendsms(request):
     call = verify.is_call(request.GET.get('code'))
     if call:
-        code = randint()
+        code = common.randint()
         data = ManeuGuest.objects.filter(phone=call).all().update(remark=code)
         if data:
             response = sendsms(call, code)
