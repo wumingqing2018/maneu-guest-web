@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.forms import widgets
-from common.common import get_random_code
+from common.common import randint
 from maneu.service import sendsms
 class SendSMSForm(forms.Form):
     call = forms.CharField(
@@ -20,7 +20,7 @@ class SendSMSForm(forms.Form):
         call = cleaned_data.get('call')
         try:
             # 生成6位随机验证码
-            code = get_random_code()
+            code = randint()
             if sendsms(call, code) != 0:
                 cleaned_data['code'] = code
                 return cleaned_data
