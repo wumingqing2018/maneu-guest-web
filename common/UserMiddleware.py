@@ -20,10 +20,10 @@ class UserMiddleware(MiddlewareMixin):
                 settings.JWT_CONFIG['SECRET_KEY'],
                 algorithms=[settings.JWT_CONFIG['ALGORITHM']]
             )
-            user_id = payload.get('user_id')
-            if not user_id:
+            user_phone = payload.get('user_phone')
+            if not user_phone:
                 return self._unauthorized_response('Token 中缺少用户标识')
-            request.jwt_user_id = user_id
+            request.jwt_user_phone = user_phone
         except jwt.ExpiredSignatureError:
             return self._unauthorized_response('Token 已过期')
         except jwt.InvalidTokenError:

@@ -1,136 +1,372 @@
-import json
-import uuid
+# -*- coding: utf-8 -*-
+"""
+API 接口模块 (重构版)
+所有视图均为 JSON API 端点，仅接受 POST 请求。
+响应统一格式：{"status": bool, "message": str, "content": any}
+数据访问全部通过 service 层，视图层不再直接操作 Model。
+"""
 
-from common.forms.sendSMSForm import SendSMSForm
-from common.forms.userLoginForm import UserLoginForm
-from django.forms.models import model_to_dict
+import json
+import logging
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from common.util_common import *
-from common.util_verify import *
-from common.utli_jwt import *
+from common import util_common, util_verify, utli_jwt
+from common.sendSMSForm import SendSMSForm
+from common.userLoginForm import UserLoginForm
+
 from maneu.service import *
-from maneu.models import *
+
+logger = logging.getLogger(__name__)
 
 
+# ========================= 内部辅助函数 =========================
+# 注意：以下函数仅做通用工具，不再包含任何 Model 查询逻辑。
+
+def _extract_param(request, key):
+    """从请求中提取参数（支持 form 和 json）"""
+    if request.content_type == 'application/json':
+        try:
+            return json.loads(request.body).get(key)
+        except Exception:
+            return None
+    return request.POST.get(key)
+
+
+def _json_error(message, status_code=400):
+    """统一错误响应格式"""
+    return JsonResponse({
+        'status': False,
+        'message': message,
+        'content': {}
+    }, status=status_code)
+
+
+def _get_valid_access_token():
+    """从缓存获取微信 access_token，若无效则自动刷新"""
+    token = cache.get('wechat_access_token')
+    if token:
+        return token
+    return _refresh_wechat_access_token()
+
+
+def _refresh_wechat_access_token():
+    """调用微信接口刷新 access_token，并写入缓存"""
+    try:
+        result = util_common.get_miniprogram_token()
+        new_token = result.get('access_token') if result else None
+        if new_token:
+            cache.set('wechat_access_token', new_token, timeout=7000)
+            return new_token
+        logger.error('刷新微信 token 失败: %s', result)
+        return None
+    except Exception as e:
+        logger.exception('刷新微信 token 异常: %s', e)
+        return None
+
+
+def _fetch_phone_with_retry(code, access_token):
+    """获取手机号，失败时自动刷新 token 重试一次"""
+    phone_info = util_common.get_miniprogram_phone(code, access_token)
+    if phone_info.get('status'):
+        return phone_info.get('message')
+
+    logger.warning('微信 token 失效，尝试刷新...')
+    new_token = _refresh_wechat_access_token()
+    if not new_token:
+        return None
+
+    phone_info = util_common.get_miniprogram_phone(code, new_token)
+    if phone_info.get('status'):
+        return phone_info.get('message')
+
+    logger.error('获取手机号最终失败: %s', phone_info.get('message'))
+    return None
+
+
+def _generate_jwt_for_user(user):
+    """为用户生成 access_token 和 refresh_token"""
+    return {
+        'access_token': utli_jwt.generate_access_token(user),
+        'refresh_token': utli_jwt.generate_refresh_token(user)
+    }
+
+
+def _send_verification_code(call, code):
+    """发送短信验证码，返回 (success, message)"""
+    try:
+        response = util_common.send_sms_code(call=call, code=code)
+        if response.get('status'):
+            return True, '验证码已发送'
+        return False, response.get('message', '发送失败')
+    except Exception as e:
+        logger.exception('发送短信异常: %s', e)
+        return False, '系统繁忙，请稍后重试'
+
+
+# ========================= API：验证接口 =========================
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def order_verify(request):
-    index_id = is_uuid(request.GET.get('index_id'))
-    if index_id:
+    """API：订单验证（根据 index_id 获取订单信息）"""
+    index_id = _extract_param(request, 'index_id')
+    if not util_verify.is_uuid(index_id):
+        return _json_error('请提交正确的参数')
 
-        try:
-            data = ManeuStore.objects.filter(id=index_id).first()
-            data_time = data.time
-            data_data = json.loads(data.content)
-            content = {'status': True, 'message': '请求成功', 'content': {'time': data_time, 'data': data_data}}
-        except Exception as e:
-            content = {'status': 'false', 'message': str(e), 'content': {}, 'token': ''}
+    data = get_order_by_id(index_id)
+    if not data:
+        return _json_error('记录不存在')
+
+    content = {
+        'time': data.get('time'),
+        'data': json.loads(data.get('content', '{}'))
+    }
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
-    else:
-        content = {'status': 'false', 'message': '没有找到你的订单', 'content': {}, 'token': ''}
-    return JsonResponse(content)
-
-
+@csrf_exempt
+@require_http_methods(["POST"])
 def store_verify(request):
-    index_id = is_uuid(request.GET.get('index_id'))
-    if index_id:
+    """API：门店验证"""
+    index_id = _extract_param(request, 'index_id')
+    if not util_verify.is_uuid(index_id):
+        return _json_error('请提交正确的参数')
 
-        try:
-            data = ManeuStore.objects.filter(id=index_id).first()
-            data_time = data.time
-            data_data = json.loads(data.content)
-            content = {'status': True, 'message': '请求成功', 'content': {'time': data_time, 'data': data_data}}
-        except Exception as e:
-            content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
+    data = get_store_by_id(index_id)
+    if not data:
+        return _json_error('记录不存在')
+
+    content = {
+        'time': data.get('time'),
+        'data': json.loads(data.get('content', '{}'))
+    }
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
-    else:
-        content = {'status': False, 'message': '请提交正确的参数', 'content': {}, 'token': ''}
-    return JsonResponse(content)
-
-
+@csrf_exempt
+@require_http_methods(["POST"])
 def report_verify(request):
-    index_id = is_uuid(request.GET.get('index_id'))
-    if index_id:
+    """API：报告验证"""
+    index_id = _extract_param(request, 'index_id')
+    if not util_verify.is_uuid(index_id):
+        return _json_error('请提交正确的参数')
 
-        try:
-            data = ManeuReport.objects.filter(id=index_id).first()
-            content = {'status': True, 'message': '请求成功', 'content': {'time': data.time, 'plan': data.plan, 'os_va': data.os_va, 'os_cyl': data.os_cyl, 'os_sph': data.os_sph, 'os_ax': data.os_ax, 'od_va': data.od_va, 'od_cyl': data.od_cyl, 'od_sph': data.od_sph, 'od_ax': data.od_ax}}
-        except Exception as e:
-            content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
+    data = get_report_by_id(index_id)
+    if not data:
+        return _json_error('记录不存在')
 
-
-    else:
-        content = {'status': False, 'message': '请提交正确的参数', 'content': {}, 'token': ''}
-    return JsonResponse(content)
-
-
-def login(request):
-    call = is_call(request.GET.get('call'))
-    code = is_token_6(request.GET.get('code'))
-
-    if call and code:
-        token = uuid.uuid4()
-        guest = ManeuGuest.objects.filter(phone=call).all().update(remark=token)
-        if guest:
-            content = {'status': True, 'message': '请求成功', 'content': {}, 'token': token}
-        else:
-            content = {'status': False, 'message': '请求失败', 'content': {}, 'token': ''}
-    else:
-        content = {'status': False, 'message': '登录失败：请提交正确的手机号和验证码', 'content': {}, 'token': ''}
-
-    return JsonResponse(content)
+    fields = ['time', 'plan', 'os_va', 'os_cyl', 'os_sph', 'os_ax',
+              'od_va', 'od_cyl', 'od_sph', 'od_ax']
+    content = {f: data.get(f) for f in fields}
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
-def login_wx(request):
-    code = is_token_64(request.GET.get('code'))
-    if code:
-        data_token = ManeuAdmin.objects.filter().first()
-        phone = get_phone_number(code, data_token.content)
-        if phone['status']:
-            token = uuid.uuid4()
-            guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
-            if guest != 0:
-                content = {'status': True, 'message': '请求成功', 'content': {}, 'token': token}
-            else:
-                content = {'status': False, 'message': '请求失败', 'content': {}, 'token': ''}
-        else:
-            data_token = get_miniprogram_token()['access_token']
-            ManeuAdmin.objects.all().update(content=data_token)
-            phone = get_phone_number(code, data_token)
-            if phone['status']:
-                token = uuid.uuid4()
-                guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
-                if guest != 0:
-                    content = {'status': True, 'message': '请求成功', 'content': {}, 'token': token}
-                else:
-                    content = {'status': False, 'message': '请求失败', 'content': {}, 'token': ''}
-            else:
-                content = {'status': False, 'message': '请求失败：请联系管理员', 'content': {}, 'token': ''}
-    else:
-        content = {'status': False, 'message': '登录失败：请提交正确的微信号', 'content': {}, 'token': ''}
+# ========================= API：列表接口 =========================
 
-    return JsonResponse(content)
+@csrf_exempt
+@require_http_methods(["POST"])
+def order_list(request):
+    """API：当前用户的订单列表（status=3）"""
+    phone = utli_jwt.get_admin_phone_from_request(request)
+    data = get_orders_by_phone(phone, status=3)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def report_list(request):
+    """API：当前用户的报告列表（status=2）"""
+    phone = utli_jwt.get_admin_phone_from_request(request)
+    data = get_reports_by_phone(phone, status=2)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def store_list(request):
+    """API：当前用户的门店列表"""
+    phone = utli_jwt.get_admin_phone_from_request(request)
+    data = get_stores_by_phone(phone)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def repair_list(request):
+    """API：当前用户的维修记录列表"""
+    phone = utli_jwt.get_admin_phone_from_request(request)
+    data = get_repairs_by_phone(phone)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+
+# ========================= API：详情接口 =========================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def order_detail(request):
+    """API：订单详情"""
+    record_id = _extract_param(request, 'code')
+    if not util_verify.is_uuid(record_id):
+        return _json_error('记录ID无效')
+    data = get_order_by_id(record_id)
+    if not data:
+        return _json_error('记录不存在', status_code=404)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def store_detail(request):
+    """API：门店详情"""
+    record_id = _extract_param(request, 'code')
+    if not util_verify.is_uuid(record_id):
+        return _json_error('记录ID无效')
+    data = get_store_by_id(record_id)
+    if not data:
+        return _json_error('记录不存在', status_code=404)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def report_detail(request):
+    """API：报告详情"""
+    record_id = _extract_param(request, 'code')
+    if not util_verify.is_uuid(record_id):
+        return _json_error('记录ID无效')
+    data = get_report_by_id(record_id)
+    if not data:
+        return _json_error('记录不存在', status_code=404)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def repair_detail(request):
+    """API：维修记录详情"""
+    record_id = _extract_param(request, 'code')
+    if not util_verify.is_uuid(record_id):
+        return _json_error('记录ID无效')
+    data = get_repair_by_id(record_id)
+    if not data:
+        return _json_error('记录不存在', status_code=404)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def guest_detail(request):
+    """API：当前登录用户信息"""
+    phone = utli_jwt.get_admin_phone_from_request(request)
+    user = get_guest_by_phone(phone)    # 返回 ManeuGuest 实例或 None
+    if not user:
+        return _json_error('用户不存在', status_code=404)
+
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': user
+    })
+
+
+# ========================= API：认证接口 =========================
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def sendsms(request):
-    call = is_call(request.GET.get('code'))
-    if call:
-        code = randint()
-        data = ManeuGuest.objects.filter(phone=call).all().update(remark=code)
-        if data:
-            response = sendsms(call, code)
-            if response['Code'] == 'OK':
-                content = {'status': True, 'message': '请求成功', 'content': {}, 'token': ''}
-            else:
-                content = {'status': False, 'message': '短信发送失败，今日次数用完了', 'content': {}, 'token': ''}
-        else:
-            content = {'status': False, 'message': '请求失败', 'content': {}, 'token': ''}
-    else:
-        content = {'status': False, 'message': '登录失败：请提交正确的手机号', 'content': {}, 'token': ''}
-    return JsonResponse(content)
+    """API：发送短信验证码"""
+    form = SendSMSForm(request.POST)
+    if not form.is_valid():
+        return _json_error(form.errors.as_text())
+
+    call = form.cleaned_data['call']
+    code = form.cleaned_data['code']
+    ok, msg = _send_verification_code(call, code)
+    if ok:
+        return JsonResponse({'status': True, 'message': msg, 'content': {}})
+    return _json_error(msg)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def access_token_sms(request):
+    """API：短信验证码登录"""
+    form = UserLoginForm(request.POST)
+    if not form.is_valid():
+        return _json_error(form.errors.as_text())
+
+    user = form.cleaned_data['user']    # 此时 user 应为 ManeuGuest 实例
+    tokens = _generate_jwt_for_user(user)
+    return JsonResponse({
+        'status': True,
+        'message': '登录成功',
+        'content': tokens
+    })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def access_token_weixin(request):
+    """API：微信小程序登录"""
+    try:
+        code = json.loads(request.body).get('code')
+    except Exception:
+        return _json_error('无效的JSON格式')
+
+    if not code or not util_verify.is_token_64(code):
+        return _json_error('登录失败：请提交正确的微信号')
+
+    access_token = _get_valid_access_token()
+    if not access_token:
+        return _json_error('系统错误，无法获取微信授权')
+
+    phone = _fetch_phone_with_retry(code, access_token)
+    if phone is None:
+        return _json_error('获取手机号失败，请联系管理员')
+
+    # 使用 service 层获取用户
+    user = get_guest_by_phone(phone)
+    if not user:
+        return _json_error('该手机号未注册')
+
+    tokens = _generate_jwt_for_user(user)
+    return JsonResponse({
+        'status': True,
+        'message': '登录成功',
+        'content': tokens
+    })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def refresh_token(request):
+    """API：刷新 access_token"""
+    refresh_token = request.POST.get('refresh_token')
+    if not refresh_token:
+        return _json_error('缺少 refresh_token', status_code=401)
+
+    payload = utli_jwt.verify_token(refresh_token, expected_type='refresh')
+    if not payload:
+        return _json_error('refresh_token 无效或已过期', status_code=401)
+
+    user_phone = payload.get('user_phone')
+    if not user_phone:
+        return _json_error('请提交手机号', status_code=401)
+
+    user = get_guest_by_phone(user_phone)
+    if not user:
+        return _json_error('用户不存在', status_code=401)
+
+    new_access_token = utli_jwt.generate_access_token(user)
+    return JsonResponse({
+        'status': True,
+        'message': '刷新成功',
+        'content': {'access_token': new_access_token}
+    })
+
 
 
 def get_index(request):
@@ -150,329 +386,5 @@ def get_index(request):
         "index": 'https://maneu.online/static/img/1njj.jpg',
         "data": 'https://maneu.online/static/img/2njj.jpg',
     }]
-    return JsonResponse({'status': True, 'message': '', 'content': data, 'token': ''})
+    return JsonResponse({'status': True, 'message': '', 'content': data})
 
-
-
-
-# ---------- 列表类接口（返回多条记录） ----------
-
-def order_list(request):
-    """
-    获取当前用户的订单列表（仅限状态为 3 的订单）
-    请求方式：GET
-    参数：
-        token (str): 用户身份凭证（UUID）
-    返回：
-        {
-            status: bool,       # 请求是否成功
-            message: str,       # 提示信息
-            content: list,      # 订单数据列表（每个元素为字典）
-            token: str          # 新的 token（用于下一次请求）
-        }
-    流程：
-        1. 验证 token 是否有效（UUID 格式）
-        2. 通过 token 查询 ManeuGuest 表获取用户
-        3. 若用户存在，则立即生成新 token 并更新到该用户的 remark 字段（实现 token 换发）
-        4. 查询 ManeuOrder 表，按手机号筛选状态为 3 的订单，按时间倒序
-        5. 返回数据和新 token
-        6. 若用户不存在或 token 无效，返回错误并提示重新登录
-    """
-    token = is_uuid(request.GET.get('token'))
-    if token:
-        # 生成新 token
-        remark = str(uuid.uuid4())
-        guest = ManeuGuest.objects.filter(remark=token).first()
-        # 尝试更新用户的 remark 为新的 token，若返回值不为 0 表示更新成功（用户存在）
-        if ManeuGuest.objects.filter(remark=token).update(remark=remark) != 0:
-            # 查询订单：phone 匹配、status=3（已完成的订单），按 time 倒序
-            data = ManeuOrder.objects.filter(phone=guest.phone, status=3) \
-                                     .order_by('-time') \
-                                     .all() \
-                                     .values('id', 'name', 'time', 'phone', 'remark')
-            return JsonResponse({
-                'status': True,
-                'message': '',
-                'content': list(data),
-                'token': remark
-            })
-        else:
-            # 更新失败（说明 token 对应的用户不存在）
-            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-    else:
-        # token 格式无效
-        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-
-    return JsonResponse(content)
-
-
-def report_list(request):
-    """
-    获取当前用户的报告列表（仅限状态为 2 的报告）
-    参数与返回格式同 order_list，区别在于查询 ManeuReport 表
-    注意：此处先获取 guest 对象，再判断是否存在，与 order_list 略有不同，但逻辑等价
-    """
-    token = is_uuid(request.GET.get('token'))
-    guest = ManeuGuest.objects.filter(remark=token).first()
-    if guest:
-        remark = str(uuid.uuid4())
-        # 更新 token
-        guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
-        # 查询报告：手机号匹配且 status=2
-        data = ManeuReport.objects.filter(phone=guest.phone, status=2) \
-                                  .order_by('-time') \
-                                  .all() \
-                                  .values('id', 'name', 'time', 'phone', 'remark')
-        return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
-    else:
-        content = {'status': False, 'message': '请重新登录。', 'content': {}, 'token': ''}
-    return JsonResponse(content)
-
-
-def store_list(request):
-    """
-    获取当前用户的门店列表（无状态过滤，返回所有门店记录）
-    参数与返回格式同 order_list，查询 ManeuStore 表
-    """
-    token = is_uuid(request.GET.get('token'))
-    guest = ManeuGuest.objects.filter(remark=token).first()
-    if guest:
-        remark = str(uuid.uuid4())
-        guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
-        data = ManeuStore.objects.filter(phone=guest.phone) \
-                                 .order_by('-time') \
-                                 .all() \
-                                 .values('id', 'name', 'time', 'phone', 'remark')
-        return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
-    else:
-        content = {'status': False, 'message': '请重新登录。', 'content': {}, 'token': ''}
-    return JsonResponse(content)
-
-
-def repair_list(request):
-    """
-    获取当前用户的维修记录列表（无状态过滤）
-    参数与返回格式同 order_list，查询 ManeuRepair 表
-    """
-    token = is_uuid(request.GET.get('token'))
-    guest = ManeuGuest.objects.filter(remark=token).first()
-    if guest:
-        remark = str(uuid.uuid4())
-        guest_update = ManeuGuest.objects.filter(remark=token).update(remark=remark)
-        data = ManeuRepair.objects.filter(phone=guest.phone) \
-                                  .order_by('-time') \
-                                  .all() \
-                                  .values('id', 'name', 'time', 'phone', 'remark')
-        return JsonResponse({'status': True, 'message': '', 'content': list(data), 'token': remark})
-    else:
-        content = {'status': False, 'message': '请重新登录。', 'content': {}, 'token': ''}
-    return JsonResponse(content)
-
-
-# ---------- 详情类接口（返回单条记录） ----------
-
-def order_detail(request):
-    """
-    获取指定订单的详细信息
-    请求方式：GET
-    参数：
-        code (str): 订单 ID（UUID 格式）
-        token (str): 用户凭证（UUID）
-    返回：
-        status: bool, message: str, content: dict（订单详情）, token: str
-    流程：
-        1. 验证 code 和 token 是否为合法 UUID
-        2. 使用 token 更新用户 remark（换发新 token），若更新失败则用户无效
-        3. 根据 code 查询订单，若存在则返回模型数据，否则捕获异常返回错误信息
-    """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
-
-    if code or mark:  # 注意：这里是 or，只要有一个有效即可（可能设计初衷允许 code 为空？但实际需要 code）
-        remark = uuid.uuid4()  # 注意：此处生成的是 UUID 对象，后面直接用于字符串？实际上应转为 str
-        # 更新用户的 token，若返回 0 表示未找到该用户
-        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
-        if guest != 0:
-            try:
-                data = ManeuOrder.objects.filter(id=code).first()
-                # 使用 model_to_dict 将模型实例转为字典
-                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-            except Exception as e:
-                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-        else:
-            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-    else:
-        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-
-    return JsonResponse(content)
-
-
-def store_detail(request):
-    """
-    获取指定门店的详细信息
-    参数及逻辑同 order_detail，查询 ManeuStore 表
-    """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
-
-    if code or mark:
-        remark = uuid.uuid4()
-        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
-        if guest != 0:
-            try:
-                data = ManeuStore.objects.filter(id=code).first()
-                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-            except Exception as e:
-                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-        else:
-            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-    else:
-        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-
-    return JsonResponse(content)
-
-
-def guest_detail(request):
-    """
-    获取当前用户自己的详细信息
-    参数：code 为用户 ID，token 为凭证
-    逻辑同 order_detail，但查询 ManeuGuest 表
-    """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
-
-    if code or mark:
-        remark = uuid.uuid4()
-        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
-        if guest != 0:
-            try:
-                data = ManeuGuest.objects.filter(id=code).first()
-                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-            except Exception as e:
-                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-        else:
-            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-    else:
-        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-
-    return JsonResponse(content)
-
-
-def report_detail(request):
-    """
-    获取指定报告的详细信息
-    参数及逻辑同 order_detail，查询 ManeuReport 表
-    """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
-
-    if code or mark:
-        remark = uuid.uuid4()
-        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
-        if guest != 0:
-            try:
-                data = ManeuReport.objects.filter(id=code).first()
-                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-            except Exception as e:
-                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-        else:
-            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-    else:
-        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-
-    return JsonResponse(content)
-
-
-def repair_detail(request):
-    """
-    获取指定维修记录的详细信息
-    参数及逻辑同 order_detail，查询 ManeuRepair 表
-    """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
-
-    if code or mark:
-        remark = uuid.uuid4()
-        guest = ManeuGuest.objects.filter(remark=mark).update(remark=remark)
-        if guest != 0:
-            try:
-                data = ManeuRepair.objects.filter(id=code).first()
-                content = {'status': True, 'message': '请求成功', 'content': model_to_dict(data), 'token': remark}
-            except Exception as e:
-                content = {'status': False, 'message': str(e), 'content': {}, 'token': remark}
-        else:
-            content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-    else:
-        content = {'status': False, 'message': '请重新登录', 'content': {}, 'token': ''}
-
-    return JsonResponse(content)
-
-
-@csrf_exempt  # 因为使用 JWT，无需 CSRF
-@require_http_methods(["POST"])  # 只允许 POST
-def sendsms(request):
-    form = SendSMSForm(request.POST)
-    if form.is_valid():
-        call = form.cleaned_data['call']
-        code = form.cleaned_data['code']  # 由表单 clean 生成的验证码
-
-        # 调用短信发送服务
-        response = sendsms(call=call, code=code)
-        if response.get('Code') == 'OK':
-            content = {'status': True,'message': '验证码已发送', 'content': {}}
-        else:
-            content = {'status': False, 'message': response["Message"], 'content': {}}
-    else:
-        content = {'status': False, 'message': form.errors.as_text(), 'content': {}}
-    return JsonResponse(content)
-
-
-
-@csrf_exempt  # 因为使用 JWT，无需 CSRF
-@require_http_methods(["POST"])  # 只允许 POST
-def access_token_sms(request):
-    form = UserLoginForm(request.POST)
-
-    if form.is_valid():
-        # 从表单获取已验证的用户对象（假设你在 form.clean() 中设置了 'user'）
-        user = form.cleaned_data['user']
-        a_token = generate_access_token(user)
-        r_token = generate_refresh_token(user)
-        content = {'status': True, 'message': '登录成功', 'content': {'access_token': a_token,'refresh_token': r_token}}
-    else:
-        content = {'status': False, 'message': form.errors.as_text(), 'content': {}}
-
-    return JsonResponse(content)
-
-
-
-@csrf_exempt  # 因为使用 JWT，无需 CSRF
-@require_http_methods(["POST"])  # 只允许 POST
-def refresh_token(request):
-    """刷新 access token（接收 refresh_token，返回新 access_token）"""
-    token = request.POST.get('refresh_token')
-    if not token:
-        return JsonResponse({'status': False, 'message': '缺少 refresh_token'}, status=401)
-
-    payload = verify_token(token, expected_type='refresh')
-    if not payload:
-        return JsonResponse({'status': False, 'message': 'refresh_token 无效或已过期'}, status=401)
-
-    user = admin_find_id(payload['user_id'])
-    if not payload:
-        return JsonResponse({'status': False, 'message': '用户不存在'}, status=401)
-
-    new_access_token = generate_access_token(user)
-    # 如需滚动刷新，可同时生成新的 refresh_token 返回
-    # new_refresh_token = generate_refresh_token(user)
-    return JsonResponse({
-        'status': True,
-        'access_token': new_access_token,
-        # 'refresh_token': new_refresh_token,   # 若启用滚动刷新取消注释
-    })
-
-
-def remove_token(request):
-    """前端清除 token 后跳转登录页，这里只做重定向"""
-    content = {'status': True, 'message': 'OK', 'content': {}}
-    return JsonResponse(content)
