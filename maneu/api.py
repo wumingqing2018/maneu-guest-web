@@ -8,15 +8,14 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from common.util_common import *
-from common.util_verify import *
+from common import common,verify
 from common.utli_jwt import *
 from maneu.service import *
 from maneu.models import *
 
 
 def order_verify(request):
-    index_id = is_uuid(request.GET.get('index_id'))
+    index_id = verify.is_uuid(request.GET.get('index_id'))
     if index_id:
 
         try:
@@ -34,7 +33,7 @@ def order_verify(request):
 
 
 def store_verify(request):
-    index_id = is_uuid(request.GET.get('index_id'))
+    index_id = verify.is_uuid(request.GET.get('index_id'))
     if index_id:
 
         try:
@@ -45,14 +44,13 @@ def store_verify(request):
         except Exception as e:
             content = {'status': False, 'message': str(e), 'content': {}, 'token': ''}
 
-
     else:
         content = {'status': False, 'message': '请提交正确的参数', 'content': {}, 'token': ''}
     return JsonResponse(content)
 
 
 def report_verify(request):
-    index_id = is_uuid(request.GET.get('index_id'))
+    index_id = verify.is_uuid(request.GET.get('index_id'))
     if index_id:
 
         try:
@@ -68,8 +66,8 @@ def report_verify(request):
 
 
 def login(request):
-    call = is_call(request.GET.get('call'))
-    code = is_token_6(request.GET.get('code'))
+    call = verify.is_call(request.GET.get('call'))
+    code = verify.is_token_6(request.GET.get('code'))
 
     if call and code:
         token = uuid.uuid4()
@@ -85,10 +83,10 @@ def login(request):
 
 
 def login_wx(request):
-    code = is_token_64(request.GET.get('code'))
+    code = verify.is_token_64(request.GET.get('code'))
     if code:
         data_token = ManeuAdmin.objects.filter().first()
-        phone = get_phone_number(code, data_token.content)
+        phone = common.get_phone_number(code, data_token.content)
         if phone['status']:
             token = uuid.uuid4()
             guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
@@ -97,9 +95,9 @@ def login_wx(request):
             else:
                 content = {'status': False, 'message': '请求失败', 'content': {}, 'token': ''}
         else:
-            data_token = get_miniprogram_token()['access_token']
+            data_token = common.get_miniprogram_token()['access_token']
             ManeuAdmin.objects.all().update(content=data_token)
-            phone = get_phone_number(code, data_token)
+            phone = common.get_phone_number(code, data_token)
             if phone['status']:
                 token = uuid.uuid4()
                 guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
@@ -116,7 +114,7 @@ def login_wx(request):
 
 
 def sendsms(request):
-    call = is_call(request.GET.get('code'))
+    call = verify.is_call(request.GET.get('code'))
     if call:
         code = randint()
         data = ManeuGuest.objects.filter(phone=call).all().update(remark=code)
@@ -178,7 +176,7 @@ def order_list(request):
         5. 返回数据和新 token
         6. 若用户不存在或 token 无效，返回错误并提示重新登录
     """
-    token = is_uuid(request.GET.get('token'))
+    token = verify.is_uuid(request.GET.get('token'))
     if token:
         # 生成新 token
         remark = str(uuid.uuid4())
@@ -212,7 +210,7 @@ def report_list(request):
     参数与返回格式同 order_list，区别在于查询 ManeuReport 表
     注意：此处先获取 guest 对象，再判断是否存在，与 order_list 略有不同，但逻辑等价
     """
-    token = is_uuid(request.GET.get('token'))
+    token = verify.is_uuid(request.GET.get('token'))
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
         remark = str(uuid.uuid4())
@@ -234,7 +232,7 @@ def store_list(request):
     获取当前用户的门店列表（无状态过滤，返回所有门店记录）
     参数与返回格式同 order_list，查询 ManeuStore 表
     """
-    token = is_uuid(request.GET.get('token'))
+    token = verify.is_uuid(request.GET.get('token'))
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
         remark = str(uuid.uuid4())
@@ -254,7 +252,7 @@ def repair_list(request):
     获取当前用户的维修记录列表（无状态过滤）
     参数与返回格式同 order_list，查询 ManeuRepair 表
     """
-    token = is_uuid(request.GET.get('token'))
+    token = verify.is_uuid(request.GET.get('token'))
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
         remark = str(uuid.uuid4())
@@ -285,8 +283,8 @@ def order_detail(request):
         2. 使用 token 更新用户 remark（换发新 token），若更新失败则用户无效
         3. 根据 code 查询订单，若存在则返回模型数据，否则捕获异常返回错误信息
     """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
 
     if code or mark:  # 注意：这里是 or，只要有一个有效即可（可能设计初衷允许 code 为空？但实际需要 code）
         remark = uuid.uuid4()  # 注意：此处生成的是 UUID 对象，后面直接用于字符串？实际上应转为 str
@@ -312,8 +310,8 @@ def store_detail(request):
     获取指定门店的详细信息
     参数及逻辑同 order_detail，查询 ManeuStore 表
     """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
 
     if code or mark:
         remark = uuid.uuid4()
@@ -338,8 +336,8 @@ def guest_detail(request):
     参数：code 为用户 ID，token 为凭证
     逻辑同 order_detail，但查询 ManeuGuest 表
     """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
 
     if code or mark:
         remark = uuid.uuid4()
@@ -363,8 +361,8 @@ def report_detail(request):
     获取指定报告的详细信息
     参数及逻辑同 order_detail，查询 ManeuReport 表
     """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
 
     if code or mark:
         remark = uuid.uuid4()
@@ -388,8 +386,8 @@ def repair_detail(request):
     获取指定维修记录的详细信息
     参数及逻辑同 order_detail，查询 ManeuRepair 表
     """
-    code = is_uuid(request.GET.get('code'))
-    mark = is_uuid(request.GET.get('token'))
+    code = verify.is_uuid(request.GET.get('code'))
+    mark = verify.is_uuid(request.GET.get('token'))
 
     if code or mark:
         remark = uuid.uuid4()

@@ -3,8 +3,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from common.util_common import *
-from common.util_verify import *
+from common import common,verify
 from maneu.models import *
 from django.forms.models import model_to_dict
 import uuid
@@ -31,8 +30,8 @@ def verify_report(request):
 
 
 def login(request):
-    call =  is_call(request.GET.get('call'))
-    code =  is_token_6(request.GET.get('code'))
+    call =  verify.is_call(request.GET.get('call'))
+    code =  verify.is_token_6(request.GET.get('code'))
 
     if call and code:
         token = uuid.uuid4()
@@ -48,10 +47,10 @@ def login(request):
 
 
 def login_wx(request):
-    code =  is_token_64(request.GET.get('code'))
+    code =  verify.is_token_64(request.GET.get('code'))
     if code:
         data_token = ManeuAdmin.objects.filter().first()
-        phone = get_phone_number(code, data_token.content)
+        phone = common.get_phone_number(code, data_token.content)
         if phone['status']:
             token = uuid.uuid4()
             guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
@@ -60,9 +59,9 @@ def login_wx(request):
             else:
                 content = {'status': False, 'message': '请求失败', 'content': {}, 'token': ''}
         else:
-            data_token = get_miniprogram_token()['access_token']
+            data_token = common.get_miniprogram_token()['access_token']
             ManeuAdmin.objects.all().update(content=data_token)
-            phone = get_phone_number(code, data_token)
+            phone = common.get_phone_number(code, data_token)
             if phone['status']:
                 token = uuid.uuid4()
                 guest = ManeuGuest.objects.filter(phone=phone['message']).update(remark=token)
@@ -79,12 +78,12 @@ def login_wx(request):
 
 
 def sendsms(request):
-    call =  is_call(request.GET.get('code'))
+    call =  verify.is_call(request.GET.get('code'))
     if call:
         code = randint()
         data = ManeuGuest.objects.filter(phone=call).all().update(remark=code)
         if data:
-            response = sendsms(call, code)
+            response = common.sendsms(call, code)
             if response['Code'] == 'OK':
                 content = {'status': True, 'message': '请求成功', 'content': {}, 'token': ''}
             else:
@@ -117,8 +116,8 @@ def get_index(request):
 
 
 def get_list(request):
-    text =  is_token_6(request.GET.get('text'))
-    token =  is_uuid(request.GET.get('token'))
+    text =  verify.is_token_6(request.GET.get('text'))
+    token =  verify.is_uuid(request.GET.get('token'))
 
     guest = ManeuGuest.objects.filter(remark=token).first()
     if guest:
@@ -143,9 +142,9 @@ def get_list(request):
 
 
 def get_detail(request):
-    code =  is_uuid(request.GET.get('code'))
-    text =  is_token_6(request.GET.get('text'))
-    token =  is_uuid(request.GET.get('token'))
+    code =  verify.is_uuid(request.GET.get('code'))
+    text =  verify.is_token_6(request.GET.get('text'))
+    token =  verify.is_uuid(request.GET.get('token'))
 
     if text:
         if code:
