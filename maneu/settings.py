@@ -126,22 +126,35 @@ STATIC_ROOT = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 """
-session config
+Static files config
+https:#docs.djangoproject.com/en/3.0/howto/static-files/
 """
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-# Session的cookie保存在浏览器上时的key，即：session_id＝随机字符串（默认）
-SESSION_COOKIE_NAME = "sessionid"
-# Session的cookie保存的路径（默认）
-SESSION_COOKIE_PATH = "/"
-# Session的cookie保存的域名（默认）
-SESSION_COOKIE_DOMAIN = None
-# 是否Https传输cookie（默认）
-SESSION_COOKIE_SECURE = True
-# 是否Session的cookie只支持http传输（默认）
-SESSION_COOKIE_HTTPONLY = True
-# Session的cookie失效日期（2周）（默认）
-SESSION_COOKIE_AGE = 3600
-# 是否关闭浏览器使得Session过期（默认）
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-# 是否每次请求都保存Session，默认修改之后才保存（默认）
-SESSION_SAVE_EVERY_REQUEST = True
+STATIC_URL = '/static/'
+STATIC_ROOT = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+# settings.py 末尾追加
+JWT_CONFIG = {
+    'SECRET_KEY': SECRET_KEY,  # 直接用 Django 的 SECRET_KEY
+    'ALGORITHM': 'HS256',
+    'ACCESS_TOKEN_LIFETIME': 300,  # 1 小时
+    'REFRESH_TOKEN_LIFETIME': 604800,  # 7 天
+}
+#
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/0",  # 或 redis://:password@127.0.0.1:6379/0
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#             # "PASSWORD": "your_redis_password",           # Redis密码
+#             "SOCKET_TIMEOUT": 5,                         # 读写超时
+#             "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",  # 数据压缩
+#             "CONNECTION_POOL_KWARGS": {
+#                 "max_connections": 100,                  # 连接池大小
+#                 "health_check_interval": 30              # 连接健康检查
+#             }
+#         },
+#         "KEY_PREFIX": "maneu"                            # Key前缀，防冲突
+#     }
+# }
