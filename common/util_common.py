@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 """
+common/util_common.py
 通用工具函数模块
 提供微信接口、时间、IP、随机数、短信发送等功能。
 """
@@ -138,15 +138,14 @@ def getip(request):
 
 # ======================== 随机数生成 ========================
 
-def randint():
+def get_random_code():
     """
     生成一个 6 位随机整数，用于短信验证码。
 
     :return: 100000 到 999999 之间的随机整数
     :rtype: int
     :example:
-        >>> randint()
-        482716
+        482711
     """
     return random.randint(100000, 999999)
 
