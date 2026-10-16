@@ -24,10 +24,12 @@ urlpatterns = [
     path('verify_store/',   views.verify_store,   name='verify_store'),
     path('verify_report/',  views.verify_report,  name='verify_report'),
 
+
     # ==================== 一、扫码验证类（免登录） ====================
     path('order_verify/',   apis.order_verify,    name='order_verify'),
     path('store_verify/',   apis.store_verify,    name='store_verify'),
     path('report_verify/',  apis.report_verify,   name='report_verify'),
+
 
     # ==================== 二、认证类 API（免登录） ====================
     # ⚠️ 这些是登录/刷新接口，不能带 /auth/
@@ -49,7 +51,5 @@ urlpatterns = [
     path('apis/auth/store_detail/',     apis.store_detail,          name='store_detail'),
     path('apis/auth/report_detail/',    apis.report_detail,         name='report_detail'),
     path('apis/auth/repair_detail/',    apis.repair_detail,         name='repair_detail'),
-
-    # 用户信息
     path('apis/auth/guest_detail/',     apis.guest_detail,          name='guest_detail'),
 ]
