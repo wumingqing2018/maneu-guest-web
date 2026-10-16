@@ -15,25 +15,14 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from common import util_common, util_verify, util_jwt
-from common.sendSMSForm import SendSMSForm
-from common.userLoginForm import UserLoginForm
-
+from common import util_verify, util_jwt
 from maneu.service import (
     # 查询
     get_order_by_id,
     get_store_by_id,
     get_report_by_id,
-    get_repair_by_id,
-    get_orders_by_phone,
-    get_reports_by_phone,
-    get_stores_by_phone,
-    get_repairs_by_phone,
-    get_guest_by_phone,
     get_guest_model_by_phone,
     # 验证码
-    generate_sms_code,
-    save_sms_code,
 )
 
 logger = logging.getLogger(__name__)
@@ -70,9 +59,11 @@ def _get_valid_access_token():
 
 
 def _refresh_wechat_access_token():
+    from common import util_wechat
+
     """调用微信接口刷新 access_token，并写入缓存"""
     try:
-        result = util_common.get_miniprogram_token()
+        result = util_wechat.get_miniprogram_token()
         new_token = result.get('access_token') if result else None
         if new_token:
             cache.set('wechat_access_token', new_token, timeout=7000)
@@ -85,8 +76,10 @@ def _refresh_wechat_access_token():
 
 
 def _fetch_phone_with_retry(code, access_token):
+    from common import util_wechat
+
     """获取手机号，失败时自动刷新 token 重试一次"""
-    phone_info = util_common.get_miniprogram_phone(code, access_token)
+    phone_info = util_wechat.get_miniprogram_phone(code, access_token)
     if phone_info.get('status'):
         return phone_info.get('message')
 
@@ -95,7 +88,7 @@ def _fetch_phone_with_retry(code, access_token):
     if not new_token:
         return None
 
-    phone_info = util_common.get_miniprogram_phone(code, new_token)
+    phone_info = util_wechat.get_miniprogram_phone(code, new_token)
     if phone_info.get('status'):
         return phone_info.get('message')
 
@@ -112,9 +105,11 @@ def _generate_jwt_for_user(user):
 
 
 def _send_verification_code(call, code):
+    from common import util_sms
+
     """发送短信验证码，返回 (success, message)"""
     try:
-        response = util_common.send_sms_code(call=call, code=code)
+        response = util_sms.send_sms_code(call=call, code=code)
         if response.get('status'):
             return True, '验证码已发送'
         return False, response.get('message', '发送失败')
@@ -190,6 +185,12 @@ def report_verify(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def order_list(request):
+    from maneu.service import (
+        # 查询
+        get_orders_by_phone,
+        # 验证码
+    )
+
     """API：当前用户的订单列表（status=3）"""
     phone = util_jwt.get_admin_phone_from_request(request)
     data = get_orders_by_phone(phone, status=3)
@@ -199,6 +200,12 @@ def order_list(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def report_list(request):
+    from maneu.service import (
+        # 查询
+        get_reports_by_phone,
+        # 验证码
+    )
+
     """API：当前用户的报告列表（status=2）"""
     phone = util_jwt.get_admin_phone_from_request(request)
     data = get_reports_by_phone(phone, status=2)
@@ -208,6 +215,12 @@ def report_list(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def store_list(request):
+    from maneu.service import (
+        # 查询
+        get_stores_by_phone,
+        # 验证码
+    )
+
     """API：当前用户的门店列表"""
     phone = util_jwt.get_admin_phone_from_request(request)
     data = get_stores_by_phone(phone)
@@ -217,6 +230,12 @@ def store_list(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def repair_list(request):
+    from maneu.service import (
+        # 查询
+        get_repairs_by_phone,
+        # 验证码
+    )
+
     """API：当前用户的维修记录列表"""
     phone = util_jwt.get_admin_phone_from_request(request)
     data = get_repairs_by_phone(phone)
@@ -269,6 +288,12 @@ def report_detail(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def repair_detail(request):
+    from maneu.service import (
+        # 查询
+        get_repair_by_id,
+        # 验证码
+    )
+
     """API：维修记录详情"""
     record_id = _extract_param(request, 'code')
     if not util_verify.is_uuid(record_id):
@@ -282,6 +307,12 @@ def repair_detail(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def guest_detail(request):
+    from maneu.service import (
+        # 查询
+        get_guest_by_phone,
+        # 验证码
+    )
+
     """API：当前登录用户信息"""
     phone = util_jwt.get_admin_phone_from_request(request)
     user = get_guest_by_phone(phone)
@@ -297,6 +328,15 @@ def guest_detail(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def sendsms(request):
+    from common.sendSMSForm import SendSMSForm
+    from maneu.service import (
+        # 查询
+        get_guest_model_by_phone,
+        # 验证码
+        generate_sms_code,
+        save_sms_code,
+    )
+
     """
     API：发送短信验证码
     流程：
@@ -329,6 +369,8 @@ def sendsms(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def access_token_sms(request):
+    from common.userLoginForm import UserLoginForm
+
     """
     API：短信验证码登录
     UserLoginForm 内部已完成：

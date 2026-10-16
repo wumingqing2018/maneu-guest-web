@@ -1,19 +1,20 @@
 import re
-from typing import Optional
 
 # ============================================================
 # 预编译正则表达式（提升性能，避免每次调用重复编译）
 # ============================================================
 
-# 移动设备特征长匹配
+# 预编译正则表达式（提升性能，避免每次调用重复编译）
+
+# 移动设备特征（长匹配）
 _LONG_MOBILE_REGEX = re.compile(
     r'googlebot-mobile|android|avantgo|blackberry|blazer|elaine|hiptop|ip(hone|od)|kindle|midp|mmp'
     r'|mobile|o2|opera mini|palm( os)?|pda|plucker|pocket|psp|smartphone|symbian|treo|up\.(browser|link)'
     r'|vodafone|wap|windows ce; (iemobile|ppc)|xiino|maemo|fennec',
-    re.IGNORECASE
+    re.IGNORECASE,
 )
 
-# 移动设备特征短匹配
+# 移动设备特征（短匹配）
 _SHORT_MOBILE_REGEX = re.compile(
     r'1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)'
     r'|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)'
@@ -33,19 +34,19 @@ _SHORT_MOBILE_REGEX = re.compile(
     r'|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)'
     r'|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit'
     r'|wi(g |nc|nw)|wmlb|wonu|x700|xda(\-|2|g)|yas\-|your|zeto|zte\-',
-    re.IGNORECASE
+    re.IGNORECASE,
 )
 
-# 手机号正则（中国大陆）
+# 中国大陆手机号
 _PHONE_REGEX = re.compile(r'^1[3-9]\d{9}$')
 
-# 6位数字验证码
+# 6 位数字验证码
 _TOKEN_6_REGEX = re.compile(r'^\d{6}$')
 
-# 32位十六进制字符串
+# 32 位十六进制字符串（如 MD5）
 _TOKEN_32_REGEX = re.compile(r'^[0-9a-fA-F]{32}$')
 
-# 64位十六进制字符串
+# 64 位十六进制字符串
 _TOKEN_64_REGEX = re.compile(r'^[0-9a-fA-F]{64}$')
 
 # UUID 格式（8-4-4-4-12）
@@ -54,15 +55,15 @@ _UUID_REGEX = re.compile(
 )
 
 
-def is_mobile(ua: Optional[str]) -> bool:
+def is_mobile(ua):
     """
     判断 User-Agent 是否来自移动设备（手机/平板）。
-    参数:
-        ua: 请求头中的 HTTP_USER_AGENT 字符串，可为 None
-    返回:
-        True 表示移动端，False 表示 PC 端
-    注意:
-        当 ua 为 None 或长度不足时，安全返回 False
+
+    :param ua: 请求头中的 HTTP_USER_AGENT 字符串，可为 None
+    :type ua: str or None
+    :return: True 表示移动端，False 表示 PC 端
+    :rtype: bool
+    :note: 当 ua 为 None 或长度不足时，安全返回 False
     """
     if not ua or not isinstance(ua, str):
         return False
@@ -71,62 +72,75 @@ def is_mobile(ua: Optional[str]) -> bool:
     if _LONG_MOBILE_REGEX.search(ua):
         return True
 
-    # 短特征匹配仅使用 UA 的前 4 个字符，需确保长度足够
+    # 短特征匹配仅使用 UA 的前 4 个字符
     prefix = ua[:4] if len(ua) >= 4 else ua
     return bool(_SHORT_MOBILE_REGEX.search(prefix))
 
 
-def is_call(code: Optional[str]) -> Optional[str]:
+def is_call(code):
     """
     校验中国大陆手机号格式。
-    参数:
-        code: 待验证字符串
-    返回:
-        如果是合法手机号返回原字符串，否则返回 None
+
+    :param code: 待验证字符串
+    :type code: str or None
+    :return: 合法则返回原字符串，否则返回 None
+    :rtype: str or None
     """
     if not code or not isinstance(code, str):
         return None
     return code if _PHONE_REGEX.match(code) else None
 
 
-def is_token_6(code: Optional[str]) -> Optional[str]:
+def is_token_6(code):
     """
     校验 6 位纯数字验证码。
-    返回:
-        合法返回原字符串，否则 None
+
+    :param code: 待验证字符串
+    :type code: str or None
+    :return: 合法则返回原字符串，否则返回 None
+    :rtype: str or None
     """
     if not code or not isinstance(code, str):
         return None
     return code if _TOKEN_6_REGEX.match(code) else None
 
 
-def is_token_32(code: Optional[str]) -> Optional[str]:
+def is_token_32(code):
     """
     校验 32 位十六进制字符串（如 MD5）。
-    返回:
-        合法返回原字符串，否则 None
+
+    :param code: 待验证字符串
+    :type code: str or None
+    :return: 合法则返回原字符串，否则返回 None
+    :rtype: str or None
     """
     if not code or not isinstance(code, str):
         return None
     return code if _TOKEN_32_REGEX.match(code) else None
 
 
-def is_token_64(code: Optional[str]) -> Optional[str]:
+def is_token_64(code):
     """
     校验 64 位十六进制字符串。
-    返回:
-        合法返回原字符串，否则 None
+
+    :param code: 待验证字符串
+    :type code: str or None
+    :return: 合法则返回原字符串，否则返回 None
+    :rtype: str or None
     """
     if not code or not isinstance(code, str):
         return None
     return code if _TOKEN_64_REGEX.match(code) else None
 
 
-def is_uuid(code: Optional[str]) -> Optional[str]:
+def is_uuid(code):
     """
     校验标准 UUID 格式（如 550e8400-e29b-41d4-a716-446655440000）。
-    返回:
-        合法返回原字符串，否则 None
+
+    :param code: 待验证字符串
+    :type code: str or None
+    :return: 合法则返回原字符串，否则返回 None
+    :rtype: str or None
     """
     if not code or not isinstance(code, str):
         return None
