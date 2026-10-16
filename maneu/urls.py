@@ -36,10 +36,8 @@ urlpatterns = [
     path('apis/login_by_wechat/',       apis.login_by_wechat,       name='login_by_wechat'),
     path('apis/refresh_access_token/',  apis.refresh_access_token,  name='refresh_access_token'),
 
-    # ==================== 三、首页数据（免登录） ====================
-    path('apis/get_index/',             apis.get_index,             name='get_index'),
 
-    # ==================== 四、业务 API（需登录，路径含 /auth/） ====================
+    # ==================== 三、业务 API（需登录，路径含 /auth/） ====================
     # 列表类
     path('apis/auth/order_list/',       apis.order_list,            name='order_list'),
     path('apis/auth/store_list/',       apis.store_list,            name='store_list'),
