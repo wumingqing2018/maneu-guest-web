@@ -10,10 +10,11 @@ API 视图层
     3. 组装统一格式的 JSON 响应
 
 约定：
-    1. 响应格式：{"status": bool, "message": str, "content": any}
-    2. 错误响应由 _json_error() 构造，默认 HTTP 400
-    3. 数据访问全部通过 maneu.service 层
-    4. 需登录接口路径含 '/auth/'，由 UserMiddleware 自动拦截
+    1. 所有接口统一使用 JSON 请求体（Content-Type: application/json）
+    2. 响应格式：{"status": bool, "message": str, "content": any}
+    3. 错误响应由 _json_error() 构造，默认 HTTP 400
+    4. 数据访问全部通过 maneu.service 层
+    5. 需登录接口路径含 '/auth/'，由 UserMiddleware 自动拦截
 
 命名规则：
     - 扫码验证类：xxx_verify      （免登录）
@@ -32,8 +33,6 @@ from django.views.decorators.http import require_http_methods
 from common import util_verify, util_jwt
 from common.util_sms import send_sms_code
 from common.util_wechat import get_miniprogram_token, get_miniprogram_phone
-from common.sendSMSForm import SendSMSForm
-from common.userLoginForm import UserLoginForm
 
 from maneu.service import (
     # 数据查询
@@ -50,6 +49,9 @@ from maneu.service import (
     # 验证码
     generate_sms_code,
     save_sms_code,
+    verify_sms_code,
+    is_sms_locked,
+    record_sms_fail,
 )
 
 logger = logging.getLogger(__name__)
@@ -59,9 +61,28 @@ logger = logging.getLogger(__name__)
 # 一、内部辅助函数
 # ============================================================================
 
+def _parse_json(request):
+    """
+    解析请求体为 JSON dict。
+
+    所有 API 统一使用 JSON 请求体（Content-Type: application/json）。
+    解析失败或非对象类型时返回空 dict，由调用方自行判断。
+
+    :param request: Django HTTP 请求
+    :type request: HttpRequest
+    :return: 参数字典，解析失败返回 {}
+    :rtype: dict
+    """
+    try:
+        data = json.loads(request.body or '{}')
+        return data if isinstance(data, dict) else {}
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return {}
+
+
 def _extract_param(request, key):
     """
-    从请求中提取参数（兼容 form 和 JSON body）。
+    从 JSON 请求体中提取单个参数。
 
     :param request: Django HTTP 请求
     :type request: HttpRequest
@@ -70,12 +91,7 @@ def _extract_param(request, key):
     :return: 参数值，不存在返回 None
     :rtype: str or None
     """
-    if request.content_type == 'application/json':
-        try:
-            return json.loads(request.body).get(key)
-        except Exception:
-            return None
-    return request.POST.get(key)
+    return _parse_json(request).get(key)
 
 
 def _json_error(message, status_code=400):
@@ -172,8 +188,8 @@ def order_verify(request):
     API：订单验证
     根据 index_id 返回订单信息。
 
-    :param index_id: 订单 UUID
-    :type index_id: str
+    请求体（JSON）：
+        {"index_id": "<订单 UUID>"}
     """
     index_id = _extract_param(request, 'index_id')
     if not util_verify.is_uuid(index_id):
@@ -197,8 +213,8 @@ def store_verify(request):
     API：门店验证
     根据 index_id 返回门店信息。
 
-    :param index_id: 门店 UUID
-    :type index_id: str
+    请求体（JSON）：
+        {"index_id": "<门店 UUID>"}
     """
     index_id = _extract_param(request, 'index_id')
     if not util_verify.is_uuid(index_id):
@@ -222,8 +238,8 @@ def report_verify(request):
     API：报告验证
     根据 index_id 返回报告信息。
 
-    :param index_id: 报告 UUID
-    :type index_id: str
+    请求体（JSON）：
+        {"index_id": "<报告 UUID>"}
     """
     index_id = _extract_param(request, 'index_id')
     if not util_verify.is_uuid(index_id):
@@ -250,6 +266,9 @@ def report_verify(request):
 def order_list(request):
     """
     API：当前用户的订单列表（status=3）
+
+    请求体（JSON）：
+        {}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
     data = get_orders_by_phone(phone, status=3)
@@ -261,6 +280,9 @@ def order_list(request):
 def report_list(request):
     """
     API：当前用户的报告列表（status=2）
+
+    请求体（JSON）：
+        {}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
     data = get_reports_by_phone(phone, status=2)
@@ -272,6 +294,9 @@ def report_list(request):
 def store_list(request):
     """
     API：当前用户的门店列表
+
+    请求体（JSON）：
+        {}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
     data = get_stores_by_phone(phone)
@@ -283,6 +308,9 @@ def store_list(request):
 def repair_list(request):
     """
     API：当前用户的维修记录列表
+
+    请求体（JSON）：
+        {}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
     data = get_repairs_by_phone(phone)
@@ -300,8 +328,8 @@ def order_detail(request):
     """
     API：订单详情
 
-    :param code: 订单 UUID
-    :type code: str
+    请求体（JSON）：
+        {"code": "<订单 UUID>"}
     """
     record_id = _extract_param(request, 'code')
     if not util_verify.is_uuid(record_id):
@@ -319,8 +347,8 @@ def store_detail(request):
     """
     API：门店详情
 
-    :param code: 门店 UUID
-    :type code: str
+    请求体（JSON）：
+        {"code": "<门店 UUID>"}
     """
     record_id = _extract_param(request, 'code')
     if not util_verify.is_uuid(record_id):
@@ -338,8 +366,8 @@ def report_detail(request):
     """
     API：报告详情
 
-    :param code: 报告 UUID
-    :type code: str
+    请求体（JSON）：
+        {"code": "<报告 UUID>"}
     """
     record_id = _extract_param(request, 'code')
     if not util_verify.is_uuid(record_id):
@@ -357,8 +385,8 @@ def repair_detail(request):
     """
     API：维修记录详情
 
-    :param code: 维修记录 UUID
-    :type code: str
+    请求体（JSON）：
+        {"code": "<维修记录 UUID>"}
     """
     record_id = _extract_param(request, 'code')
     if not util_verify.is_uuid(record_id):
@@ -376,6 +404,9 @@ def guest_detail(request):
     """
     API：当前登录用户信息
     手机号由 UserMiddleware 注入到 request.jwt_phone。
+
+    请求体（JSON）：
+        {}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
     user = get_guest_by_phone(phone)
@@ -395,30 +426,30 @@ def send_sms(request):
     """
     API：发送短信验证码
 
+    请求体（JSON）：
+        {"call": "13640651582"}
+
     流程：
-        1. 表单校验手机号格式
+        1. 校验手机号格式
         2. 确认手机号已注册
         3. 生成验证码 → 存 Redis
         4. 调用阿里云发送
-
-    :param call: 手机号
-    :type call: str
     """
-    form = SendSMSForm(request.POST)
-    if not form.is_valid():
-        return _json_error(form.errors.as_text())
+    call = _extract_param(request, 'call')
 
-    call = form.cleaned_data['call']
+    # 1. 手机号格式校验
+    if not util_verify.is_call(call):
+        return _json_error('请输入正确的手机号')
 
-    # 手机号必须已注册
+    # 2. 手机号必须已注册
     if not get_guest_model_by_phone(call):
         return _json_error('当前账号未注册')
 
-    # 生成验证码并存入 Redis
+    # 3. 生成验证码并存入 Redis
     code = generate_sms_code()
     save_sms_code(call, code)
 
-    # 发送短信
+    # 4. 发送短信
     ok, msg = _send_verification_code(call, code)
     if ok:
         return JsonResponse({'status': True, 'message': msg, 'content': {}})
@@ -431,24 +462,39 @@ def login_by_sms(request):
     """
     API：短信验证码登录
 
-    UserLoginForm 内部已完成：
-        - 手机号格式校验
-        - 验证码校验（Redis，成功后自动删除）
-        - 用户存在性校验
-    校验通过后 cleaned_data['user'] 为 ManeuGuest ORM 实例。
+    请求体（JSON）：
+        {"call": "13640651582", "code": "123456"}
 
-    :param call: 手机号
-    :type call: str
-    :param code: 6 位验证码
-    :type code: str
-    :return: {'access_token': str, 'refresh_token': str}
-    :rtype: JsonResponse
+    流程：
+        1. 校验手机号、验证码格式
+        2. 检查是否因错误次数过多被锁定
+        3. 校验验证码（Redis，成功后自动删除）
+        4. 查库拿用户，生成 JWT
     """
-    form = UserLoginForm(request.POST)
-    if not form.is_valid():
-        return _json_error(form.errors.as_text())
+    call = _extract_param(request, 'call')
+    code = _extract_param(request, 'code')
 
-    user = form.cleaned_data['user']
+    # 1. 格式校验
+    if not util_verify.is_call(call):
+        return _json_error('请输入正确的手机号')
+    if not util_verify.is_token_6(code):
+        return _json_error('验证码格式错误')
+
+    # 2. 防爆破：错误次数过多直接拒绝
+    if is_sms_locked(call):
+        return _json_error('验证码错误次数过多，请重新获取')
+
+    # 3. 验证码校验（成功后自动从 Redis 删除）
+    if not verify_sms_code(call, code):
+        record_sms_fail(call)
+        return _json_error('验证码错误或已过期')
+
+    # 4. 查用户
+    user = get_guest_model_by_phone(call)
+    if not user:
+        return _json_error('该手机号未注册')
+
+    # 5. 生成 JWT
     tokens = _generate_jwt_for_user(user)
     return JsonResponse({'status': True, 'message': '登录成功', 'content': tokens})
 
@@ -459,20 +505,15 @@ def login_by_wechat(request):
     """
     API：微信小程序登录
 
+    请求体（JSON）：
+        {"code": "<64位十六进制字符串>"}
+
     流程：
         1. 接收小程序 wx.login 返回的 code
         2. 用 code 换取手机号（token 失效时自动刷新重试）
         3. 查库拿用户，生成 JWT
-
-    :param code: 64 位十六进制字符串（wx.login 凭证）
-    :type code: str
-    :return: {'access_token': str, 'refresh_token': str}
-    :rtype: JsonResponse
     """
-    try:
-        code = json.loads(request.body).get('code')
-    except Exception:
-        return _json_error('无效的JSON格式')
+    code = _extract_param(request, 'code')
 
     if not code or not util_verify.is_token_64(code):
         return _json_error('登录失败：请提交正确的微信号')
@@ -501,12 +542,10 @@ def refresh_access_token(request):
     """
     API：刷新 access_token
 
-    用 refresh_token 换新的 access_token（refresh_token 本身不变）。
+    请求体（JSON）：
+        {"refresh_token": "<上次登录返回的 refresh_token>"}
 
-    :param refresh_token: 上次登录返回的 refresh_token
-    :type refresh_token: str
-    :return: {'access_token': str}
-    :rtype: JsonResponse
+    用 refresh_token 换新的 access_token（refresh_token 本身不变）。
     """
     token = _extract_param(request, 'refresh_token')
     if not token:
@@ -531,28 +570,3 @@ def refresh_access_token(request):
         'message': '刷新成功',
         'content': {'access_token': new_access_token},
     })
-
-
-# ============================================================================
-# 六、首页数据接口（免登录）
-# ============================================================================
-
-@csrf_exempt
-@require_http_methods(["GET", "POST"])
-def get_index(request):
-    """
-    API：首页轮播图数据
-    """
-    data = [
-        {'index': 'https://maneu.online/static/img/3.gif',
-         'data':  'https://maneu.online/static/img/gif2.jpg'},
-        {'index': 'https://maneu.online/static/img/1mcjs.jpg',
-         'data':  'https://maneu.online/static/img/2mcjs.jpg'},
-        {'index': 'https://maneu.online/static/img/1xzy.jpg',
-         'data':  'https://maneu.online/static/img/2xzy.jpg'},
-        {'index': 'https://maneu.online/static/img/1yqs.jpg',
-         'data':  'https://maneu.online/static/img/2yqs.jpg'},
-        {'index': 'https://maneu.online/static/img/1njj.jpg',
-         'data':  'https://maneu.online/static/img/2njj.jpg'},
-    ]
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})

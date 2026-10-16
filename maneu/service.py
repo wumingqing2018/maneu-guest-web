@@ -5,7 +5,7 @@ maneu/service.py
 封装所有数据访问与业务逻辑，供 apis.py 等视图层调用。
 
 职责：
-    1. 短信验证码的生成 / 存储 / 校验（基于 Redis）
+    1. 短信验证码的生成 / 存储 / 校验 / 防爆破（基于 Redis）
     2. 用户、订单、报告、门店、维修记录的数据查询
 
 约定：
@@ -34,7 +34,9 @@ from maneu.models import (
 # ============================================================================
 
 SMS_CODE_PREFIX = 'sms:code:'    # Redis key 前缀：sms:code:{phone}
-SMS_CODE_TTL = 300               # 有效期（秒）
+SMS_FAIL_PREFIX = 'sms:fail:'    # Redis key 前缀：sms:fail:{phone}
+SMS_CODE_TTL = 300               # 验证码有效期（秒）
+SMS_FAIL_LIMIT = 5               # 连续错误上限，超过则作废验证码
 
 
 def generate_sms_code():
@@ -60,6 +62,7 @@ def save_sms_code(phone, code):
     :type code: str
     """
     cache.set(f'{SMS_CODE_PREFIX}{phone}', code, timeout=SMS_CODE_TTL)
+    cache.delete(f'{SMS_FAIL_PREFIX}{phone}')    # 新验证码下发，重置失败计数
 
 
 def verify_sms_code(phone, code):
@@ -87,6 +90,35 @@ def verify_sms_code(phone, code):
 
     cache.delete(key)
     return True
+
+
+def is_sms_locked(phone):
+    """
+    判断手机号是否因验证码错误次数过多被锁定。
+
+    :param phone: 手机号
+    :type phone: str
+    :return: True 表示已锁定
+    :rtype: bool
+    """
+    return cache.get(f'{SMS_FAIL_PREFIX}{phone}', 0) >= SMS_FAIL_LIMIT
+
+
+def record_sms_fail(phone):
+    """
+    记录一次验证码错误。
+
+    当失败次数达到上限时，主动删除对应的验证码，强制用户重新获取。
+
+    :param phone: 手机号
+    :type phone: str
+    """
+    key = f'{SMS_FAIL_PREFIX}{phone}'
+    count = cache.get(key, 0) + 1
+    cache.set(key, count, timeout=SMS_CODE_TTL)
+
+    if count >= SMS_FAIL_LIMIT:
+        cache.delete(f'{SMS_CODE_PREFIX}{phone}')
 
 
 # ============================================================================

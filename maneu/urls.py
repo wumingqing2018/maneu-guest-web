@@ -42,8 +42,8 @@ urlpatterns = [
     # ==================== 四、业务 API（需登录，路径含 /auth/） ====================
     # 列表类
     path('apis/auth/order_list/',       apis.order_list,            name='order_list'),
-    path('apis/auth/report_list/',      apis.report_list,           name='report_list'),
     path('apis/auth/store_list/',       apis.store_list,            name='store_list'),
+    path('apis/auth/report_list/',      apis.report_list,           name='report_list'),
     path('apis/auth/repair_list/',      apis.repair_list,           name='repair_list'),
 
     # 详情类
