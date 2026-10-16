@@ -37,21 +37,18 @@ urlpatterns = [
     path('apis/access_token_weixin/',  apis.access_token_weixin,  name='access_token_weixin'),
     path('apis/refresh_token/',        apis.refresh_token,        name='refresh_token'),
 
-    # ==================== 4. 首页数据（免登录） ====================
-    path('apis/get_index/', apis.get_index, name='get_index'),
-
-    # ==================== 5. 业务 apis（需登录，路径含 /auth/） ====================
+    # ==================== 4. 业务 apis（需登录，路径含 /auth/） ====================
     # ⚠️ 以下接口当前暂不开放，等前端准备好后取消注释即可自动走 JWT 校验
     #
-    # path('apis/auth/order_list/',    apis.order_list,    name='order_list'),
-    # path('apis/auth/report_list/',   apis.report_list,   name='report_list'),
-    # path('apis/auth/store_list/',    apis.store_list,    name='store_list'),
-    # path('apis/auth/repair_list/',   apis.repair_list,   name='repair_list'),
-    #
-    # path('apis/auth/order_detail/',  apis.order_detail,  name='order_detail'),
-    # path('apis/auth/store_detail/',  apis.store_detail,  name='store_detail'),
-    # path('apis/auth/report_detail/', apis.report_detail, name='report_detail'),
-    # path('apis/auth/repair_detail/', apis.repair_detail, name='repair_detail'),
-    #
-    # path('apis/auth/guest_detail/',  apis.guest_detail,  name='guest_detail'),
+    path('apis/auth/order_list/',    apis.order_list,    name='order_list'),
+    path('apis/auth/report_list/',   apis.report_list,   name='report_list'),
+    path('apis/auth/store_list/',    apis.store_list,    name='store_list'),
+    path('apis/auth/repair_list/',   apis.repair_list,   name='repair_list'),
+
+    path('apis/auth/order_detail/',  apis.order_detail,  name='order_detail'),
+    path('apis/auth/store_detail/',  apis.store_detail,  name='store_detail'),
+    path('apis/auth/report_detail/', apis.report_detail, name='report_detail'),
+    path('apis/auth/repair_detail/', apis.repair_detail, name='repair_detail'),
+
+    path('apis/auth/guest_detail/',  apis.guest_detail,  name='guest_detail'),
 ]

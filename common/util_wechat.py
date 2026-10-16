@@ -1,11 +1,9 @@
-
 import logging
 import os
 
 import requests
 
 logger = logging.getLogger(__name__)
-
 
 
 # ============================================================================
@@ -80,4 +78,3 @@ def get_miniprogram_phone(code, access_token):
     except requests.RequestException as e:
         logger.exception('请求微信手机号接口失败: %s', e)
         return {'status': False, 'message': '网络请求失败'}
-

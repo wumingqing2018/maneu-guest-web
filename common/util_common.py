@@ -28,7 +28,7 @@ def current_time():
     :return: 格式为 'YYYY-MM-DD HH:MM:SS' 的时间字符串
     :rtype: str
     :example:
-        >>> current_time()
+        urrent_time()
         '2026-06-30 14:30:25'
     """
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -49,8 +49,9 @@ def getip(request):
     :type request: HttpRequest
     :return: IP 地址字符串，若无法获取则返回 None
     :rtype: str or None
+    :use:
+        getip(request)
     :example:
-        >>> getip(request)
         '192.168.1.100'
     """
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -71,7 +72,7 @@ def get_random_code():
     :return: 100000 到 999999 之间的随机整数
     :rtype: int
     :example:
-        >>> get_random_code()
+        get_random_code()
         482711
     """
     return random.randint(100000, 999999)
@@ -86,7 +87,7 @@ def generate_random_32hex():
     :return: 32 位十六进制字符串
     :rtype: str
     :example:
-        >>> generate_random_32hex()
+        generate_random_32hex()
         'a1b2c3d4e5f678901234567890abcdef'
     """
     return secrets.token_hex(16)

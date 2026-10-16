@@ -1,4 +1,3 @@
-
 import json
 import logging
 import os
@@ -8,6 +7,7 @@ from aliyunsdkcore.client import AcsClient
 from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
 
 logger = logging.getLogger(__name__)
+
 
 # ============================================================================
 # 二、阿里云短信
@@ -56,4 +56,3 @@ def send_sms_code(call, code):
     except Exception as e:
         logger.exception('短信发送异常: %s', e)
         return {'status': False, 'message': '系统繁忙，请稍后重试'}
-

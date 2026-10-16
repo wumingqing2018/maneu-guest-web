@@ -27,7 +27,7 @@ JWT_CONFIG = settings.JWT_CONFIG
 AUTH_URL_KEYWORDS = JWT_CONFIG.get('AUTH_URL_KEYWORDS', ['/auth/'])
 
 AUTH_HEADER_NAME = JWT_CONFIG.get('AUTH_HEADER_NAME', 'HTTP_AUTHORIZATION')
-AUTH_HEADER_PREFIX = JWT_CONFIG['AUTH_HEADER_TYPES'][0] + ' '   # 'Bearer '
+AUTH_HEADER_PREFIX = JWT_CONFIG['AUTH_HEADER_TYPES'][0] + ' '  # 'Bearer '
 
 
 class UserMiddleware(MiddlewareMixin):
@@ -62,7 +62,7 @@ class UserMiddleware(MiddlewareMixin):
             return self._unauthorized_response('Token 中缺少用户标识')
 
         request.jwt_user_id = user_id
-        request.jwt_phone   = payload.get('user_phone')
+        request.jwt_phone = payload.get('user_phone')
         request.jwt_payload = payload
 
         return None

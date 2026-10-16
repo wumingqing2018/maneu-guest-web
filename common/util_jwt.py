@@ -31,7 +31,7 @@ def _base_payload(user, token_type, lifetime_seconds):
     now = _now()
     return {
         'user_id': str(user.id),
-        'user_phone': getattr(user, 'phone', None),   # ← 业务用手机号
+        'user_phone': getattr(user, 'phone', None),  # ← 业务用手机号
         'type': token_type,
         'jti': str(uuid.uuid4()),
         'iss': JWT_ISSUER,
