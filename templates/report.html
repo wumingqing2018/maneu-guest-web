@@ -64,11 +64,9 @@
             $.ajax({
                 url: report_verify_url,
                 method: "POST",
-                data: {index_id: index_id},
+                contentType: "application/json",
+                data: JSON.stringify({index_id: index_id}),
                 dataType: "json",
-                header: {
-                    'content-type': 'application/json'
-                },
                 timeout: 10000,
                 success: function (res) {
                     console.log(res);
