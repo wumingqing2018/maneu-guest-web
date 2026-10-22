@@ -48,10 +48,10 @@ urlpatterns = [
     path('apis/auth/repair_verify/', apis.repair_verify, name='repair_verify'),
 
     # 详情类
-    path('apis/auth/order_detail/', apis.order_detail, name='order_detail'),
-    path('apis/auth/store_detail/', apis.store_detail, name='store_detail'),
-    path('apis/auth/report_detail/', apis.report_detail, name='report_detail'),
-    path('apis/auth/repair_detail/', apis.repair_detail, name='repair_detail'),
-    path('apis/auth/guest_detail/', apis.guest_detail, name='guest_detail'),
+    # path('apis/auth/order_detail/', apis.order_detail, name='order_detail'),
+    # path('apis/auth/store_detail/', apis.store_detail, name='store_detail'),
+    # path('apis/auth/report_detail/', apis.report_detail, name='report_detail'),
+    # path('apis/auth/repair_detail/', apis.repair_detail, name='repair_detail'),
+    # path('apis/auth/guest_detail/', apis.guest_detail, name='guest_detail'),
 
 ]
