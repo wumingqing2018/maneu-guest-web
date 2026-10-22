@@ -599,7 +599,7 @@ def refresh_access_token(request):
 from django.http import HttpResponse
 
 
-def validation_file_view(request):
+def VQwxjTJTH5(request):
     # 替换为校验文件中的真实内容
     file_content = "c8966dfaa24aa981832913b888981534"
     return HttpResponse(file_content, content_type='text/plain')
