@@ -255,6 +255,31 @@ def report_verify(request):
     return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def repair_verify(request):
+    """
+    API：报告验证
+    根据 index_id 返回报告信息。
+
+    请求体（JSON）：
+        {"index_id": "<报告 UUID>"}
+    """
+    index_id = _extract_param(request, 'index_id')
+    if not util_verify.is_uuid(index_id):
+        return _json_error('请提交正确的参数')
+
+    data = get_report_by_id(index_id)
+    if not data:
+        return _json_error('记录不存在')
+
+    fields = ['time', 'plan', 'os_va', 'os_cyl', 'os_sph', 'os_ax',
+              'od_va', 'od_cyl', 'od_sph', 'od_ax']
+    content = {f: data.get(f) for f in fields}
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
+
+
 # ============================================================================
 # 三、列表类接口（需登录，路径含 /auth/）
 # 用途：返回当前登录用户的各类记录列表
