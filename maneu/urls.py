@@ -53,7 +53,8 @@ urlpatterns = [
     path('apis/auth/report_detail/', apis.report_detail, name='report_detail'),
     path('apis/auth/repair_detail/', apis.repair_detail, name='repair_detail'),
     path('apis/auth/guest_detail/', apis.guest_detail, name='guest_detail'),
-
-    path('verify_order/VQwxjTJTH5.txt', apis.VQwxjTJTH5, name='VQwxjTJTH5'),
-
+    path('verify_order/VQwxjTJTH5.txt', apis.VQwxjTJTH5),
+    path('verify_store/VQwxjTJTH5.txt', apis.VQwxjTJTH5),
+    path('verify_report/VQwxjTJTH5.txt', apis.VQwxjTJTH5),
+    path('verify_repair/VQwxjTJTH5.txt', apis.VQwxjTJTH5),
 ]
