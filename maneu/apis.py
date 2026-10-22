@@ -595,3 +595,11 @@ def refresh_access_token(request):
         'message': '刷新成功',
         'content': {'access_token': new_access_token},
     })
+
+from django.http import HttpResponse
+
+
+def validation_file_view(request):
+    # 替换为校验文件中的真实内容
+    file_content = "c8966dfaa24aa981832913b888981534"
+    return HttpResponse(file_content, content_type='text/plain')
