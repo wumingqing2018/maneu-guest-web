@@ -201,7 +201,7 @@ def get_reports_by_phone(phone, status=None):
     return list(qs.order_by('-time').values(*_LIST_FIELDS))
 
 
-def get_stores_by_phone(phone):
+def get_stores_by_phone(phone, status=None):
     """
     按手机号查门店列表。
 
