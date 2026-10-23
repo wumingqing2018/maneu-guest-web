@@ -324,7 +324,7 @@ def store_list(request):
         {}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
-    data = get_stores_by_phone(phone)
+    data = get_reports_by_phone(phone, status=2)
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
