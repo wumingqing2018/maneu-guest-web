@@ -19,3 +19,8 @@ def verify_store(request):
 def verify_report(request):
     index_id = request.GET.get('index_id')
     return render(request, 'report.html', {'index_id': index_id})
+
+
+def verify_repair(request):
+    index_id = request.GET.get('index_id')
+    return render(request, 'repair.html', {'index_id': index_id})

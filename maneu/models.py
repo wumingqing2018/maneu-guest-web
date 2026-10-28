@@ -130,7 +130,7 @@ class ManeuStore(models.Model):
     time = models.DateTimeField(blank=True, null=True)
     order_id = models.CharField(max_length=36)
     admin_id = models.CharField(max_length=36)
-    guess_id = models.CharField(max_length=36)
+    guest_id = models.CharField(max_length=36)
     content = models.TextField()
 
     class Meta:
