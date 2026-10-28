@@ -81,14 +81,19 @@ class ManeuRepair(models.Model):
 
 
 class ManeuReport(models.Model):
-    id = models.CharField(primary_key=True, max_length=36)
+    id = models.CharField(primary_key=True, max_length=36, default=uuid4, editable=False)
     admin_id = models.CharField(max_length=36, blank=True, null=True)
     guest_id = models.CharField(max_length=36, blank=True, null=True)
-    phone = models.CharField(max_length=36, blank=True, null=True)
-    name = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
-    status = models.CharField(db_column='status', max_length=36, blank=True, null=True)  # Field name made lowercase.
+    name = models.CharField(max_length=36, blank=True, null=True)
+    phone = models.CharField(max_length=36, blank=True, null=True)
+    status = models.CharField(max_length=36, blank=True, null=True)
     plan = models.CharField(db_column='PLAN', max_length=36, blank=True, null=True)  # Field name made lowercase.
+    sex = models.CharField(max_length=36, blank=True, null=True)
+    age = models.CharField(max_length=36, blank=True, null=True)
+    dfh = models.CharField(max_length=36, blank=True, null=True)
+    ot = models.CharField(max_length=36, blank=True, null=True)
+    em = models.CharField(max_length=36, blank=True, null=True)
     pd = models.CharField(db_column='PD', max_length=36, blank=True, null=True)  # Field name made lowercase.
     od_al = models.CharField(db_column='OD_AL', max_length=36, blank=True, null=True)  # Field name made lowercase.
     od_ak = models.CharField(db_column='OD_AK', max_length=36, blank=True, null=True)  # Field name made lowercase.
