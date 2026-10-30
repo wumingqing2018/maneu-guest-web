@@ -289,22 +289,8 @@ def get_admin_by_id(admin_id):
     :return: 机构 dict，找不到返回 None
     :rtype: dict or None
     """
-    src_fields = list(_ADMIN_PUBLIC_FIELD_MAP.keys())
-    row = (
-        ManeuAdmin.objects
-        .filter(id=admin_id)
-        .values(*src_fields)
-        .first()
-    )
-    if not row:
-        return None
-
-    # 模型字段名 → 对外键名
-    return {
-        out_key: row.get(src_key)
-        for src_key, out_key in _ADMIN_PUBLIC_FIELD_MAP.items()
-    }
-
+    obj = ManeuOrder.objects.filter(id=admin_id).first()
+    return model_to_dict(obj) if obj else None
 
 def get_order_by_id(record_id):
     """
