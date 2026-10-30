@@ -441,7 +441,7 @@ def order_detail(request):
     if err:
         return err
 
-    admin = get_admin_by_id(admin_id=data.get('admin_id'))
+    admin = get_admin_by_id(data.get('admin_id'))
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data, 'admin': admin})
 
 

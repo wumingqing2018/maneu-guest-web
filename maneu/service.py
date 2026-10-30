@@ -289,7 +289,7 @@ def get_admin_by_id(admin_id):
     :return: 机构 dict，找不到返回 None
     :rtype: dict or None
     """
-    obj = ManeuOrder.objects.filter(id=admin_id).first()
+    obj = ManeuAdmin.objects.filter(id=admin_id).first()
     return model_to_dict(obj) if obj else None
 
 def get_order_by_id(record_id):
