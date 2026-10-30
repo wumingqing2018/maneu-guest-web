@@ -15,6 +15,7 @@ API 视图层
     3. 错误响应由 _json_error() 构造，默认 HTTP 400
     4. 数据访问全部通过 maneu.service 层
     5. 需登录接口路径含 '/auth/'，由 UserMiddleware 自动拦截
+    6. 需登录的详情接口额外校验记录归属（phone 必须匹配当前登录用户）
 
 命名规则：
     - 扫码验证类：xxx_verify      （免登录）
@@ -26,7 +27,8 @@ API 视图层
 import json
 import logging
 
-from django.http import JsonResponse
+from django.core.cache import cache
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
@@ -36,6 +38,7 @@ from common.util_wechat import get_miniprogram_token, get_miniprogram_phone
 
 from maneu.service import (
     # 数据查询
+    get_admin_by_id,
     get_order_by_id,
     get_store_by_id,
     get_report_by_id,
@@ -55,6 +58,10 @@ from maneu.service import (
 )
 
 logger = logging.getLogger(__name__)
+
+# 短信发送冷却时间（秒），同一手机号在此期间内重复请求将被拒绝
+SMS_SEND_COOLDOWN = 60
+SMS_SEND_PREFIX = 'sms:send:'
 
 
 # ============================================================================
@@ -109,6 +116,45 @@ def _json_error(message, status_code=400):
         {'status': False, 'message': message, 'content': {}},
         status=status_code,
     )
+
+
+def _safe_json(raw, default=None):
+    """
+    安全解析 JSON 字符串；若已是 dict/list 直接返回，脏数据返回 default。
+
+    用于 content 字段可能是 TextField（字符串）或 JSONField（已是对象）的场景。
+
+    :param raw: 原始 content 值
+    :param default: 解析失败时的兜底值，默认 {}
+    :return: dict / list / default
+    """
+    if isinstance(raw, (dict, list)):
+        return raw
+    try:
+        return json.loads(raw or '{}')
+    except (json.JSONDecodeError, TypeError):
+        return default if default is not None else {}
+
+
+def _check_owner(request, data):
+    """
+    校验记录归属：记录的 phone 必须与当前登录用户一致。
+
+    历史数据 phone 为空时放行（避免旧记录全部不可访问）。
+
+    :param request: Django HTTP 请求（已通过 UserMiddleware 注入 jwt_phone）
+    :param data: 记录 dict
+    :return: 通过返回 None，不通过返回错误响应
+    :rtype: JsonResponse or None
+    """
+    record_phone = data.get('phone')
+    if not record_phone:
+        return None
+
+    phone = util_jwt.get_admin_phone_from_request(request)
+    if record_phone != phone:
+        return _json_error('无权访问该记录', status_code=403)
+    return None
 
 
 def _fetch_phone_with_retry(code, access_token):
@@ -176,6 +222,26 @@ def _send_verification_code(call, code):
         return False, '系统繁忙，请稍后重试'
 
 
+def _paging_params(request):
+    """
+    从请求体提取分页参数，非法值归一为 None（表示不分页）。
+
+    :param request: Django HTTP 请求
+    :return: (offset, limit)
+    :rtype: tuple[int or None, int or None]
+    """
+    params = _parse_json(request)
+
+    def _to_int(v):
+        try:
+            i = int(v)
+            return i if i >= 0 else None
+        except (TypeError, ValueError):
+            return None
+
+    return _to_int(params.get('offset')), _to_int(params.get('limit'))
+
+
 # ============================================================================
 # 二、扫码验证类接口（免登录）
 # 用途：用户扫二维码后，根据 index_id 返回对应记录信息
@@ -201,7 +267,7 @@ def order_verify(request):
 
     content = {
         'time': data.get('time'),
-        'data': json.loads(data.get('content') or '{}'),
+        'data': _safe_json(data.get('content')),
     }
     return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
@@ -226,7 +292,7 @@ def store_verify(request):
 
     content = {
         'time': data.get('time'),
-        'data': json.loads(data.get('content') or '{}'),
+        'data': _safe_json(data.get('content')),
     }
     return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
@@ -255,28 +321,28 @@ def report_verify(request):
     return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
-
 @csrf_exempt
 @require_http_methods(["POST"])
 def repair_verify(request):
     """
-    API：报告验证
-    根据 index_id 返回报告信息。
+    API：维修记录验证
+    根据 index_id 返回维修记录信息。
 
     请求体（JSON）：
-        {"index_id": "<报告 UUID>"}
+        {"index_id": "<维修记录 UUID>"}
     """
     index_id = _extract_param(request, 'index_id')
     if not util_verify.is_uuid(index_id):
         return _json_error('请提交正确的参数')
 
-    data = get_report_by_id(index_id)
+    data = get_repair_by_id(index_id)
     if not data:
         return _json_error('记录不存在')
 
-    fields = ['time', 'plan', 'os_va', 'os_cyl', 'os_sph', 'os_ax',
-              'od_va', 'od_cyl', 'od_sph', 'od_ax']
-    content = {f: data.get(f) for f in fields}
+    content = {
+        'time': data.get('time'),
+        'data': _safe_json(data.get('content')),
+    }
     return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
@@ -284,19 +350,21 @@ def repair_verify(request):
 # 三、列表类接口（需登录，路径含 /auth/）
 # 用途：返回当前登录用户的各类记录列表
 # 说明：手机号由 UserMiddleware 注入到 request.jwt_phone
+#       支持可选 offset / limit 分页参数，不传则返回全量
 # ============================================================================
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def order_list(request):
     """
-    API：当前用户的订单列表（status=3）
+    API：当前用户的订单列表
 
-    请求体（JSON）：
-        {}
+    请求体（JSON，可选分页）：
+        {"offset": 0, "limit": 20}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
-    data = get_orders_by_phone(phone, status=3)
+    offset, limit = _paging_params(request)
+    data = get_orders_by_phone(phone, offset=offset, limit=limit)
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
@@ -304,13 +372,14 @@ def order_list(request):
 @require_http_methods(["POST"])
 def report_list(request):
     """
-    API：当前用户的报告列表（status=2）
+    API：当前用户的报告列表
 
-    请求体（JSON）：
-        {}
+    请求体（JSON，可选分页）：
+        {"offset": 0, "limit": 20}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
-    data = get_reports_by_phone(phone, status=2)
+    offset, limit = _paging_params(request)
+    data = get_reports_by_phone(phone, offset=offset, limit=limit)
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
@@ -320,11 +389,12 @@ def store_list(request):
     """
     API：当前用户的门店列表
 
-    请求体（JSON）：
-        {}
+    请求体（JSON，可选分页）：
+        {"offset": 0, "limit": 20}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
-    data = get_stores_by_phone(phone, status=2)
+    offset, limit = _paging_params(request)
+    data = get_stores_by_phone(phone, offset=offset, limit=limit)
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
@@ -334,17 +404,20 @@ def repair_list(request):
     """
     API：当前用户的维修记录列表
 
-    请求体（JSON）：
-        {}
+    请求体（JSON，可选分页）：
+        {"offset": 0, "limit": 20}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
-    data = get_repairs_by_phone(phone)
+    offset, limit = _paging_params(request)
+    data = get_repairs_by_phone(phone, offset=offset, limit=limit)
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
 # ============================================================================
 # 四、详情类接口（需登录，路径含 /auth/）
 # 用途：根据记录 ID 返回详情
+# 安全：额外校验记录归属，仅允许访问本人记录
+# 说明：admin 字段暂置于响应顶层以兼容小程序，后续可考虑并入 content
 # ============================================================================
 
 @csrf_exempt
@@ -363,7 +436,13 @@ def order_detail(request):
     data = get_order_by_id(record_id)
     if not data:
         return _json_error('记录不存在', status_code=404)
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+    err = _check_owner(request, data)
+    if err:
+        return err
+
+    admin = get_admin_by_id(admin_id=data.get('admin_id'))
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data, 'admin': admin})
 
 
 @csrf_exempt
@@ -382,7 +461,13 @@ def store_detail(request):
     data = get_store_by_id(record_id)
     if not data:
         return _json_error('记录不存在', status_code=404)
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+    err = _check_owner(request, data)
+    if err:
+        return err
+
+    admin = get_admin_by_id(admin_id=data.get('admin_id'))
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data, 'admin': admin})
 
 
 @csrf_exempt
@@ -401,7 +486,13 @@ def report_detail(request):
     data = get_report_by_id(record_id)
     if not data:
         return _json_error('记录不存在', status_code=404)
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+    err = _check_owner(request, data)
+    if err:
+        return err
+
+    admin = get_admin_by_id(admin_id=data.get('admin_id'))
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data, 'admin': admin})
 
 
 @csrf_exempt
@@ -420,7 +511,13 @@ def repair_detail(request):
     data = get_repair_by_id(record_id)
     if not data:
         return _json_error('记录不存在', status_code=404)
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
+
+    err = _check_owner(request, data)
+    if err:
+        return err
+
+    admin = get_admin_by_id(admin_id=data.get('admin_id'))
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data, 'admin': admin})
 
 
 @csrf_exempt
@@ -457,8 +554,9 @@ def send_sms(request):
     流程：
         1. 校验手机号格式
         2. 确认手机号已注册
-        3. 生成验证码 → 存 Redis
-        4. 调用阿里云发送
+        3. 冷却检查（同一手机号 60 秒内只能发送一次）
+        4. 生成验证码 → 存 Redis
+        5. 调用阿里云发送（失败时清理验证码与冷却）
     """
     call = _extract_param(request, 'call')
 
@@ -470,15 +568,24 @@ def send_sms(request):
     if not get_guest_model_by_phone(call):
         return _json_error('当前账号未注册')
 
-    # 3. 生成验证码并存入 Redis
+    # 3. 冷却检查，防止短信轰炸
+    cooldown_key = f'{SMS_SEND_PREFIX}{call}'
+    if cache.get(cooldown_key):
+        return _json_error('发送过于频繁，请稍后再试')
+    cache.set(cooldown_key, 1, timeout=SMS_SEND_COOLDOWN)
+
+    # 4. 生成验证码并存入 Redis
     code = generate_sms_code()
     save_sms_code(call, code)
 
-    # 4. 发送短信
+    # 5. 发送短信，失败时回滚
     ok, msg = _send_verification_code(call, code)
-    if ok:
-        return JsonResponse({'status': True, 'message': msg, 'content': {}})
-    return _json_error(msg)
+    if not ok:
+        cache.delete(f'sms:code:{call}')
+        cache.delete(cooldown_key)
+        return _json_error(msg)
+
+    return JsonResponse({'status': True, 'message': msg, 'content': {}})
 
 
 @csrf_exempt
@@ -496,8 +603,9 @@ def login_by_sms(request):
         3. 校验验证码（Redis，成功后自动删除）
         4. 查库拿用户，生成 JWT
     """
-    call = _extract_param(request, 'call')
-    code = _extract_param(request, 'code')
+    params = _parse_json(request)
+    call = params.get('call')
+    code = params.get('code')
 
     # 1. 格式校验
     if not util_verify.is_call(call):
@@ -570,7 +678,9 @@ def refresh_access_token(request):
     请求体（JSON）：
         {"refresh_token": "<上次登录返回的 refresh_token>"}
 
-    用 refresh_token 换新的 access_token（refresh_token 本身不变）。
+    用 refresh_token 换新的 access_token 与 refresh_token。
+    ⚠️ refresh_token 采用轮换策略：每次刷新后旧 refresh_token 不再保证有效，
+       客户端必须保存响应中的新 refresh_token。
     """
     token = _extract_param(request, 'refresh_token')
     if not token:
@@ -590,16 +700,23 @@ def refresh_access_token(request):
         return _json_error('用户不存在', status_code=401)
 
     new_access_token = util_jwt.generate_access_token(user)
+    new_refresh_token = util_jwt.generate_refresh_token(user)
     return JsonResponse({
         'status': True,
         'message': '刷新成功',
-        'content': {'access_token': new_access_token},
+        'content': {
+            'access_token': new_access_token,
+            'refresh_token': new_refresh_token,
+        },
     })
 
-from django.http import HttpResponse
 
+# ============================================================================
+# 六、平台校验文件（微信小程序服务器域名校验）
+# ============================================================================
 
 def VQwxjTJTH5(request):
     # 替换为校验文件中的真实内容
+    from django.http import HttpResponse
     file_content = "c8966dfaa24aa981832913b888981534"
     return HttpResponse(file_content, content_type='text/plain')

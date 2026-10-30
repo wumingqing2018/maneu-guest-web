@@ -10,7 +10,7 @@ maneu/service.py
 
 约定：
     - get_*_by_id              返回 dict 或 None（供详情接口）
-    - get_*_by_phone           返回 list[dict]（供列表接口）
+    - get_*_by_phone           返回 list[dict]（供列表接口，可选 offset/limit 分页）
     - get_guest_by_phone       返回 dict 或 None（已排除 password 字段）
     - get_guest_model_by_phone 返回 ORM 实例或 None（供生成 JWT 等场景）
 """
@@ -21,6 +21,7 @@ from django.core.cache import cache
 from django.forms.models import model_to_dict
 
 from maneu.models import (
+    ManeuAdmin,
     ManeuGuest,
     ManeuOrder,
     ManeuReport,
@@ -28,15 +29,14 @@ from maneu.models import (
     ManeuRepair,
 )
 
-
 # ============================================================================
 # 一、短信验证码
 # ============================================================================
 
-SMS_CODE_PREFIX = 'sms:code:'    # Redis key 前缀：sms:code:{phone}
-SMS_FAIL_PREFIX = 'sms:fail:'    # Redis key 前缀：sms:fail:{phone}
-SMS_CODE_TTL = 300               # 验证码有效期（秒）
-SMS_FAIL_LIMIT = 5               # 连续错误上限，超过则作废验证码
+SMS_CODE_PREFIX = 'sms:code:'  # Redis key 前缀：sms:code:{phone}
+SMS_FAIL_PREFIX = 'sms:fail:'  # Redis key 前缀：sms:fail:{phone}
+SMS_CODE_TTL = 300  # 验证码有效期（秒）
+SMS_FAIL_LIMIT = 5  # 连续错误上限，超过则作废验证码
 
 
 def generate_sms_code():
@@ -62,7 +62,7 @@ def save_sms_code(phone, code):
     :type code: str
     """
     cache.set(f'{SMS_CODE_PREFIX}{phone}', code, timeout=SMS_CODE_TTL)
-    cache.delete(f'{SMS_FAIL_PREFIX}{phone}')    # 新验证码下发，重置失败计数
+    cache.delete(f'{SMS_FAIL_PREFIX}{phone}')  # 新验证码下发，重置失败计数
 
 
 def verify_sms_code(phone, code):
@@ -167,69 +167,144 @@ def get_guest_model_by_phone(phone):
 _LIST_FIELDS = ['id', 'name', 'time', 'phone', 'remark']
 
 
-def get_orders_by_phone(phone, status=None):
+def _paginate(qs, offset=None, limit=None):
     """
-    按手机号查订单列表。
+    对 QuerySet 做可选切片。
+
+    - offset/limit 均为 None：返回原 QuerySet（全量）
+    - 仅 offset：从 offset 到末尾
+    - 仅 limit：从头取 limit 条
+    - 两者都有：标准分页
+
+    :param qs: 已排序的 QuerySet
+    :param offset: 起始偏移，None 表示从头
+    :type offset: int or None
+    :param limit: 返回条数，None 表示不限制
+    :type limit: int or None
+    :return: 切片后的 QuerySet
+    """
+    if offset is not None and limit is not None:
+        return qs[offset:offset + limit]
+    if offset is not None:
+        return qs[offset:]
+    if limit is not None:
+        return qs[:limit]
+    return qs
+
+
+def get_orders_by_phone(phone, offset=None, limit=None):
+    """
+    按手机号查订单列表，按时间倒序。
 
     :param phone: 手机号
     :type phone: str
-    :param status: 订单状态过滤，None 表示不过滤
-    :type status: int or None
+    :param offset: 分页偏移，可选
+    :type offset: int or None
+    :param limit: 分页条数，可选
+    :type limit: int or None
     :return: 订单列表（仅含 _LIST_FIELDS 定义的字段）
     :rtype: list[dict]
     """
-    qs = ManeuOrder.objects.filter(phone=phone)
-    if status is not None:
-        qs = qs.filter(status=status)
-    return list(qs.order_by('-time').values(*_LIST_FIELDS))
+    qs = ManeuOrder.objects.filter(phone=phone).order_by('-time')
+    qs = _paginate(qs, offset, limit)
+    return list(qs.values(*_LIST_FIELDS))
 
 
-def get_reports_by_phone(phone, status=None):
+def get_reports_by_phone(phone, offset=None, limit=None):
     """
-    按手机号查报告列表。
+    按手机号查报告列表，按时间倒序。
 
     :param phone: 手机号
     :type phone: str
-    :param status: 报告状态过滤，None 表示不过滤
-    :type status: int or None
+    :param offset: 分页偏移，可选
+    :type offset: int or None
+    :param limit: 分页条数，可选
+    :type limit: int or None
     :return: 报告列表（仅含 _LIST_FIELDS 定义的字段）
     :rtype: list[dict]
     """
-    qs = ManeuReport.objects.filter(phone=phone)
-    if status is not None:
-        qs = qs.filter(status=status)
-    return list(qs.order_by('-time').values(*_LIST_FIELDS))
+    qs = ManeuReport.objects.filter(phone=phone).order_by('-time')
+    qs = _paginate(qs, offset, limit)
+    return list(qs.values(*_LIST_FIELDS))
 
 
-def get_stores_by_phone(phone, status=None):
+def get_stores_by_phone(phone, offset=None, limit=None):
     """
-    按手机号查门店列表。
+    按手机号查门店列表，按时间倒序。
 
     :param phone: 手机号
     :type phone: str
+    :param offset: 分页偏移，可选
+    :type offset: int or None
+    :param limit: 分页条数，可选
+    :type limit: int or None
     :return: 门店列表（仅含 _LIST_FIELDS 定义的字段）
     :rtype: list[dict]
     """
     qs = ManeuStore.objects.filter(phone=phone).order_by('-time')
+    qs = _paginate(qs, offset, limit)
     return list(qs.values(*_LIST_FIELDS))
 
 
-def get_repairs_by_phone(phone):
+def get_repairs_by_phone(phone, offset=None, limit=None):
     """
-    按手机号查维修记录列表。
+    按手机号查维修记录列表，按时间倒序。
 
     :param phone: 手机号
     :type phone: str
+    :param offset: 分页偏移，可选
+    :type offset: int or None
+    :param limit: 分页条数，可选
+    :type limit: int or None
     :return: 维修记录列表（仅含 _LIST_FIELDS 定义的字段）
     :rtype: list[dict]
     """
     qs = ManeuRepair.objects.filter(phone=phone).order_by('-time')
+    qs = _paginate(qs, offset, limit)
     return list(qs.values(*_LIST_FIELDS))
 
 
 # ============================================================================
 # 四、详情查询（按 ID）
 # ============================================================================
+
+# 机构信息对外暴露时需剔除的敏感字段
+_ADMIN_PUBLIC_FIELD_MAP = {
+    'nickname': 'nickname',
+    'phone': 'phone',
+    'location': 'location',
+    'remark': 'remark',
+}
+
+
+def get_admin_by_id(admin_id):
+    """
+    按 id 查机构（管理员）信息。
+
+    采用字段白名单查询，从 SQL 层杜绝 password / 权限等敏感字段泄露；
+    再经 _ADMIN_PUBLIC_FIELD_MAP 映射为对外统一键名，供小程序直接使用。
+
+    :param admin_id: 机构 UUID
+    :type admin_id: str
+    :return: 机构 dict，找不到返回 None
+    :rtype: dict or None
+    """
+    src_fields = list(_ADMIN_PUBLIC_FIELD_MAP.keys())
+    row = (
+        ManeuAdmin.objects
+        .filter(id=admin_id)
+        .values(*src_fields)
+        .first()
+    )
+    if not row:
+        return None
+
+    # 模型字段名 → 对外键名
+    return {
+        out_key: row.get(src_key)
+        for src_key, out_key in _ADMIN_PUBLIC_FIELD_MAP.items()
+    }
+
 
 def get_order_by_id(record_id):
     """

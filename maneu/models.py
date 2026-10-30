@@ -131,12 +131,16 @@ class ManeuReport(models.Model):
 
 
 class ManeuStore(models.Model):
-    id = models.CharField(primary_key=True, max_length=36)
-    time = models.DateTimeField(blank=True, null=True)
+    id = models.CharField(primary_key=True, max_length=36, default=uuid4, editable=False)
     order_id = models.CharField(max_length=36)
     admin_id = models.CharField(max_length=36)
     guest_id = models.CharField(max_length=36)
+    time = models.DateTimeField(blank=True, null=True)
+    name = models.CharField(max_length=36, blank=True, null=True)
+    phone = models.CharField(max_length=36, blank=True, null=True)
+    status = models.CharField(max_length=36, blank=True, null=True)
     content = models.TextField()
+    remark = models.TextField()
 
     class Meta:
         managed = False
