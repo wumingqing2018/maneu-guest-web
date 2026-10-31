@@ -13,9 +13,7 @@ import random
 from django.core.cache import cache
 from django.forms.models import model_to_dict
 
-from maneu.models import (
-    ManeuAdmin, ManeuGuest, ManeuOrder, ManeuReport, ManeuStore, ManeuRepair,
-)
+from maneu.models import *
 
 
 # ============================================================================

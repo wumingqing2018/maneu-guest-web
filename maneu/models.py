@@ -6,7 +6,6 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-from uuid import uuid4
 
 
 class ManeuAdmin(models.Model):
@@ -34,12 +33,14 @@ class ManeuGuest(models.Model):
     time = models.DateTimeField(blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
-    remark = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=36, blank=True, null=True)
     sex = models.CharField(max_length=36, blank=True, null=True)
     age = models.CharField(max_length=36, blank=True, null=True)
     dfh = models.CharField(max_length=36, blank=True, null=True)
     ot = models.CharField(max_length=36, blank=True, null=True)
     em = models.CharField(max_length=36, blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -52,11 +53,11 @@ class ManeuOrder(models.Model):
     guest_id = models.CharField(max_length=36)
     store_id = models.CharField(max_length=36)
     report_id = models.CharField(max_length=36)
-    status = models.CharField(db_column='status', max_length=36, blank=True, null=True)  # Field name made lowercase.
+    status = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField()
     name = models.CharField(max_length=36)
     phone = models.CharField(max_length=36)
-    remark = models.CharField(max_length=512)
+    remark = models.TextField()
     content = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -69,11 +70,11 @@ class ManeuRepair(models.Model):
     admin_id = models.CharField(max_length=36, blank=True, null=True)
     guest_id = models.CharField(max_length=36, blank=True, null=True)
     order_id = models.CharField(max_length=36, blank=True, null=True)
+    time = models.DateTimeField(blank=True, null=True)
     name = models.CharField(max_length=36, blank=True, null=True)
     phone = models.CharField(max_length=36, blank=True, null=True)
-    time = models.DateTimeField(blank=True, null=True)
-    content = models.TextField(blank=True, null=True)
     remark = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -81,15 +82,15 @@ class ManeuRepair(models.Model):
 
 
 class ManeuReport(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid4, editable=False)
+    id = models.CharField(primary_key=True, max_length=36)
     admin_id = models.CharField(max_length=36, blank=True, null=True)
     guest_id = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
     name = models.CharField(max_length=36, blank=True, null=True)
     phone = models.CharField(max_length=36, blank=True, null=True)
-    status = models.CharField(max_length=36, blank=True, null=True)
     remark = models.TextField(blank=True, null=True)
     content = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=36, blank=True, null=True)
     plan = models.CharField(db_column='PLAN', max_length=36, blank=True, null=True)  # Field name made lowercase.
     sex = models.CharField(max_length=36, blank=True, null=True)
     age = models.CharField(max_length=36, blank=True, null=True)
@@ -132,32 +133,17 @@ class ManeuReport(models.Model):
 
 
 class ManeuStore(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid4, editable=False)
-    order_id = models.CharField(max_length=36)
+    id = models.CharField(primary_key=True, max_length=36)
     admin_id = models.CharField(max_length=36)
+    order_id = models.CharField(max_length=36)
     guest_id = models.CharField(max_length=36)
     time = models.DateTimeField(blank=True, null=True)
     name = models.CharField(max_length=36, blank=True, null=True)
     phone = models.CharField(max_length=36, blank=True, null=True)
     status = models.CharField(max_length=36, blank=True, null=True)
-    content = models.TextField()
-    remark = models.TextField()
-
-    class Meta:
-        managed = False
-        db_table = 'maneu_store'
-
-
-class ManeuVerify(models.Model):
-    id = models.CharField(primary_key=True, max_length=36)
-    order_id = models.CharField(max_length=36, blank=True, null=True)
-    guest_id = models.CharField(max_length=36, blank=True, null=True)
-    time = models.DateTimeField(blank=True, null=True)
-    name = models.CharField(max_length=36, blank=True, null=True)
-    call = models.CharField(max_length=36, blank=True, null=True)
     remark = models.TextField(blank=True, null=True)
     content = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'maneu_verify'
+        db_table = 'maneu_store'
