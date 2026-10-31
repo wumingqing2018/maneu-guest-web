@@ -88,6 +88,8 @@ class ManeuReport(models.Model):
     name = models.CharField(max_length=36, blank=True, null=True)
     phone = models.CharField(max_length=36, blank=True, null=True)
     status = models.CharField(max_length=36, blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
     plan = models.CharField(db_column='PLAN', max_length=36, blank=True, null=True)  # Field name made lowercase.
     sex = models.CharField(max_length=36, blank=True, null=True)
     age = models.CharField(max_length=36, blank=True, null=True)
@@ -124,6 +126,7 @@ class ManeuReport(models.Model):
     os_lt = models.CharField(db_column='OS_LT', max_length=36, blank=True, null=True)  # Field name made lowercase.
     os_vt = models.CharField(db_column='OS_VT', max_length=36, blank=True, null=True)  # Field name made lowercase.
     remark = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
