@@ -66,16 +66,6 @@ def record_sms_fail(phone):
 # ============================================================================
 
 def get_guest_by_phone(phone):
-    """按手机号取用户 dict（视图层响应使用）；已剔除 password。"""
-    obj = ManeuGuest.objects.filter(phone=phone).first()
-    if not obj:
-        return None
-    data = model_to_dict(obj)
-    data.pop('password', None)
-    return data
-
-
-def get_guest_model_by_phone(phone):
     """按手机号取 ORM 实例（生成 JWT 等需要属性访问的场景）。"""
     return ManeuGuest.objects.filter(phone=phone).first()
 

@@ -17,7 +17,6 @@ API 视图层：只做参数校验、调用 service、组装 JSON 响应，不�
 import json
 import logging
 
-from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -26,15 +25,7 @@ from common import util_verify, util_jwt
 from common.util_sms import send_sms_code
 from common.util_wechat import get_miniprogram_token, get_miniprogram_phone
 
-from maneu.service import (
-    get_admin_by_id,
-    get_order_by_id, get_store_by_id, get_report_by_id, get_repair_by_id,
-    get_orders_by_phone, get_reports_by_phone, get_stores_by_phone, get_repairs_by_phone,
-    get_guest_by_phone, get_guest_model_by_phone,
-    generate_sms_code, save_sms_code, verify_sms_code,
-    is_sms_locked, record_sms_fail,
-)
-
+from maneu.service import *
 logger = logging.getLogger(__name__)
 
 SMS_SEND_COOLDOWN = 60
@@ -431,31 +422,6 @@ def repair_detail(request):
     })
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
-def guest_detail(request):
-    """当前登录用户信息；手机号由 UserMiddleware 注入。"""
-    phone = util_jwt.get_admin_phone_from_request(request)
-    user = get_guest_by_phone(phone)
-    if not user:
-        return _json_error('用户不存在', status_code=404)
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': user})
-
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def guest_update(request):
-    """
-    TODO: 目前仅返回当前用户信息，尚未实现更新。
-    需补齐：读取请求体 → 校验可改字段（nickname 等）→ service 层 update。
-    """
-    phone = util_jwt.get_admin_phone_from_request(request)
-    user = get_guest_by_phone(phone)
-    if not user:
-        return _json_error('用户不存在', status_code=404)
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': user})
-
-
 # ============================================================================
 # 五、认证（免登录）
 # ============================================================================
@@ -513,7 +479,7 @@ def login_by_sms(request):
         record_sms_fail(call)
         return _json_error('验证码错误或已过期')
 
-    user = get_guest_model_by_phone(call)
+    user = get_guest_by_phone(call)
     if not user:
         return _json_error('该手机号未注册')
 
@@ -541,7 +507,7 @@ def login_by_wechat(request):
     if phone is None:
         return _json_error('获取手机号失败，请联系管理员')
 
-    user = get_guest_model_by_phone(phone)
+    user = get_guest_by_phone(phone)
     if not user:
         return _json_error('该手机号未注册')
 
@@ -571,7 +537,7 @@ def refresh_access_token(request):
     if not user_phone:
         return _json_error('payload 中缺少 user_phone', status_code=401)
 
-    user = get_guest_model_by_phone(user_phone)
+    user = get_guest_by_phone(user_phone)
     if not user:
         return _json_error('用户不存在', status_code=401)
 
