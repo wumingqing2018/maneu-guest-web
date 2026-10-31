@@ -39,6 +39,18 @@ SMS_CODE_TTL = 300  # 验证码有效期（秒）
 SMS_FAIL_LIMIT = 5  # 连续错误上限，超过则作废验证码
 
 
+# 机构信息对外暴露时需剔除的敏感字段
+_ADMIN_PUBLIC_FIELD_MAP = {
+    'nickname': 'nickname',
+    'phone': 'phone',
+    'location': 'location',
+    'remark': 'remark',
+}
+
+# 列表接口统一返回的字段（订单 / 报告 / 门店 / 维修 共用）
+_LIST_FIELDS = ['id', 'name', 'time', 'phone', 'remark']
+
+
 def generate_sms_code():
     """
     生成 6 位数字验证码（字符串，补零）。
@@ -163,10 +175,6 @@ def get_guest_model_by_phone(phone):
 # 三、列表查询（按手机号）
 # ============================================================================
 
-# 列表接口统一返回的字段（订单 / 报告 / 门店 / 维修 共用）
-_LIST_FIELDS = ['id', 'name', 'time', 'phone', 'remark']
-
-
 def _paginate(qs, offset=None, limit=None):
     """
     对 QuerySet 做可选切片。
@@ -206,7 +214,6 @@ def get_orders_by_phone(phone, offset=None, limit=None):
     :rtype: list[dict]
     """
     qs = ManeuOrder.objects.filter(phone=phone).order_by('-time')
-    qs = _paginate(qs, offset, limit)
     return list(qs.values(*_LIST_FIELDS))
 
 
@@ -224,7 +231,6 @@ def get_reports_by_phone(phone, offset=None, limit=None):
     :rtype: list[dict]
     """
     qs = ManeuReport.objects.filter(phone=phone).order_by('-time')
-    qs = _paginate(qs, offset, limit)
     return list(qs.values(*_LIST_FIELDS))
 
 
@@ -242,7 +248,6 @@ def get_stores_by_phone(phone, offset=None, limit=None):
     :rtype: list[dict]
     """
     qs = ManeuStore.objects.filter(phone=phone).order_by('-time')
-    qs = _paginate(qs, offset, limit)
     return list(qs.values(*_LIST_FIELDS))
 
 
@@ -260,22 +265,12 @@ def get_repairs_by_phone(phone, offset=None, limit=None):
     :rtype: list[dict]
     """
     qs = ManeuRepair.objects.filter(phone=phone).order_by('-time')
-    qs = _paginate(qs, offset, limit)
     return list(qs.values(*_LIST_FIELDS))
 
 
 # ============================================================================
 # 四、详情查询（按 ID）
 # ============================================================================
-
-# 机构信息对外暴露时需剔除的敏感字段
-_ADMIN_PUBLIC_FIELD_MAP = {
-    'nickname': 'nickname',
-    'phone': 'phone',
-    'location': 'location',
-    'remark': 'remark',
-}
-
 
 def get_admin_by_id(admin_id):
     """

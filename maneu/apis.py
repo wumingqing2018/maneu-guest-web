@@ -17,6 +17,12 @@ API 视图层
     5. 需登录接口路径含 '/auth/'，由 UserMiddleware 自动拦截
     6. 需登录的详情接口额外校验记录归属（phone 必须匹配当前登录用户）
 
+响应格式总览：
+    成功：HTTP 200
+        {"status": true, "message": "请求成功", "content": <任意类型>}
+    失败：HTTP 400 / 401 / 403 / 404
+        {"status": false, "message": "<错误提示>", "content": {}}
+
 命名规则：
     - 扫码验证类：xxx_verify      （免登录）
     - 列表类：xxx_list            （需登录）
@@ -48,7 +54,6 @@ from maneu.service import (
     get_stores_by_phone,
     get_repairs_by_phone,
     get_guest_by_phone,
-    get_guest_model_by_phone,
     # 验证码
     generate_sms_code,
     save_sms_code,
@@ -256,6 +261,19 @@ def order_verify(request):
 
     请求体（JSON）：
         {"index_id": "<订单 UUID>"}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "time": "2026-02-03T20:51:33",
+                "data": { ...订单 content 解析后的对象... }
+            }
+        }
+
+    失败：
+        {"status": false, "message": "请提交正确的参数" | "记录不存在", "content": {}}
     """
     index_id = _extract_param(request, 'index_id')
     if not util_verify.is_uuid(index_id):
@@ -281,6 +299,19 @@ def store_verify(request):
 
     请求体（JSON）：
         {"index_id": "<门店 UUID>"}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "time": "2026-02-03T20:51:33",
+                "data": { ...门店 content 解析后的对象... }
+            }
+        }
+
+    失败：
+        {"status": false, "message": "请提交正确的参数" | "记录不存在", "content": {}}
     """
     index_id = _extract_param(request, 'index_id')
     if not util_verify.is_uuid(index_id):
@@ -302,10 +333,27 @@ def store_verify(request):
 def report_verify(request):
     """
     API：报告验证
-    根据 index_id 返回报告信息。
+    根据 index_id 返回报告信息（仅返回验光核心字段）。
 
     请求体（JSON）：
         {"index_id": "<报告 UUID>"}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "time": "2026-02-03T21:04:26",
+                "plan": "远用解决方案",
+                "od_va": null, "os_va": null,
+                "od_sph": "-0.75", "os_sph": "-0.50",
+                "od_cyl": "-0.50", "os_cyl": "-0.75",
+                "od_ax": "100.00", "os_ax": "180.00"
+            }
+        }
+
+    失败：
+        {"status": false, "message": "请提交正确的参数" | "记录不存在", "content": {}}
     """
     index_id = _extract_param(request, 'index_id')
     if not util_verify.is_uuid(index_id):
@@ -330,6 +378,19 @@ def repair_verify(request):
 
     请求体（JSON）：
         {"index_id": "<维修记录 UUID>"}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "time": "2026-02-03T20:51:33",
+                "data": { ...维修 content 解析后的对象... }
+            }
+        }
+
+    失败：
+        {"status": false, "message": "请提交正确的参数" | "记录不存在", "content": {}}
     """
     index_id = _extract_param(request, 'index_id')
     if not util_verify.is_uuid(index_id):
@@ -351,6 +412,7 @@ def repair_verify(request):
 # 用途：返回当前登录用户的各类记录列表
 # 说明：手机号由 UserMiddleware 注入到 request.jwt_phone
 #       支持可选 offset / limit 分页参数，不传则返回全量
+# 列表项字段：id / name / time / phone / remark（见 service._LIST_FIELDS）
 # ============================================================================
 
 @csrf_exempt
@@ -361,10 +423,27 @@ def order_list(request):
 
     请求体（JSON，可选分页）：
         {"offset": 0, "limit": 20}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": [
+                {
+                    "id": "cc8ec66d-8f5e-4440-bede-71c024b9790c",
+                    "name": "欧姐",
+                    "time": "2026-02-03T20:51:33",
+                    "phone": "13640651582",
+                    "remark": ""
+                }
+            ]
+        }
+
+    失败：
+        {"status": false, "message": "请求失败", "content": []}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
-    offset, limit = _paging_params(request)
-    data = get_orders_by_phone(phone, offset=offset, limit=limit)
+    data = get_orders_by_phone(phone)
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
@@ -376,10 +455,27 @@ def report_list(request):
 
     请求体（JSON，可选分页）：
         {"offset": 0, "limit": 20}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": [
+                {
+                    "id": "cc8ec66d-8f5e-4440-bede-71c024b9790c",
+                    "name": "XGC223",
+                    "time": "2026-02-03T21:04:26",
+                    "phone": "13640651582",
+                    "remark": "单焦点00"
+                }
+            ]
+        }
+
+    失败：
+        {"status": false, "message": "请求失败", "content": []}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
-    offset, limit = _paging_params(request)
-    data = get_reports_by_phone(phone, offset=offset, limit=limit)
+    data = get_reports_by_phone(phone)
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
@@ -391,10 +487,27 @@ def store_list(request):
 
     请求体（JSON，可选分页）：
         {"offset": 0, "limit": 20}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": [
+                {
+                    "id": "cc8ec66d-8f5e-4440-bede-71c024b9790c",
+                    "name": "某某店",
+                    "time": "2026-02-03T20:51:33",
+                    "phone": "13640651582",
+                    "remark": ""
+                }
+            ]
+        }
+
+    失败：
+        {"status": false, "message": "请求失败", "content": []}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
-    offset, limit = _paging_params(request)
-    data = get_stores_by_phone(phone, offset=offset, limit=limit)
+    data = get_stores_by_phone(phone)
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
@@ -406,10 +519,27 @@ def repair_list(request):
 
     请求体（JSON，可选分页）：
         {"offset": 0, "limit": 20}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": [
+                {
+                    "id": "cc8ec66d-8f5e-4440-bede-71c024b9790c",
+                    "name": "某某",
+                    "time": "2026-02-03T20:51:33",
+                    "phone": "13640651582",
+                    "remark": ""
+                }
+            ]
+        }
+
+    失败：
+        {"status": false, "message": "请求失败", "content": []}
     """
     phone = util_jwt.get_admin_phone_from_request(request)
-    offset, limit = _paging_params(request)
-    data = get_repairs_by_phone(phone, offset=offset, limit=limit)
+    data = get_repairs_by_phone(phone)
     return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
@@ -417,7 +547,9 @@ def repair_list(request):
 # 四、详情类接口（需登录，路径含 /auth/）
 # 用途：根据记录 ID 返回详情
 # 安全：额外校验记录归属，仅允许访问本人记录
-# 说明：admin 字段暂置于响应顶层以兼容小程序，后续可考虑并入 content
+# 说明：admin 字段置于响应顶层以兼容小程序现有读取方式，
+#       其内容由 get_admin_by_id 白名单控制，仅暴露机构公开字段
+#       （nickname / phone / location / remark，具体以 service 层为准）
 # ============================================================================
 
 @csrf_exempt
@@ -428,6 +560,32 @@ def order_detail(request):
 
     请求体（JSON）：
         {"code": "<订单 UUID>"}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "id": "cc8ec66d-8f5e-4440-bede-71c024b9790c",
+                "admin_id": "794ecfda-44d2-11ed-818f-00163e02ac92",
+                "guest_id": "",
+                "name": "欧姐",
+                "phone": "13640651582",
+                "time": "2026-02-03T20:51:33",
+                "remark": "",
+                "status": "3",
+                "content": "[{\"item_type\": \"lens\", ...}]"
+            },
+            "admin": {
+                "nickname": "wumq12",
+                "phone": "13640651582",
+                "location": "...",
+                "remark": "..."
+            }
+        }
+
+    失败：
+        {"status": false, "message": "记录ID无效" | "记录不存在" | "无权访问该记录", "content": {}}
     """
     record_id = _extract_param(request, 'code')
     if not util_verify.is_uuid(record_id):
@@ -442,7 +600,18 @@ def order_detail(request):
         return err
 
     admin = get_admin_by_id(data.get('admin_id'))
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': data, 'admin': admin})
+    content = {
+        'time': data.get('time'),
+        'name': data.get('name'),
+        'phone': data.get('phone'),
+        'remark': data.get('remark'),
+        'content': data.get('content'),
+        'admin_name': admin.get('nickname'),
+        'admin_phone': admin.get('phone'),
+        'admin_content': admin.get('content'),
+        'admin_location': admin.get('location'),
+    }
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
 @csrf_exempt
@@ -453,6 +622,31 @@ def store_detail(request):
 
     请求体（JSON）：
         {"code": "<门店 UUID>"}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "id": "cc8ec66d-8f5e-4440-bede-71c024b9790c",
+                "admin_id": "794ecfda-44d2-11ed-818f-00163e02ac92",
+                "name": "某某店",
+                "phone": "13640651582",
+                "time": "2026-02-03T20:51:33",
+                "remark": "",
+                "content": "{...门店 content 原始 JSON 字符串...}",
+                "status": "3"
+            },
+            "admin": {
+                "nickname": "wumq12",
+                "phone": "13640651582",
+                "location": "...",
+                "remark": "..."
+            }
+        }
+
+    失败：
+        {"status": false, "message": "记录ID无效" | "记录不存在" | "无权访问该记录", "content": {}}
     """
     record_id = _extract_param(request, 'code')
     if not util_verify.is_uuid(record_id):
@@ -466,8 +660,19 @@ def store_detail(request):
     if err:
         return err
 
-    admin = get_admin_by_id(admin_id=data.get('admin_id'))
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': data, 'admin': admin})
+    admin = get_admin_by_id(data.get('admin_id'))
+    content = {
+        'time': data.get('time'),
+        'name': data.get('name'),
+        'phone': data.get('phone'),
+        'remark': data.get('remark'),
+        'content': data.get('content'),
+        'admin_name': admin.get('nickname'),
+        'admin_phone': admin.get('phone'),
+        'admin_content': admin.get('content'),
+        'admin_location': admin.get('location'),
+    }
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
 @csrf_exempt
@@ -478,6 +683,53 @@ def report_detail(request):
 
     请求体（JSON）：
         {"code": "<报告 UUID>"}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "id": "cc8ec66d-8f5e-4440-bede-71c024b9790c",
+                "admin_id": "794ecfda-44d2-11ed-818f-00163e02ac92",
+                "guest_id": "",
+                "name": "XGC223",
+                "phone": "13640651582",
+                "time": "2026-02-03T21:04:26",
+                "remark": "单焦点00",
+                "sex": "男",
+                "age": "18",
+                "pd": "100.00",
+                "ot": "正",
+                "em": "交替",
+                "dfh": "无",
+                "plan": "远用解决方案",
+                "status": "2",
+
+                "od_va": null,  "os_va": null,
+                "od_sph": "-0.75", "os_sph": "-0.50",
+                "od_cyl": "-0.50", "os_cyl": "-0.75",
+                "od_ax": "100.00", "os_ax": "180.00",
+                "od_pr": "3.00",  "os_pr": "3.00",
+                "od_fr": "3.00",  "os_fr": "3.00",
+                "od_add": "50.00", "os_add": "0.00",
+                "od_bc": null,  "os_bc": null,
+                "od_al": null,  "os_al": null,
+                "od_ak": null,  "os_ak": null,
+                "od_ad": null,  "os_ad": null,
+                "od_cct": null, "os_cct": null,
+                "od_lt": null,  "os_lt": null,
+                "od_vt": null,  "os_vt": null
+            },
+            "admin": {
+                "nickname": "wumq12",
+                "phone": "13640651582",
+                "location": "...",
+                "remark": "..."
+            }
+        }
+
+    失败：
+        {"status": false, "message": "记录ID无效" | "记录不存在" | "无权访问该记录", "content": {}}
     """
     record_id = _extract_param(request, 'code')
     if not util_verify.is_uuid(record_id):
@@ -492,7 +744,18 @@ def report_detail(request):
         return err
 
     admin = get_admin_by_id(admin_id=data.get('admin_id'))
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': data, 'admin': admin})
+    content = {
+        'time': data.get('time'),
+        'name': data.get('name'),
+        'phone': data.get('phone'),
+        'remark': data.get('remark'),
+        'content': data.get('content'),
+        'admin_name': admin.get('nickname'),
+        'admin_phone': admin.get('phone'),
+        'admin_content': admin.get('content'),
+        'admin_location': admin.get('location'),
+    }
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
 @csrf_exempt
@@ -503,6 +766,31 @@ def repair_detail(request):
 
     请求体（JSON）：
         {"code": "<维修记录 UUID>"}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "id": "cc8ec66d-8f5e-4440-bede-71c024b9790c",
+                "admin_id": "794ecfda-44d2-11ed-818f-00163e02ac92",
+                "name": "某某",
+                "phone": "13640651582",
+                "time": "2026-02-03T20:51:33",
+                "remark": "",
+                "content": "{...维修 content 原始 JSON 字符串...}",
+                "status": "3"
+            },
+            "admin": {
+                "nickname": "wumq12",
+                "phone": "13640651582",
+                "location": "...",
+                "remark": "..."
+            }
+        }
+
+    失败：
+        {"status": false, "message": "记录ID无效" | "记录不存在" | "无权访问该记录", "content": {}}
     """
     record_id = _extract_param(request, 'code')
     if not util_verify.is_uuid(record_id):
@@ -517,7 +805,18 @@ def repair_detail(request):
         return err
 
     admin = get_admin_by_id(admin_id=data.get('admin_id'))
-    return JsonResponse({'status': True, 'message': '请求成功', 'content': data, 'admin': admin})
+    content = {
+        'time': data.get('time'),
+        'name': data.get('name'),
+        'phone': data.get('phone'),
+        'remark': data.get('remark'),
+        'content': data.get('content'),
+        'admin_name': admin.get('nickname'),
+        'admin_phone': admin.get('phone'),
+        'admin_content': admin.get('content'),
+        'admin_location': admin.get('location'),
+    }
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': content})
 
 
 @csrf_exempt
@@ -529,6 +828,59 @@ def guest_detail(request):
 
     请求体（JSON）：
         {}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "id": "...",
+                "phone": "13640651582",
+                "nickname": "...",
+                "...": "..."
+            }
+        }
+
+    说明：
+        content 为 ManeuGuest 的 model_to_dict 结果，已剔除 password 字段。
+
+    失败：
+        {"status": false, "message": "用户不存在", "content": {}}  （HTTP 404）
+    """
+    phone = util_jwt.get_admin_phone_from_request(request)
+    user = get_guest_by_phone(phone)
+    if not user:
+        return _json_error('用户不存在', status_code=404)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': user})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def guest_update(request):
+    """
+    API：当前登录用户信息
+    手机号由 UserMiddleware 注入到 request.jwt_phone。
+
+    请求体（JSON）：
+        {}
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "请求成功",
+            "content": {
+                "id": "...",
+                "phone": "13640651582",
+                "nickname": "...",
+                "...": "..."
+            }
+        }
+
+    说明：
+        content 为 ManeuGuest 的 model_to_dict 结果，已剔除 password 字段。
+
+    失败：
+        {"status": false, "message": "用户不存在", "content": {}}  （HTTP 404）
     """
     phone = util_jwt.get_admin_phone_from_request(request)
     user = get_guest_by_phone(phone)
@@ -557,6 +909,14 @@ def send_sms(request):
         3. 冷却检查（同一手机号 60 秒内只能发送一次）
         4. 生成验证码 → 存 Redis
         5. 调用阿里云发送（失败时清理验证码与冷却）
+
+    响应格式（JSON）：
+        {"status": true, "message": "验证码已发送", "content": {}}
+
+    失败：
+        {"status": false, "message": "请输入正确的手机号" | "当前账号未注册"
+                                      | "发送过于频繁，请稍后再试" | "<发送失败原因>",
+         "content": {}}
     """
     call = _extract_param(request, 'call')
 
@@ -565,7 +925,7 @@ def send_sms(request):
         return _json_error('请输入正确的手机号')
 
     # 2. 手机号必须已注册
-    if not get_guest_model_by_phone(call):
+    if not get_guest_by_phone(call):
         return _json_error('当前账号未注册')
 
     # 3. 冷却检查，防止短信轰炸
@@ -602,6 +962,22 @@ def login_by_sms(request):
         2. 检查是否因错误次数过多被锁定
         3. 校验验证码（Redis，成功后自动删除）
         4. 查库拿用户，生成 JWT
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "登录成功",
+            "content": {
+                "access_token": "<JWT>",
+                "refresh_token": "<JWT>"
+            }
+        }
+
+    失败：
+        {"status": false, "message": "请输入正确的手机号" | "验证码格式错误"
+                                      | "验证码错误次数过多，请重新获取"
+                                      | "验证码错误或已过期" | "该手机号未注册",
+         "content": {}}
     """
     params = _parse_json(request)
     call = params.get('call')
@@ -623,7 +999,7 @@ def login_by_sms(request):
         return _json_error('验证码错误或已过期')
 
     # 4. 查用户
-    user = get_guest_model_by_phone(call)
+    user = get_guest_by_phone(call)
     if not user:
         return _json_error('该手机号未注册')
 
@@ -645,6 +1021,23 @@ def login_by_wechat(request):
         1. 接收小程序 wx.login 返回的 code
         2. 用 code 换取手机号（token 失效时自动刷新重试）
         3. 查库拿用户，生成 JWT
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "登录成功",
+            "content": {
+                "access_token": "<JWT>",
+                "refresh_token": "<JWT>"
+            }
+        }
+
+    失败：
+        {"status": false, "message": "登录失败：请提交正确的微信号"
+                                      | "系统错误，无法获取微信授权"
+                                      | "获取手机号失败，请联系管理员"
+                                      | "该手机号未注册",
+         "content": {}}
     """
     code = _extract_param(request, 'code')
 
@@ -661,7 +1054,7 @@ def login_by_wechat(request):
         return _json_error('获取手机号失败，请联系管理员')
 
     # 必须用 ORM 实例（生成 JWT 需要 user.id / user.phone）
-    user = get_guest_model_by_phone(phone)
+    user = get_guest_by_phone(phone)
     if not user:
         return _json_error('该手机号未注册')
 
@@ -681,6 +1074,23 @@ def refresh_access_token(request):
     用 refresh_token 换新的 access_token 与 refresh_token。
     ⚠️ refresh_token 采用轮换策略：每次刷新后旧 refresh_token 不再保证有效，
        客户端必须保存响应中的新 refresh_token。
+
+    响应格式（JSON）：
+        {
+            "status": true,
+            "message": "刷新成功",
+            "content": {
+                "access_token": "<JWT>",
+                "refresh_token": "<JWT>"
+            }
+        }
+
+    失败（HTTP 401）：
+        {"status": false, "message": "缺少 refresh_token"
+                                      | "refresh_token 无效或已过期"
+                                      | "payload 中缺少 user_phone"
+                                      | "用户不存在",
+         "content": {}}
     """
     token = _extract_param(request, 'refresh_token')
     if not token:
@@ -695,7 +1105,7 @@ def refresh_access_token(request):
         return _json_error('payload 中缺少 user_phone', status_code=401)
 
     # 必须用 ORM 实例（生成 JWT 需要 user.id / user.phone）
-    user = get_guest_model_by_phone(user_phone)
+    user = get_guest_by_phone(user_phone)
     if not user:
         return _json_error('用户不存在', status_code=401)
 
@@ -716,7 +1126,14 @@ def refresh_access_token(request):
 # ============================================================================
 
 def VQwxjTJTH5(request):
-    # 替换为校验文件中的真实内容
-    from django.http import HttpResponse
+    """
+    微信小程序服务器域名校验文件（纯文本响应）。
+
+    URL：https://<域名>/VQwxjTJTH5.txt
+    微信会请求该地址校验域名归属，内容需与小程序后台下载的校验文件一致。
+
+    响应格式（text/plain）：
+        c8966dfaa24aa981832913b888981534
+    """
     file_content = "c8966dfaa24aa981832913b888981534"
     return HttpResponse(file_content, content_type='text/plain')
