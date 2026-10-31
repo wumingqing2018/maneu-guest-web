@@ -26,14 +26,7 @@ from common import util_verify, util_jwt
 from common.util_sms import send_sms_code
 from common.util_wechat import get_miniprogram_token, get_miniprogram_phone
 
-from maneu.service import (
-    get_admin_by_id,
-    get_order_by_id, get_store_by_id, get_report_by_id, get_repair_by_id,
-    get_orders_by_phone, get_reports_by_phone, get_stores_by_phone, get_repairs_by_phone,
-    get_guest_by_phone, get_guest_model_by_phone,
-    generate_sms_code, save_sms_code, verify_sms_code,
-    is_sms_locked, record_sms_fail,
-)
+from maneu.service import *
 
 logger = logging.getLogger(__name__)
 
