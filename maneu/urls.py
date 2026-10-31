@@ -43,8 +43,6 @@ urlpatterns = [
 
 
     # ==================== 三、业务 API（需登录，路径含 /auth/） ====================
-    path('apis/auth/guest_detail/', apis.guest_detail, name='guest_detail'),
-    path('apis/auth/guest_update/', apis.guest_update, name='guest_update'),
 
     # 列表类
     path('apis/auth/order_list/', apis.order_list, name='order_list'),
@@ -63,6 +61,5 @@ urlpatterns = [
     path('apis/auth/store_detail/', apis.store_detail, name='store_detail'),
     path('apis/auth/report_detail/', apis.report_detail, name='report_detail'),
     path('apis/auth/repair_detail/', apis.repair_detail, name='repair_detail'),
-
 
 ]
