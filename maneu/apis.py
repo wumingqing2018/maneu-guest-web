@@ -142,7 +142,7 @@ def _fetch_phone_with_retry(code, access_token):
 def _generate_jwt_for_user(user):
     """为 ORM 用户实例生成 JWT 令牌对。"""
     return {
-        'access_token':  util_jwt.generate_access_token(user),
+        'access_token': util_jwt.generate_access_token(user),
         'refresh_token': util_jwt.generate_refresh_token(user),
     }
 
@@ -579,7 +579,7 @@ def refresh_access_token(request):
         'status': True,
         'message': '刷新成功',
         'content': {
-            'access_token':  util_jwt.generate_access_token(user),
+            'access_token': util_jwt.generate_access_token(user),
             'refresh_token': util_jwt.generate_refresh_token(user),
         },
     })
