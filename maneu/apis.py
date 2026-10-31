@@ -11,7 +11,7 @@ API 视图层：只做参数校验、调用 service、组装 JSON 响应，不�
     - 请求体一律 application/json
     - 路径含 /auth/ 的接口由 UserMiddleware 拦截并注入 jwt_phone
     - 详情类接口额外校验记录归属（记录 phone 必须等于登录用户）
-    - 命名：xxx_verify（免登录扫码） / xxx_list / xxx_detail / 认证类
+    - 每个接口自包含：参数校验 → 查库 → 组装响应，不通过公共流程函数委托
 """
 
 import json
@@ -26,7 +26,14 @@ from common import util_verify, util_jwt
 from common.util_sms import send_sms_code
 from common.util_wechat import get_miniprogram_token, get_miniprogram_phone
 
-from maneu.service import *
+from maneu.service import (
+    get_admin_by_id,
+    get_order_by_id, get_store_by_id, get_report_by_id, get_repair_by_id,
+    get_orders_by_phone, get_reports_by_phone, get_stores_by_phone, get_repairs_by_phone,
+    get_guest_by_phone, get_guest_model_by_phone,
+    generate_sms_code, save_sms_code, verify_sms_code,
+    is_sms_locked, record_sms_fail,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +42,7 @@ SMS_SEND_PREFIX = 'sms:send:'
 
 
 # ============================================================================
-# 内部辅助
+# 通用工具（输入/输出清晰、无业务耦合）
 # ============================================================================
 
 def _parse_json(request):
@@ -48,10 +55,12 @@ def _parse_json(request):
 
 
 def _extract_param(request, key):
+    """从请求体取单个参数；不存在返回 None。"""
     return _parse_json(request).get(key)
 
 
 def _json_error(message, status_code=400):
+    """统一错误响应。"""
     return JsonResponse(
         {'status': False, 'message': message, 'content': {}},
         status=status_code,
@@ -138,72 +147,8 @@ def _generate_jwt_for_user(user):
     }
 
 
-def _verify_response(data):
-    """扫码验证类接口的公共响应：{time, data: <content 解析结果>}。"""
-    return JsonResponse({
-        'status': True,
-        'message': '请求成功',
-        'content': {
-            'time': data.get('time'),
-            'data': _safe_json(data.get('content')),
-        },
-    })
-
-
-def _list_response(getter, request):
-    """列表类接口的公共响应；getter(phone, offset, limit) 返回 list。"""
-    phone = util_jwt.get_admin_phone_from_request(request)
-    offset, limit = _paging_params(request)
-    return JsonResponse({
-        'status': True,
-        'message': '请求成功',
-        'content': getter(phone, offset, limit),
-    })
-
-
-def _detail_payload(data):
-    """
-    详情类接口的公共载荷：记录字段 + 所属机构公开信息。
-    content 保持原始 JSON 字符串，由客户端（小程序 parseContent）解析。
-    """
-    admin = get_admin_by_id(data.get('admin_id')) or {}
-    return {
-        'time':           data.get('time'),
-        'name':           data.get('name'),
-        'phone':          data.get('phone'),
-        'remark':         data.get('remark'),
-        'content':        data.get('content'),
-        'admin_name':     admin.get('nickname'),
-        'admin_phone':    admin.get('phone'),
-        'admin_location': admin.get('location'),
-        # 白名单不含 content，故恒为 None；保留键名兼容旧客户端
-        'admin_content':  admin.get('content'),
-    }
-
-
-def _detail_handler(getter, request):
-    """详情类接口的公共流程：取 code → 查记录 → 校验归属 → 组装响应。"""
-    record_id = _extract_param(request, 'code')
-    if not util_verify.is_uuid(record_id):
-        return _json_error('记录ID无效')
-
-    data = getter(record_id)
-    if not data:
-        return _json_error('记录不存在', status_code=404)
-
-    err = _check_owner(request, data)
-    if err:
-        return err
-
-    return JsonResponse({
-        'status': True,
-        'message': '请求成功',
-        'content': _detail_payload(data),
-    })
-
-
 # ============================================================================
-# 二、扫码验证（免登录）
+# 二、扫码验证（免登录）—— 每个接口独立
 # ============================================================================
 
 @csrf_exempt
@@ -217,7 +162,15 @@ def order_verify(request):
     data = get_order_by_id(index_id)
     if not data:
         return _json_error('记录不存在')
-    return _verify_response(data)
+
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': {
+            'time': data.get('time'),
+            'data': _safe_json(data.get('content')),
+        },
+    })
 
 
 @csrf_exempt
@@ -231,7 +184,15 @@ def store_verify(request):
     data = get_store_by_id(index_id)
     if not data:
         return _json_error('记录不存在')
-    return _verify_response(data)
+
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': {
+            'time': data.get('time'),
+            'data': _safe_json(data.get('content')),
+        },
+    })
 
 
 @csrf_exempt
@@ -240,7 +201,7 @@ def report_verify(request):
     """
     报告扫码验证。请求 {"index_id": "<UUID>"}。
 
-    ⚠️ 结构变更：旧版返回平铺的 od_sph / os_sph 等（历史数据多为 null），
+    ⚠️ 结构变更：旧版返回平铺的 od_sph / os_sph（历史数据多为 null），
        现改为 data.od.sph / data.os.sph；扫码端需同步读取 content.data.od.sph。
     """
     index_id = _extract_param(request, 'index_id')
@@ -250,7 +211,15 @@ def report_verify(request):
     data = get_report_by_id(index_id)
     if not data:
         return _json_error('记录不存在')
-    return _verify_response(data)
+
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': {
+            'time': data.get('time'),
+            'data': _safe_json(data.get('content')),
+        },
+    })
 
 
 @csrf_exempt
@@ -264,73 +233,202 @@ def repair_verify(request):
     data = get_repair_by_id(index_id)
     if not data:
         return _json_error('记录不存在')
-    return _verify_response(data)
+
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': {
+            'time': data.get('time'),
+            'data': _safe_json(data.get('content')),
+        },
+    })
 
 
 # ============================================================================
-# 三、列表（需登录，路径含 /auth/）
+# 三、列表（需登录，路径含 /auth/）—— 每个接口独立
 # 手机号由 UserMiddleware 注入；可选 offset / limit 分页。
 # ============================================================================
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def order_list(request):
-    """当前用户订单列表。"""
-    return _list_response(get_orders_by_phone, request)
+    """当前用户订单列表；可选 {"offset": 0, "limit": 20}。"""
+    phone = util_jwt.get_admin_phone_from_request(request)
+    offset, limit = _paging_params(request)
+    data = get_orders_by_phone(phone, offset, limit)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def report_list(request):
-    """当前用户报告列表。"""
-    return _list_response(get_reports_by_phone, request)
+    """当前用户报告列表；可选 {"offset": 0, "limit": 20}。"""
+    phone = util_jwt.get_admin_phone_from_request(request)
+    offset, limit = _paging_params(request)
+    data = get_reports_by_phone(phone, offset, limit)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def store_list(request):
-    """当前用户门店列表。"""
-    return _list_response(get_stores_by_phone, request)
+    """当前用户门店列表；可选 {"offset": 0, "limit": 20}。"""
+    phone = util_jwt.get_admin_phone_from_request(request)
+    offset, limit = _paging_params(request)
+    data = get_stores_by_phone(phone, offset, limit)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def repair_list(request):
-    """当前用户维修记录列表。"""
-    return _list_response(get_repairs_by_phone, request)
+    """当前用户维修记录列表；可选 {"offset": 0, "limit": 20}。"""
+    phone = util_jwt.get_admin_phone_from_request(request)
+    offset, limit = _paging_params(request)
+    data = get_repairs_by_phone(phone, offset, limit)
+    return JsonResponse({'status': True, 'message': '请求成功', 'content': data})
 
 
 # ============================================================================
-# 四、详情（需登录，路径含 /auth/）
+# 四、详情（需登录，路径含 /auth/）—— 每个接口独立
 # 需校验记录归属，仅允许访问本人记录。
+# admin_content 恒为 None：机构白名单不含 content（疑似授权 token）。
 # ============================================================================
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def order_detail(request):
     """订单详情。请求 {"code": "<UUID>"}。"""
-    return _detail_handler(get_order_by_id, request)
+    record_id = _extract_param(request, 'code')
+    if not util_verify.is_uuid(record_id):
+        return _json_error('记录ID无效')
+
+    data = get_order_by_id(record_id)
+    if not data:
+        return _json_error('记录不存在', status_code=404)
+
+    err = _check_owner(request, data)
+    if err:
+        return err
+
+    admin = get_admin_by_id(data.get('admin_id')) or {}
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': {
+            'time': data.get('time'),
+            'name': data.get('name'),
+            'phone': data.get('phone'),
+            'remark': data.get('remark'),
+            'content': data.get('content'),
+            'admin_name': admin.get('nickname'),
+            'admin_phone': admin.get('phone'),
+            'admin_location': admin.get('location'),
+            'admin_content': admin.get('content'),  # 白名单不含 → 恒为 None
+        },
+    })
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def store_detail(request):
     """门店详情。请求 {"code": "<UUID>"}。"""
-    return _detail_handler(get_store_by_id, request)
+    record_id = _extract_param(request, 'code')
+    if not util_verify.is_uuid(record_id):
+        return _json_error('记录ID无效')
+
+    data = get_store_by_id(record_id)
+    if not data:
+        return _json_error('记录不存在', status_code=404)
+
+    err = _check_owner(request, data)
+    if err:
+        return err
+
+    admin = get_admin_by_id(data.get('admin_id')) or {}
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': {
+            'time': data.get('time'),
+            'name': data.get('name'),
+            'phone': data.get('phone'),
+            'remark': data.get('remark'),
+            'content': data.get('content'),
+            'admin_name': admin.get('nickname'),
+            'admin_phone': admin.get('phone'),
+            'admin_location': admin.get('location'),
+            'admin_content': admin.get('content'),  # 白名单不含 → 恒为 None
+        },
+    })
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def report_detail(request):
     """报告详情。请求 {"code": "<UUID>"}。"""
-    return _detail_handler(get_report_by_id, request)
+    record_id = _extract_param(request, 'code')
+    if not util_verify.is_uuid(record_id):
+        return _json_error('记录ID无效')
+
+    data = get_report_by_id(record_id)
+    if not data:
+        return _json_error('记录不存在', status_code=404)
+
+    err = _check_owner(request, data)
+    if err:
+        return err
+
+    admin = get_admin_by_id(data.get('admin_id')) or {}
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': {
+            'time': data.get('time'),
+            'name': data.get('name'),
+            'phone': data.get('phone'),
+            'remark': data.get('remark'),
+            'content': data.get('content'),
+            'admin_name': admin.get('nickname'),
+            'admin_phone': admin.get('phone'),
+            'admin_location': admin.get('location'),
+            'admin_content': admin.get('content'),  # 白名单不含 → 恒为 None
+        },
+    })
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def repair_detail(request):
     """维修记录详情。请求 {"code": "<UUID>"}。"""
-    return _detail_handler(get_repair_by_id, request)
+    record_id = _extract_param(request, 'code')
+    if not util_verify.is_uuid(record_id):
+        return _json_error('记录ID无效')
+
+    data = get_repair_by_id(record_id)
+    if not data:
+        return _json_error('记录不存在', status_code=404)
+
+    err = _check_owner(request, data)
+    if err:
+        return err
+
+    admin = get_admin_by_id(data.get('admin_id')) or {}
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': {
+            'time': data.get('time'),
+            'name': data.get('name'),
+            'phone': data.get('phone'),
+            'remark': data.get('remark'),
+            'content': data.get('content'),
+            'admin_name': admin.get('nickname'),
+            'admin_phone': admin.get('phone'),
+            'admin_location': admin.get('location'),
+            'admin_content': admin.get('content'),  # 白名单不含 → 恒为 None
+        },
+    })
 
 
 @csrf_exempt

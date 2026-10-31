@@ -3,6 +3,9 @@ maneu/service.py
 
 业务服务层：短信验证码 + 各业务对象的数据查询。
 视图层只通过本模块访问数据库，不直接操作 Model。
+
+约定：每个 get_* 函数自包含（filter + 排序 + 可选分页 + 字段裁剪），
+     不通过公共函数委托，便于逐个独立修改。
 """
 
 import random
@@ -80,14 +83,14 @@ def get_guest_model_by_phone(phone):
 
 
 # ============================================================================
-# 三、列表查询（按手机号）
+# 三、通用工具（供列表函数使用）
 # ============================================================================
 
 _LIST_FIELDS = ['id', 'name', 'time', 'phone', 'remark']
 
 
 def _paginate(qs, offset=None, limit=None):
-    """可选切片；offset/limit 均为 None 时返回全量。"""
+    """对 QuerySet 做可选切片；offset/limit 均为 None 时返回全量。"""
     if offset is not None and limit is not None:
         return qs[offset:offset + limit]
     if offset is not None:
@@ -97,35 +100,47 @@ def _paginate(qs, offset=None, limit=None):
     return qs
 
 
-def _list_by_phone(model, phone, offset=None, limit=None):
-    """按手机号取列表（时间倒序），只返回 _LIST_FIELDS。"""
-    qs = model.objects.filter(phone=phone).order_by('-time')
-    return list(_paginate(qs, offset, limit).values(*_LIST_FIELDS))
-
+# ============================================================================
+# 四、列表查询（每个函数独立：filter + 排序 + 分页 + 字段裁剪）
+# ============================================================================
 
 def get_orders_by_phone(phone, offset=None, limit=None):
-    return _list_by_phone(ManeuOrder, phone, offset, limit)
+    """按手机号取订单列表（时间倒序）；可选 offset/limit 分页。"""
+    qs = ManeuOrder.objects.filter(phone=phone).order_by('-time')
+    qs = _paginate(qs, offset, limit)
+    return list(qs.values(*_LIST_FIELDS))
 
 
 def get_reports_by_phone(phone, offset=None, limit=None):
-    return _list_by_phone(ManeuReport, phone, offset, limit)
+    """按手机号取报告列表（时间倒序）；可选 offset/limit 分页。"""
+    qs = ManeuReport.objects.filter(phone=phone).order_by('-time')
+    qs = _paginate(qs, offset, limit)
+    return list(qs.values(*_LIST_FIELDS))
 
 
 def get_stores_by_phone(phone, offset=None, limit=None):
-    return _list_by_phone(ManeuStore, phone, offset, limit)
+    """按手机号取门店列表（时间倒序）；可选 offset/limit 分页。"""
+    qs = ManeuStore.objects.filter(phone=phone).order_by('-time')
+    qs = _paginate(qs, offset, limit)
+    return list(qs.values(*_LIST_FIELDS))
 
 
 def get_repairs_by_phone(phone, offset=None, limit=None):
-    return _list_by_phone(ManeuRepair, phone, offset, limit)
+    """按手机号取维修记录列表（时间倒序）；可选 offset/limit 分页。"""
+    qs = ManeuRepair.objects.filter(phone=phone).order_by('-time')
+    qs = _paginate(qs, offset, limit)
+    return list(qs.values(*_LIST_FIELDS))
 
 
 # ============================================================================
-# 四、详情查询（按 ID）
+# 五、详情查询（每个函数独立：filter + first + model_to_dict）
 # ============================================================================
 
-# 机构对外公开的字段。显式白名单，防止 password / 授权 token 等泄露。
-# 目前模型字段名与响应键名一致；若日后需重命名，改为 {模型字段: 响应键} 字典。
-_ADMIN_PUBLIC_FIELDS = ('nickname', 'phone', 'location', 'remark')
+# 机构对外公开的字段白名单。
+# ⚠️ ManeuAdmin 实际字段：content / email / id / level / location /
+#    nickname / password / phone / state / time / username
+#    不含 remark；content 疑似授权 token，不放入白名单。
+_ADMIN_PUBLIC_FIELDS = ('nickname', 'phone', 'location')
 
 
 def get_admin_by_id(admin_id):
@@ -139,22 +154,25 @@ def get_admin_by_id(admin_id):
     return dict(row) if row else None
 
 
-def _get_by_id(model, record_id):
-    obj = model.objects.filter(id=record_id).first()
+def get_order_by_id(record_id):
+    """按 id 取订单详情。"""
+    obj = ManeuOrder.objects.filter(id=record_id).first()
     return model_to_dict(obj) if obj else None
 
 
-def get_order_by_id(record_id):
-    return _get_by_id(ManeuOrder, record_id)
-
-
 def get_report_by_id(record_id):
-    return _get_by_id(ManeuReport, record_id)
+    """按 id 取报告详情。"""
+    obj = ManeuReport.objects.filter(id=record_id).first()
+    return model_to_dict(obj) if obj else None
 
 
 def get_store_by_id(record_id):
-    return _get_by_id(ManeuStore, record_id)
+    """按 id 取门店详情。"""
+    obj = ManeuStore.objects.filter(id=record_id).first()
+    return model_to_dict(obj) if obj else None
 
 
 def get_repair_by_id(record_id):
-    return _get_by_id(ManeuRepair, record_id)
+    """按 id 取维修记录详情。"""
+    obj = ManeuRepair.objects.filter(id=record_id).first()
+    return model_to_dict(obj) if obj else None
