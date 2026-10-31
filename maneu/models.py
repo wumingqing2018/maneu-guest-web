@@ -112,18 +112,3 @@ class ManeuStore(models.Model):
     class Meta:
         managed = False
         db_table = 'maneu_store'
-
-
-class ManeuVerify(models.Model):
-    id = models.CharField(primary_key=True, max_length=36)
-    order_id = models.CharField(max_length=36, blank=True, null=True)
-    guest_id = models.CharField(max_length=36, blank=True, null=True)
-    time = models.DateTimeField(blank=True, null=True)
-    name = models.CharField(max_length=36, blank=True, null=True)
-    call = models.CharField(max_length=36, blank=True, null=True)
-    remark = models.TextField(blank=True, null=True)
-    content = models.TextField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'maneu_verify'
