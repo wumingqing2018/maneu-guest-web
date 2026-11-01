@@ -1,139 +1,35 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block css %}
-    <link href="{% static 'css/store.css' %}" rel="stylesheet">
-{% endblock %}
-{% block content %}
-    <body>
-
-    <div class="mobile-wrapper">
-        <!-- 品牌区 -->
-        <div class="brand-section">
-            <img src="{% static 'img/maneu/logo.svg' %}" alt="徕可" class="brand-logo">
-            <div class="brand-text">
-                <h1>徕可官方授权许可正品</h1>
-                <h2>Officially Licensed Products</h2>
-            </div>
-        </div>
-
-        <!-- 验证卡片（内容由JS动态生成） -->
-        <div id="verify-card" class="verify-card"></div>
-
-        <!-- 小程序引导 -->
-        <div class="footer-guide">
-            <img src="{% static 'img/maneu/code.jpg' %}" alt="小程序码" class="qrcode-img">
-            <p class="guide-text">微信扫码进入小程序</p>
-            <p class="guide-sub">了解更多徕可官方授权信息</p>
-        </div>
-
-        <!-- ICP备案 -->
-        <div class="footer-icp">
-            <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener">粤ICP备2023070483号</a>
-        </div>
-    </div>
-
-    </body>
-{% endblock %}
-{% block javascript %}
-    <script>
-        // 后端注入数据
-        let index_id = "{{ index_id|escapejs }}";
-        let report_verify_url = "{% url 'report_verify' %}";
-
-        // XSS 防护函数
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function (m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-
-        $(document).ready(function () {
-            var $card = $('#verify-card');
-
-            if (!index_id || index_id.trim() === "") {
-                $card.html('<div class="info-placeholder"> 未提供订单号，请使用正确的链接访问</div>');
-                return;
-            }
-
-            $card.html('<div class="loading-placeholder"><span class="spinner"></span> 正在验证报告信息...</div>');
-
-            $.ajax({
-                url: report_verify_url,
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({index_id: index_id}),
-                dataType: "json",
-                timeout: 10000,
-                success: function (res) {
-                    console.log(res);
-                    renderReport(res);
-                },
-                error: function (xhr, status, error) {
-                    console.error("AJAX Error:", status, error);
-                    $card.html(`
-                    <div class="status-badge fail">请求失败</div>
-                    <div class="fail-message">网络错误或服务器无响应，请刷新页面后重试。</div>
-                `);
-                }
-            });
-
-            function addProp($grid, key, val) {
-                if (val !== undefined && val !== null && String(val).trim() !== '') {
-                    $grid.append(`
-                        <div class="prop-item">
-                            <span class="prop-key">${escapeHtml(key)}</span>
-                            <span class="prop-val">${escapeHtml(String(val))}</span>
-                        </div>
-                    `);
-                }
-            }
-
-            function renderReport(data) {
-                $card.empty();
-                var isSuccess = (data.status === true || data.status === 'true');
-                var content = data.content || {};
-
-                if (isSuccess && content) {
-                    $card.append('<div class="status-badge success"> 验光报告验证通过</div>');
-                    if (content.time) {
-                        $card.append(`<div class="time-section">验光时间 <strong>${escapeHtml(content.time)}</strong></div>`);
-                    }
-                    if (content.plan) {
-                        $card.append(`<div class="plan-info">处方类型：${escapeHtml(content.plan)}</div>`);
-                    }
-
-                    // 右眼 (OD)
-                    var $odBlock = $('<div class="product-item"></div>');
-                    $odBlock.append('<div class="first-property"><span class="first-key">右眼 (OD)</span></div>');
-                    var $odGrid = $('<div class="props-grid"></div>');
-                    addProp($odGrid, '球镜 (SPH)', content.od_sph);
-                    addProp($odGrid, '柱镜 (CYL)', content.od_cyl);
-                    addProp($odGrid, '轴位 (AX)', content.od_ax);
-                    addProp($odGrid, '视力 (VA)', content.od_va);
-                    $odBlock.append($odGrid);
-                    $card.append($odBlock);
-
-                    // 左眼 (OS)
-                    var $osBlock = $('<div class="product-item"></div>');
-                    $osBlock.append('<div class="first-property"><span class="first-key">左眼 (OS)</span></div>');
-                    var $osGrid = $('<div class="props-grid"></div>');
-                    addProp($osGrid, '球镜 (SPH)', content.os_sph);
-                    addProp($osGrid, '柱镜 (CYL)', content.os_cyl);
-                    addProp($osGrid, '轴位 (AX)', content.os_ax);
-                    addProp($osGrid, '视力 (VA)', content.os_va);
-                    $osBlock.append($osGrid);
-                    $card.append($osBlock);
-
-                } else {
-                    $card.append('<div class="status-badge fail"> 验证失败</div>');
-                    var message = data.message ? escapeHtml(data.message) : '未查询到验光报告信息。';
-                    $card.append(`<div class="fail-message">${message}</div>`);
-                }
-            }
-        });
-    </script>
-{% endblock %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2775.1">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
+    p.p5 {margin: 0.0px 0.0px 12.0px 0.0px; font: 12.0px 'Songti SC'; -webkit-text-stroke: #000000}
+    p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; color: #0000e9; -webkit-text-stroke: #0000e9}
+    span.s1 {font-kerning: none}
+    span.s2 {font: 12.0px 'Lucida Grande'; font-kerning: none}
+    span.s3 {font: 12.0px Times; font-kerning: none}
+    span.s4 {font: 12.0px 'Songti SC'; text-decoration: underline ; font-kerning: none}
+    span.s5 {text-decoration: underline ; font-kerning: none}
+    span.s6 {font: 12.0px Times; text-decoration: underline ; font-kerning: none}
+    span.s7 {font: 12.0px 'Lucida Grande'; text-decoration: underline ; font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">{% extends 'base.html' %} {% load static %} {% block css %} {% endblock %} {% block content %}</span></p>
+<p class="p1"><span class="s1"><img src="file:///Attachment.png" alt="Attachment.png"></span></p>
+<h1 style="margin: 0.0px 0.0px 16.1px 0.0px; font: 24.0px 'Songti SC'; -webkit-text-stroke: #000000"><span class="s1"><b>寰曞彲瀹樻柟鎺堟潈璁稿彲姝ｅ搧</b><b></b></span></h1>
+<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Times; -webkit-text-stroke: #000000"><span class="s1"><b>Officially Licensed Products</b></span></h2>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><img src="file:///Attachment.png" alt="Attachment.png"></span></p>
+<p class="p5"><span class="s1">寰俊鎵爜杩涘叆灏忕▼搴</span><span class="s2">�</span></p>
+<p class="p5"><span class="s1">浜嗚</span><span class="s3">В</span><span class="s1">鏇村寰曞彲瀹樻柟鎺堟潈淇</span><span class="s3">℃</span><span class="s1">伅</span></p>
+<p class="p6"><span class="s4"><a href="https://beian.miit.gov.cn/">绮<span class="s5"></span><span class="s6">CP</span><span class="s5">澶</span><span class="s7">�</span><span class="s6">2023070483</span><span class="s5">鍙</span><span class="s7">�</span></a></span></p>
+<p class="p1"><span class="s1">{% endblock %} {% block javascript %} {% endblock %}</span></p>
+</body>
+</html>

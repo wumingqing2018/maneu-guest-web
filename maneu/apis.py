@@ -514,6 +514,7 @@ def login_by_wechat(request):
     return JsonResponse({
         'status': True,
         'message': '登录成功',
+        'call': phone,
         'content': _generate_jwt_for_user(user),
     })
 
