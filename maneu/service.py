@@ -19,6 +19,10 @@ from django.utils import timezone
 from maneu.models import (
     ManeuAdmin, ManeuGuest, ManeuOrder, ManeuReport, ManeuStore, ManeuRepair,
 )
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 
 # ============================================================================
@@ -111,11 +115,12 @@ def get_or_create_guest_by_wechat(open_id, phone=None):
     open_id 可为 None（微信授权 code 换不到 open_id 时降级为手机号登录）：
       - open_id=None：跳过 open_id 查询，仅按 phone 查
       - open_id=None 且 phone 命中的用户已有 open_id：保留原值不覆盖
-      - 冲突判定：仅当 open_id 和 user.open_id 都有值且不等时才报错
+      - 冲突判定：仅当 open_id 和 user.open_id 都有值且不等时，**覆盖为新值**
+        （历史数据 bug 或 AppID 变更会导致 open_id 变化，以最新一次登录为准）
 
-    返回 (user, created)；手机号与已有 open_id 冲突时抛 ValueError。
+    返回 (user, created)。
     """
-    # 1. open_id 命中
+    # 1. open_id 命中 → 直接登录
     if open_id:
         user = ManeuGuest.objects.filter(open_id=open_id).first()
         if user:
@@ -124,18 +129,17 @@ def get_or_create_guest_by_wechat(open_id, phone=None):
                 user.save(update_fields=['phone'])
             return user, False
 
-    # 2. phone 命中 → 按需绑定 open_id
+    # 2. phone 命中 → 按需绑定 / 覆盖 open_id
     if phone:
         user = ManeuGuest.objects.filter(phone=phone).first()
         if user:
-            if open_id and user.open_id and user.open_id != open_id:
-                # 双方都有 open_id 且不一致 → 拒绝
-                raise ValueError('该手机号已绑定其他微信账号')
-            if open_id and not user.open_id:
-                # 用户原无 open_id，绑定当前
+            if open_id and user.open_id != open_id:
+                logger.warning(
+                    'open_id 变更，以手机号为准覆盖 phone=%s old=%s new=%s',
+                    phone, user.open_id, open_id,
+                )
                 user.open_id = open_id
                 user.save(update_fields=['open_id'])
-            # 其他情况：open_id=None 不动 user.open_id；open_id 与已有相同不动
             return user, False
 
     # 3. 新建
@@ -149,7 +153,7 @@ def get_or_create_guest_by_wechat(open_id, phone=None):
         )
         return user, True
     except IntegrityError:
-        # 并发兜底：open_id 或 phone 撞唯一索引
+        # 并发兜底
         if open_id:
             user = ManeuGuest.objects.filter(open_id=open_id).first()
             if user:

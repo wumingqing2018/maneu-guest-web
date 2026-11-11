@@ -538,7 +538,6 @@ def send_sms(request):
 
     return JsonResponse({'status': True, 'message': msg, 'content': {}})
 
-
 @csrf_exempt
 @require_http_methods(["POST"])
 def login_by_sms(request):
@@ -569,10 +568,7 @@ def login_by_sms(request):
         if not open_id:
             logger.warning('login_by_sms 获取 open_id 失败，降级为纯手机号登录')
 
-    try:
-        user, created = get_or_create_guest_by_wechat(open_id, call)
-    except ValueError as e:
-        return _json_error(str(e))
+    user, created = get_or_create_guest_by_wechat(open_id, call)
 
     return JsonResponse({
         'status': True,
@@ -618,10 +614,7 @@ def login_by_wechat(request):
     if phone is None:
         return _json_error('获取手机号失败，请联系管理员')
 
-    try:
-        user, created = get_or_create_guest_by_wechat(open_id, phone)
-    except ValueError as e:
-        return _json_error(str(e))
+    user, created = get_or_create_guest_by_wechat(open_id, phone)
 
     return JsonResponse({
         'status': True,
