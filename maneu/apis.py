@@ -35,11 +35,10 @@ from maneu.service import (
     # 常量（单一来源，勿在本地重复定义）
     SMS_CODE_PREFIX,
     # 用户
-    get_guest_by_phone, get_guest_by_open_id,
+    get_guest_by_phone,
     get_or_create_guest_by_phone, get_or_create_guest_by_wechat,
     # 详情
-    get_admin_by_id,
-    get_guest_by_id, get_order_by_id, get_store_by_id,
+    get_admin_by_id, get_order_by_id, get_store_by_id,
     get_report_by_id, get_repair_by_id,
     # 列表
     get_orders_by_phone, get_reports_by_phone,
@@ -545,8 +544,8 @@ def send_sms(request):
 def login_by_sms(request):
     """
     短信登录；手机号未注册时自动创建账号。
-    请求 {"call": "手机号", "code": "6位数字", "login_code": "<wx.login code>", }
-    login_code 可选：传了就换 openid 并绑定。
+    请求 {"call": "手机号", "code": "6位数字", "login_code": "<wx.login code>"}。
+    login_code 可选：传了才尝试换 open_id 并绑定，换不到不阻断登录。
     """
     params = _parse_json(request)
     call = params.get('call')
@@ -563,16 +562,15 @@ def login_by_sms(request):
         record_sms_fail(call)
         return _json_error('验证码错误或已过期')
 
-    # 可选：用 login_code 换 openid 并尝试绑定
+    # open_id 可选：拿不到不影响登录
     open_id = None
     if login_code:
         open_id = get_miniprogram_open_id(login_code)
+        if not open_id:
+            logger.warning('login_by_sms 获取 open_id 失败，降级为纯手机号登录')
 
     try:
-        if open_id:
-            user, created = get_or_create_guest_by_wechat(open_id, call)
-        else:
-            user, created = get_or_create_guest_by_phone(call)
+        user, created = get_or_create_guest_by_wechat(open_id, call)
     except ValueError as e:
         return _json_error(str(e))
 
@@ -594,18 +592,22 @@ def login_by_wechat(request):
     """
     微信登录；首次登录自动创建账号。
     请求 {"code": "<手机号 code>", "login_code": "<wx.login code>"}。
+
+    login_code 可选：传了才尝试换 open_id 并绑定，换不到按纯手机号登录。
+    手机号 code 是核心，必须提供且格式合法。
     """
     phone_code = _extract_param(request, 'code')
     login_code = _extract_param(request, 'login_code')
 
     if not phone_code or not util_verify.is_token_64(phone_code):
         return _json_error('登录失败：请提交正确的微信号')
-    if not login_code:
-        return _json_error('缺少 login_code（请先调用 wx.login）')
 
-    open_id = get_miniprogram_open_id(login_code)
-    if not open_id:
-        return _json_error('获取 open_id 失败，请重试')
+    # open_id 可选：换不到不阻断
+    open_id = None
+    if login_code:
+        open_id = get_miniprogram_open_id(login_code)
+        if not open_id:
+            logger.warning('login_by_wechat 获取 open_id 失败，降级为纯手机号登录')
 
     token_data = get_miniprogram_token()
     access_token = token_data.get('access_token')
@@ -628,7 +630,7 @@ def login_by_wechat(request):
         'call': user.phone,
         'content': {
             **_generate_jwt_for_user(user),
-            'open_id': open_id,
+            'open_id': user.open_id,   # 可能为 None，前端存缓存时注意判空
         },
     })
 

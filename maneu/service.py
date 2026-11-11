@@ -107,7 +107,13 @@ def get_or_create_guest_by_phone(phone):
 def get_or_create_guest_by_wechat(open_id, phone=None):
     """
     微信登录：优先按 open_id 查 → 再按 phone 查并绑定 → 都没有则创建。
-    返回 (user, created)；手机号已绑其他微信时抛 ValueError。
+
+    open_id 可为 None（微信授权 code 换不到 open_id 时降级为手机号登录）：
+      - open_id=None：跳过 open_id 查询，仅按 phone 查
+      - open_id=None 且 phone 命中的用户已有 open_id：保留原值不覆盖
+      - 冲突判定：仅当 open_id 和 user.open_id 都有值且不等时才报错
+
+    返回 (user, created)；手机号与已有 open_id 冲突时抛 ValueError。
     """
     # 1. open_id 命中
     if open_id:
@@ -118,14 +124,18 @@ def get_or_create_guest_by_wechat(open_id, phone=None):
                 user.save(update_fields=['phone'])
             return user, False
 
-    # 2. phone 命中 → 绑定 open_id
+    # 2. phone 命中 → 按需绑定 open_id
     if phone:
         user = ManeuGuest.objects.filter(phone=phone).first()
         if user:
-            if user.open_id and user.open_id != open_id:
+            if open_id and user.open_id and user.open_id != open_id:
+                # 双方都有 open_id 且不一致 → 拒绝
                 raise ValueError('该手机号已绑定其他微信账号')
-            user.open_id = open_id
-            user.save(update_fields=['open_id'])
+            if open_id and not user.open_id:
+                # 用户原无 open_id，绑定当前
+                user.open_id = open_id
+                user.save(update_fields=['open_id'])
+            # 其他情况：open_id=None 不动 user.open_id；open_id 与已有相同不动
             return user, False
 
     # 3. 新建
