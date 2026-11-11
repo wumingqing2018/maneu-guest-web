@@ -13,8 +13,8 @@ maneu/urls.py
 """
 from django.urls import path
 
-from maneu import views
 from maneu import apis
+from maneu import views
 
 urlpatterns = [
     # ==================== 页面 / 视图 ====================
@@ -28,19 +28,16 @@ urlpatterns = [
     path('verify_repair/', views.verify_repair, name='verify_repair'),
     path('verify_repair/VQwxjTJTH5.txt', apis.VQwxjTJTH5),
 
-
     # ==================== 一、扫码验证类（免登录） ====================
     path('order_verify/', apis.order_verify, name='order_verify'),
     path('store_verify/', apis.store_verify, name='store_verify'),
     path('report_verify/', apis.report_verify, name='report_verify'),
-
 
     # ==================== 二、认证类 API（这些是登录/刷新接口，不能带 /auth/） ====================
     path('apis/send_sms/', apis.send_sms, name='send_sms'),
     path('apis/login_by_sms/', apis.login_by_sms, name='login_by_sms'),
     path('apis/login_by_wechat/', apis.login_by_wechat, name='login_by_wechat'),
     path('apis/refresh_access_token/', apis.refresh_access_token, name='refresh_access_token'),
-
 
     # ==================== 三、业务 API（需登录，路径含 /auth/） ====================
 

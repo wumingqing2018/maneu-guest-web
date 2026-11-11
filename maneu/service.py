@@ -8,6 +8,7 @@ maneu/service.py
      不通过公共函数委托，便于逐个独立修改。
 """
 
+import logging
 import random
 import uuid
 
@@ -19,20 +20,17 @@ from django.utils import timezone
 from maneu.models import (
     ManeuAdmin, ManeuGuest, ManeuOrder, ManeuReport, ManeuStore, ManeuRepair,
 )
-import logging
 
 logger = logging.getLogger(__name__)
-
-
 
 # ============================================================================
 # 一、短信验证码
 # ============================================================================
 
-SMS_CODE_PREFIX = 'sms:code:'   # Redis key：sms:code:{phone}
-SMS_FAIL_PREFIX = 'sms:fail:'   # Redis key：sms:fail:{phone}
-SMS_CODE_TTL = 300              # 验证码有效期（秒）
-SMS_FAIL_LIMIT = 5              # 连续错误上限，达到后作废验证码
+SMS_CODE_PREFIX = 'sms:code:'  # Redis key：sms:code:{phone}
+SMS_FAIL_PREFIX = 'sms:fail:'  # Redis key：sms:fail:{phone}
+SMS_CODE_TTL = 300  # 验证码有效期（秒）
+SMS_FAIL_LIMIT = 5  # 连续错误上限，达到后作废验证码
 
 
 def generate_sms_code():

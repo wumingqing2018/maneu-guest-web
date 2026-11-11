@@ -9,7 +9,8 @@ from django.db import models
 
 
 class ManeuAdmin(models.Model):
-    id = models.CharField(primary_key=True, max_length=36)  # The composite primary key (id, username) found, that is not supported. The first column is selected.
+    id = models.CharField(primary_key=True,
+                          max_length=36)  # The composite primary key (id, username) found, that is not supported. The first column is selected.
     username = models.CharField(max_length=36)
     password = models.CharField(max_length=36)
     nickname = models.CharField(max_length=36)

@@ -30,13 +30,12 @@ from common.util_wechat import (
     get_miniprogram_open_id,
     get_file_verify_content,
 )
-
 from maneu.service import (
     # 常量（单一来源，勿在本地重复定义）
     SMS_CODE_PREFIX,
     # 用户
     get_guest_by_phone,
-    get_or_create_guest_by_phone, get_or_create_guest_by_wechat,
+    get_or_create_guest_by_wechat,
     # 详情
     get_admin_by_id, get_order_by_id, get_store_by_id,
     get_report_by_id, get_repair_by_id,
@@ -538,6 +537,7 @@ def send_sms(request):
 
     return JsonResponse({'status': True, 'message': msg, 'content': {}})
 
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def login_by_sms(request):
@@ -623,7 +623,7 @@ def login_by_wechat(request):
         'call': user.phone,
         'content': {
             **_generate_jwt_for_user(user),
-            'open_id': user.open_id,   # 可能为 None，前端存缓存时注意判空
+            'open_id': user.open_id,  # 可能为 None，前端存缓存时注意判空
         },
     })
 
