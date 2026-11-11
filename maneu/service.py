@@ -1,7 +1,7 @@
 """
 maneu/service.py
 
-业务服务层：短信验证码 + 各业务对象的数据查询。
+业务服务层：短信验证码 + 用户查询/注册 + 各业务对象的数据查询。
 视图层只通过本模块访问数据库，不直接操作 Model。
 
 约定：每个 get_* 函数自包含（filter + 排序 + 可选分页 + 字段裁剪），
@@ -9,11 +9,16 @@ maneu/service.py
 """
 
 import random
+import uuid
 
 from django.core.cache import cache
+from django.db import IntegrityError
 from django.forms.models import model_to_dict
+from django.utils import timezone
 
-from maneu.models import *
+from maneu.models import (
+    ManeuAdmin, ManeuGuest, ManeuOrder, ManeuReport, ManeuStore, ManeuRepair,
+)
 
 
 # ============================================================================
@@ -62,12 +67,88 @@ def record_sms_fail(phone):
 
 
 # ============================================================================
-# 二、用户查询
+# 二、用户查询 / 注册
 # ============================================================================
 
 def get_guest_by_phone(phone):
-    """按手机号取 ORM 实例（生成 JWT 等需要属性访问的场景）。"""
+    """按手机号取 ORM 实例；不存在返回 None。"""
     return ManeuGuest.objects.filter(phone=phone).first()
+
+
+def get_guest_by_open_id(open_id):
+    """按微信 open_id 取 ORM 实例；不存在返回 None。"""
+    if not open_id:
+        return None
+    return ManeuGuest.objects.filter(open_id=open_id).first()
+
+
+def get_or_create_guest_by_phone(phone):
+    """
+    短信登录：按手机号查，没注册就自动创建。
+    返回 (user, created)；并发下靠唯一索引兜底。
+    """
+    user = ManeuGuest.objects.filter(phone=phone).first()
+    if user:
+        return user, False
+
+    try:
+        user = ManeuGuest.objects.create(
+            id=str(uuid.uuid4()),
+            phone=phone,
+            time=timezone.now(),
+            status='1',
+        )
+        return user, True
+    except IntegrityError:
+        # 并发下被其他请求先插入，重查
+        return ManeuGuest.objects.filter(phone=phone).first(), False
+
+
+def get_or_create_guest_by_wechat(open_id, phone=None):
+    """
+    微信登录：优先按 open_id 查 → 再按 phone 查并绑定 → 都没有则创建。
+    返回 (user, created)；手机号已绑其他微信时抛 ValueError。
+    """
+    # 1. open_id 命中
+    if open_id:
+        user = ManeuGuest.objects.filter(open_id=open_id).first()
+        if user:
+            if phone and user.phone != phone:
+                user.phone = phone
+                user.save(update_fields=['phone'])
+            return user, False
+
+    # 2. phone 命中 → 绑定 open_id
+    if phone:
+        user = ManeuGuest.objects.filter(phone=phone).first()
+        if user:
+            if user.open_id and user.open_id != open_id:
+                raise ValueError('该手机号已绑定其他微信账号')
+            user.open_id = open_id
+            user.save(update_fields=['open_id'])
+            return user, False
+
+    # 3. 新建
+    try:
+        user = ManeuGuest.objects.create(
+            id=str(uuid.uuid4()),
+            open_id=open_id,
+            phone=phone,
+            time=timezone.now(),
+            status='1',
+        )
+        return user, True
+    except IntegrityError:
+        # 并发兜底：open_id 或 phone 撞唯一索引
+        if open_id:
+            user = ManeuGuest.objects.filter(open_id=open_id).first()
+            if user:
+                return user, False
+        if phone:
+            user = ManeuGuest.objects.filter(phone=phone).first()
+            if user:
+                return user, False
+        raise
 
 
 # ============================================================================
@@ -124,10 +205,11 @@ def get_repairs_by_phone(phone, offset=None, limit=None):
 # 五、详情查询（每个函数独立：filter + first + model_to_dict）
 # ============================================================================
 
-# 机构对外公开的字段白名单。
-# ⚠️ ManeuAdmin 实际字段：content / email / id / level / location /
-#    nickname / password / phone / state / time / username
-#    不含 remark；content 疑似授权 token，不放入白名单。
+# 机构对外公开字段白名单。
+# ⚠️ ManeuAdmin 实际字段：id / username / password / nickname / email / phone /
+#    level / state / time / content / location
+#    - 不含 remark
+#    - content 疑似授权 token，不进白名单
 _ADMIN_PUBLIC_FIELDS = ('nickname', 'phone', 'location')
 
 
@@ -140,6 +222,12 @@ def get_admin_by_id(admin_id):
         .first()
     )
     return dict(row) if row else None
+
+
+def get_guest_by_id(record_id):
+    """按 id 取用户详情"""
+    obj = ManeuGuest.objects.filter(id=record_id).first()
+    return model_to_dict(obj) if obj else None
 
 
 def get_order_by_id(record_id):

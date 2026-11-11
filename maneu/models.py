@@ -29,18 +29,13 @@ class ManeuAdmin(models.Model):
 
 class ManeuGuest(models.Model):
     id = models.CharField(primary_key=True, max_length=36)
-    admin_id = models.CharField(max_length=36, blank=True, null=True)
+    open_id = models.CharField(max_length=36, blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=36, blank=True, null=True)
     remark = models.TextField(blank=True, null=True)
     content = models.TextField(blank=True, null=True)
-    sex = models.CharField(max_length=36, blank=True, null=True)
-    age = models.CharField(max_length=36, blank=True, null=True)
-    dfh = models.CharField(max_length=36, blank=True, null=True)
-    ot = models.CharField(max_length=36, blank=True, null=True)
-    em = models.CharField(max_length=36, blank=True, null=True)
 
     class Meta:
         managed = False

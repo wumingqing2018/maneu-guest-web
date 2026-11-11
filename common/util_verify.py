@@ -1,12 +1,18 @@
+"""
+common/util_verify.py
+
+格式校验工具：手机号 / 验证码 / UUID / 移动端 UA。
+所有 is_* 函数返回 bool（True=合法，False=非法），不再返回原字符串。
+"""
+
 import re
 
-# ============================================================
-# 预编译正则表达式（提升性能，避免每次调用重复编译）
-# ============================================================
 
-# 预编译正则表达式（提升性能，避免每次调用重复编译）
+# ============================================================================
+# 预编译正则
+# ============================================================================
 
-# 移动设备特征（长匹配）
+# 移动设备特征（长匹配，对整个 UA 搜索）
 _LONG_MOBILE_REGEX = re.compile(
     r'googlebot-mobile|android|avantgo|blackberry|blazer|elaine|hiptop|ip(hone|od)|kindle|midp|mmp'
     r'|mobile|o2|opera mini|palm( os)?|pda|plucker|pocket|psp|smartphone|symbian|treo|up\.(browser|link)'
@@ -14,7 +20,7 @@ _LONG_MOBILE_REGEX = re.compile(
     re.IGNORECASE,
 )
 
-# 移动设备特征（短匹配）
+# 移动设备特征（短匹配，只看 UA 前 4 个字符）
 _SHORT_MOBILE_REGEX = re.compile(
     r'1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)'
     r'|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)'
@@ -43,10 +49,10 @@ _PHONE_REGEX = re.compile(r'^1[3-9]\d{9}$')
 # 6 位数字验证码
 _TOKEN_6_REGEX = re.compile(r'^\d{6}$')
 
-# 32 位十六进制字符串（如 MD5）
+# 32 位十六进制（如 MD5）
 _TOKEN_32_REGEX = re.compile(r'^[0-9a-fA-F]{32}$')
 
-# 64 位十六进制字符串
+# 64 位十六进制
 _TOKEN_64_REGEX = re.compile(r'^[0-9a-fA-F]{64}$')
 
 # UUID 格式（8-4-4-4-12）
@@ -55,93 +61,53 @@ _UUID_REGEX = re.compile(
 )
 
 
+# ============================================================================
+# 内部辅助
+# ============================================================================
+
+def _match(pattern, value):
+    """value 是非空字符串且匹配 pattern 时返回 True，否则 False。"""
+    return bool(value and isinstance(value, str) and pattern.match(value))
+
+
+# ============================================================================
+# 公开校验函数（统一返回 bool）
+# ============================================================================
+
 def is_mobile(ua):
     """
-    判断 User-Agent 是否来自移动设备（手机/平板）。
+    判断 User-Agent 是否来自移动设备。
 
     :param ua: 请求头中的 HTTP_USER_AGENT 字符串，可为 None
-    :type ua: str or None
-    :return: True 表示移动端，False 表示 PC 端
-    :rtype: bool
-    :note: 当 ua 为 None 或长度不足时，安全返回 False
+    :return: True=移动端，False=PC 端或空值
     """
     if not ua or not isinstance(ua, str):
         return False
-
-    # 长特征匹配（完整 UA 中搜索）
     if _LONG_MOBILE_REGEX.search(ua):
         return True
-
-    # 短特征匹配仅使用 UA 的前 4 个字符
-    prefix = ua[:4] if len(ua) >= 4 else ua
-    return bool(_SHORT_MOBILE_REGEX.search(prefix))
+    return bool(_SHORT_MOBILE_REGEX.search(ua[:4]))
 
 
 def is_call(code):
-    """
-    校验中国大陆手机号格式。
-
-    :param code: 待验证字符串
-    :type code: str or None
-    :return: 合法则返回原字符串，否则返回 None
-    :rtype: str or None
-    """
-    if not code or not isinstance(code, str):
-        return None
-    return code if _PHONE_REGEX.match(code) else None
+    """校验中国大陆手机号格式。"""
+    return _match(_PHONE_REGEX, code)
 
 
 def is_token_6(code):
-    """
-    校验 6 位纯数字验证码。
-
-    :param code: 待验证字符串
-    :type code: str or None
-    :return: 合法则返回原字符串，否则返回 None
-    :rtype: str or None
-    """
-    if not code or not isinstance(code, str):
-        return None
-    return code if _TOKEN_6_REGEX.match(code) else None
+    """校验 6 位纯数字验证码。"""
+    return _match(_TOKEN_6_REGEX, code)
 
 
 def is_token_32(code):
-    """
-    校验 32 位十六进制字符串（如 MD5）。
-
-    :param code: 待验证字符串
-    :type code: str or None
-    :return: 合法则返回原字符串，否则返回 None
-    :rtype: str or None
-    """
-    if not code or not isinstance(code, str):
-        return None
-    return code if _TOKEN_32_REGEX.match(code) else None
+    """校验 32 位十六进制字符串（如 MD5）。"""
+    return _match(_TOKEN_32_REGEX, code)
 
 
 def is_token_64(code):
-    """
-    校验 64 位十六进制字符串。
-
-    :param code: 待验证字符串
-    :type code: str or None
-    :return: 合法则返回原字符串，否则返回 None
-    :rtype: str or None
-    """
-    if not code or not isinstance(code, str):
-        return None
-    return code if _TOKEN_64_REGEX.match(code) else None
+    """校验 64 位十六进制字符串。"""
+    return _match(_TOKEN_64_REGEX, code)
 
 
 def is_uuid(code):
-    """
-    校验标准 UUID 格式（如 550e8400-e29b-41d4-a716-446655440000）。
-
-    :param code: 待验证字符串
-    :type code: str or None
-    :return: 合法则返回原字符串，否则返回 None
-    :rtype: str or None
-    """
-    if not code or not isinstance(code, str):
-        return None
-    return code if _UUID_REGEX.match(code) else None
+    """校验标准 UUID（550e8400-e29b-41d4-a716-446655440000）。"""
+    return _match(_UUID_REGEX, code)

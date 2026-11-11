@@ -1,3 +1,10 @@
+"""
+common/util_sms.py
+
+阿里云短信发送封装。
+- AcsClient 模块级单例，进程生命周期内复用
+"""
+
 import json
 import logging
 import os
@@ -8,43 +15,40 @@ from aliyunsdkdysmsapi.request.v20170525.SendSmsRequest import SendSmsRequest
 
 logger = logging.getLogger(__name__)
 
+# 模块级单例
+_acs_client = None
 
-# ============================================================================
-# 二、阿里云短信
-# ============================================================================
+
+def _get_client():
+    """懒加载 AcsClient；首次调用时构造，后续复用。"""
+    global _acs_client
+    if _acs_client is None:
+        credentials = AccessKeyCredential(
+            os.environ.get('ALIBABA_CLOUD_ACCESS_KEY_ID'),
+            os.environ.get('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
+        )
+        _acs_client = AcsClient(region_id='cn-shenzhen', credential=credentials)
+    return _acs_client
+
 
 def send_sms_code(call, code):
     """
     通过阿里云短信服务发送验证码。
 
     :param call: 接收短信的手机号
-    :type call: str
-    :param code: 6 位验证码（数字字符串或整数）
-    :type code: str or int
-    :return: 发送结果字典，包含 status (bool) 和 message (str)
-    :rtype: dict
-    :use:
-         send_sms_code('13800138000', '123456')
-    :example:
-        {'status': True, 'message': 'OK'}
-        or
-        {'status': False, 'message': 'Invalid phone number'}
+    :param code: 6 位验证码
+    :return: {'status': bool, 'message': str}
     """
     try:
-        credentials = AccessKeyCredential(
-            os.environ.get('ALIBABA_CLOUD_ACCESS_KEY_ID'),
-            os.environ.get('ALIBABA_CLOUD_ACCESS_KEY_SECRET'),
-        )
         request = SendSmsRequest()
         request.set_accept_format('json')
-        request.set_SignName("爱视光学")
-        request.set_TemplateCode("SMS_485420526")
+        request.set_SignName('爱视光学')
+        request.set_TemplateCode('SMS_485420526')
         request.set_PhoneNumbers(call)
-        request.set_TemplateParam({'code': code})
+        request.set_TemplateParam({'code': str(code)})
 
-        client = AcsClient(region_id='cn-shenzhen', credential=credentials)
+        client = _get_client()
         response = client.do_action_with_exception(request)
-
         result = json.loads(response.decode('utf-8'))
 
         if result.get('Code') == 'OK':

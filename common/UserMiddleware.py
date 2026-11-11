@@ -1,19 +1,19 @@
 """
 common/UserMiddleware.py
 
-用户登录校验中间件（基于 JWT）
+JWT 鉴权中间件。
 
-规则（重要）：
-  路径里含 JWT_CONFIG['AUTH_URL_KEYWORDS'] 中的任意关键词（默认 '/auth/'）
-  → 走 JWT 校验
-  否则 → 直接放行
+规则：
+    路径含 AUTH_URL_KEYWORDS（默认 '/auth/'）→ 需鉴权
+    其他路径 → 直接放行
 
-职责：
-  1. 判断当前路径是否需要鉴权
-  2. 从 Authorization 头提取 access token
-  3. 校验类型、签发者、黑名单
-  4. 将 user_id / user_phone / payload 挂到 request 上
+流程：
+    1. 取 Authorization 头 → 提取 Bearer token
+    2. 解码 + 校验类型 / 签名 / issuer
+    3. 校验黑名单（jti 是否已失效）
+    4. 挂载到 request：jwt_user_id / jwt_phone / jwt_payload
 """
+
 import jwt
 from django.conf import settings
 from django.http import JsonResponse
@@ -23,21 +23,26 @@ from common.util_jwt import decode_token, is_blacklisted
 
 JWT_CONFIG = settings.JWT_CONFIG
 
-# ⭐ 需要鉴权的路径关键词
+# 需要鉴权的路径关键词
 AUTH_URL_KEYWORDS = JWT_CONFIG.get('AUTH_URL_KEYWORDS', ['/auth/'])
 
+# Authorization 头 META 键名
 AUTH_HEADER_NAME = JWT_CONFIG.get('AUTH_HEADER_NAME', 'HTTP_AUTHORIZATION')
-AUTH_HEADER_PREFIX = JWT_CONFIG['AUTH_HEADER_TYPES'][0] + ' '  # 'Bearer '
+
+# 鉴权前缀（默认 'Bearer '），支持 settings 覆盖多种类型时取第一个
+_AUTH_TYPES = JWT_CONFIG.get('AUTH_HEADER_TYPES', ['Bearer'])
+AUTH_HEADER_PREFIX = f'{_AUTH_TYPES[0]} '
 
 
 class UserMiddleware(MiddlewareMixin):
+    """JWT 鉴权中间件：路径命中关键词才校验，其余放行"""
 
     def process_request(self, request):
-        # 1. 不需要登录的路径，直接放行
+        # 1. 不需要鉴权的路径放行
         if not self._need_auth(request.path_info):
             return None
 
-        # 2. 取 Authorization 头
+        # 2. 提取 Authorization 头
         auth_header = (request.META.get(AUTH_HEADER_NAME) or '').strip()
         if not auth_header.startswith(AUTH_HEADER_PREFIX):
             return self._unauthorized_response('未提供有效的 Token')
@@ -56,7 +61,7 @@ class UserMiddleware(MiddlewareMixin):
         if is_blacklisted(payload):
             return self._unauthorized_response('Token 已失效，请重新登录')
 
-        # 5. 挂载到 request，供视图直接使用
+        # 5. 挂载用户信息
         user_id = payload.get('user_id')
         if not user_id:
             return self._unauthorized_response('Token 中缺少用户标识')
@@ -69,12 +74,13 @@ class UserMiddleware(MiddlewareMixin):
 
     @staticmethod
     def _need_auth(path):
-        """路径含关键词 → 需要登录"""
+        """路径含任一关键词 → 需鉴权"""
         return any(kw in path for kw in AUTH_URL_KEYWORDS)
 
     @staticmethod
     def _unauthorized_response(message):
+        """统一 401 响应（与 apis._json_error 三字段格式一致）"""
         return JsonResponse(
-            {'status': False, 'message': message},
+            {'status': False, 'message': message, 'content': {}},
             status=401,
         )

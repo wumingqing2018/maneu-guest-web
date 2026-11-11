@@ -17,23 +17,47 @@ API 视图层：只做参数校验、调用 service、组装 JSON 响应，不�
 import json
 import logging
 
+from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from common import util_verify, util_jwt
 from common.util_sms import send_sms_code
-from common.util_wechat import get_miniprogram_token, get_miniprogram_phone
+from common.util_wechat import (
+    get_miniprogram_token,
+    get_miniprogram_phone,
+    get_miniprogram_open_id,
+    get_file_verify_content,
+)
 
-from maneu.service import *
+from maneu.service import (
+    # 常量（单一来源，勿在本地重复定义）
+    SMS_CODE_PREFIX,
+    # 用户
+    get_guest_by_phone, get_guest_by_open_id,
+    get_or_create_guest_by_phone, get_or_create_guest_by_wechat,
+    # 详情
+    get_admin_by_id,
+    get_guest_by_id, get_order_by_id, get_store_by_id,
+    get_report_by_id, get_repair_by_id,
+    # 列表
+    get_orders_by_phone, get_reports_by_phone,
+    get_stores_by_phone, get_repairs_by_phone,
+    # 短信
+    generate_sms_code, save_sms_code, verify_sms_code,
+    is_sms_locked, record_sms_fail,
+)
+
 logger = logging.getLogger(__name__)
 
+# 发送冷却（apis 特有，service 不涉及）
 SMS_SEND_COOLDOWN = 60
 SMS_SEND_PREFIX = 'sms:send:'
 
 
 # ============================================================================
-# 通用工具（输入/输出清晰、无业务耦合）
+# 一、通用工具
 # ============================================================================
 
 def _parse_json(request):
@@ -111,7 +135,7 @@ def _send_verification_code(call, code):
 
 
 def _fetch_phone_with_retry(code, access_token):
-    """用微信 code 换手机号；token 失效时刷新一次并重试。"""
+    """用微信手机号 code 换手机号；token 失效时刷新一次并重试。"""
     phone_info = get_miniprogram_phone(code, access_token)
     if phone_info.get('status'):
         return phone_info.get('message')
@@ -139,7 +163,7 @@ def _generate_jwt_for_user(user):
 
 
 # ============================================================================
-# 二、扫码验证（免登录）—— 每个接口独立
+# 二、扫码验证（免登录）
 # ============================================================================
 
 @csrf_exempt
@@ -192,8 +216,8 @@ def report_verify(request):
     """
     报告扫码验证。请求 {"index_id": "<UUID>"}。
 
-    ⚠️ 结构变更：旧版返回平铺的 od_sph / os_sph（历史数据多为 null），
-       现改为 data.od.sph / data.os.sph；扫码端需同步读取 content.data.od.sph。
+    ⚠️ 结构：content.data.od.sph / content.data.os.sph（嵌套对象），
+       不是平铺的 od_sph / os_sph；扫码端需按新结构读取。
     """
     index_id = _extract_param(request, 'index_id')
     if not util_verify.is_uuid(index_id):
@@ -236,7 +260,7 @@ def repair_verify(request):
 
 
 # ============================================================================
-# 三、列表（需登录，路径含 /auth/）—— 每个接口独立
+# 三、列表（需登录，路径含 /auth/）
 # 手机号由 UserMiddleware 注入；可选 offset / limit 分页。
 # ============================================================================
 
@@ -281,10 +305,71 @@ def repair_list(request):
 
 
 # ============================================================================
-# 四、详情（需登录，路径含 /auth/）—— 每个接口独立
+# 四、详情（需登录，路径含 /auth/）
 # 需校验记录归属，仅允许访问本人记录。
-# admin_content 恒为 None：机构白名单不含 content（疑似授权 token）。
 # ============================================================================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def guest_detail(request):
+    """
+    当前登录用户信息。
+    身份由 UserMiddleware 注入的 jwt_phone 决定，不接收 code。
+    """
+    phone = util_jwt.get_admin_phone_from_request(request)
+    if not phone:
+        return _json_error('未登录', status_code=401)
+
+    user = get_guest_by_phone(phone)
+    if not user:
+        return _json_error('用户不存在', status_code=404)
+
+    return JsonResponse({
+        'status': True,
+        'message': '请求成功',
+        'content': {
+            'id': user.id,
+            'open_id': user.open_id,
+            'phone': user.phone,
+            'name': user.name,
+            'status': user.status,
+            'remark': user.remark,
+            'time': user.time,
+        },
+    })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def guest_update(request):
+    """
+    更新当前登录用户昵称（预留：后续可扩展头像等字段）。
+    请求 {"name": "..."}（可选）。
+    """
+    phone = util_jwt.get_admin_phone_from_request(request)
+    if not phone:
+        return _json_error('未登录', status_code=401)
+
+    user = get_guest_by_phone(phone)
+    if not user:
+        return _json_error('用户不存在', status_code=404)
+
+    data = _parse_json(request)
+    update_fields = []
+
+    if 'name' in data:
+        name = str(data['name']).strip()
+        if len(name) > 32:
+            return _json_error('昵称过长')
+        user.name = name
+        update_fields.append('name')
+
+    if not update_fields:
+        return _json_error('没有可更新的字段')
+
+    user.save(update_fields=update_fields)
+    return JsonResponse({'status': True, 'message': '更新成功', 'content': {}})
+
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -315,7 +400,7 @@ def order_detail(request):
             'admin_name': admin.get('nickname'),
             'admin_phone': admin.get('phone'),
             'admin_location': admin.get('location'),
-            'admin_content': admin.get('content'),  # 白名单不含 → 恒为 None
+            'admin_content': admin.get('content'),
         },
     })
 
@@ -349,7 +434,7 @@ def store_detail(request):
             'admin_name': admin.get('nickname'),
             'admin_phone': admin.get('phone'),
             'admin_location': admin.get('location'),
-            'admin_content': admin.get('content'),  # 白名单不含 → 恒为 None
+            'admin_content': admin.get('content'),
         },
     })
 
@@ -383,7 +468,7 @@ def report_detail(request):
             'admin_name': admin.get('nickname'),
             'admin_phone': admin.get('phone'),
             'admin_location': admin.get('location'),
-            'admin_content': admin.get('content'),  # 白名单不含 → 恒为 None
+            'admin_content': admin.get('content'),
         },
     })
 
@@ -417,7 +502,7 @@ def repair_detail(request):
             'admin_name': admin.get('nickname'),
             'admin_phone': admin.get('phone'),
             'admin_location': admin.get('location'),
-            'admin_content': admin.get('content'),  # 白名单不含 → 恒为 None
+            'admin_content': admin.get('content'),
         },
     })
 
@@ -431,15 +516,12 @@ def repair_detail(request):
 def send_sms(request):
     """
     发送短信验证码。请求 {"call": "手机号"}。
-    流程：格式校验 → 已注册校验 → 60s 冷却 → 生成并保存 → 发送；
-         发送失败时回滚验证码与冷却。
+    ⚠️ 登录即注册：不再校验手机号是否已注册。
     """
     call = _extract_param(request, 'call')
 
     if not util_verify.is_call(call):
         return _json_error('请输入正确的手机号')
-    if not get_guest_by_phone(call):
-        return _json_error('当前账号未注册')
 
     cooldown_key = f'{SMS_SEND_PREFIX}{call}'
     if cache.get(cooldown_key):
@@ -451,7 +533,7 @@ def send_sms(request):
 
     ok, msg = _send_verification_code(call, code)
     if not ok:
-        cache.delete(f'sms:code:{call}')
+        cache.delete(f'{SMS_CODE_PREFIX}{call}')
         cache.delete(cooldown_key)
         return _json_error(msg)
 
@@ -462,12 +544,14 @@ def send_sms(request):
 @require_http_methods(["POST"])
 def login_by_sms(request):
     """
-    短信验证码登录。请求 {"call": "手机号", "code": "6位数字"}。
-    失败累计达上限会锁定，需重新获取验证码。
+    短信登录；手机号未注册时自动创建账号。
+    请求 {"call": "手机号", "code": "6位数字", "login_code": "<wx.login code>", }
+    login_code 可选：传了就换 openid 并绑定。
     """
     params = _parse_json(request)
     call = params.get('call')
     code = params.get('code')
+    login_code = params.get('login_code')
 
     if not util_verify.is_call(call):
         return _json_error('请输入正确的手机号')
@@ -479,43 +563,73 @@ def login_by_sms(request):
         record_sms_fail(call)
         return _json_error('验证码错误或已过期')
 
-    user = get_guest_by_phone(call)
-    if not user:
-        return _json_error('该手机号未注册')
+    # 可选：用 login_code 换 openid 并尝试绑定
+    open_id = None
+    if login_code:
+        open_id = get_miniprogram_open_id(login_code)
+
+    try:
+        if open_id:
+            user, created = get_or_create_guest_by_wechat(open_id, call)
+        else:
+            user, created = get_or_create_guest_by_phone(call)
+    except ValueError as e:
+        return _json_error(str(e))
 
     return JsonResponse({
         'status': True,
-        'message': '登录成功',
-        'content': _generate_jwt_for_user(user),
+        'message': '注册并登录成功' if created else '登录成功',
+        'is_new': created,
+        'call': user.phone,
+        'content': {
+            **_generate_jwt_for_user(user),
+            'open_id': user.open_id,
+        },
     })
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def login_by_wechat(request):
-    """微信小程序登录。请求 {"code": "<64位十六进制>"}。"""
-    code = _extract_param(request, 'code')
-    if not code or not util_verify.is_token_64(code):
+    """
+    微信登录；首次登录自动创建账号。
+    请求 {"code": "<手机号 code>", "login_code": "<wx.login code>"}。
+    """
+    phone_code = _extract_param(request, 'code')
+    login_code = _extract_param(request, 'login_code')
+
+    if not phone_code or not util_verify.is_token_64(phone_code):
         return _json_error('登录失败：请提交正确的微信号')
+    if not login_code:
+        return _json_error('缺少 login_code（请先调用 wx.login）')
+
+    open_id = get_miniprogram_open_id(login_code)
+    if not open_id:
+        return _json_error('获取 open_id 失败，请重试')
 
     token_data = get_miniprogram_token()
     access_token = token_data.get('access_token')
     if not access_token:
         return _json_error('系统错误，无法获取微信授权')
 
-    phone = _fetch_phone_with_retry(code, access_token)
+    phone = _fetch_phone_with_retry(phone_code, access_token)
     if phone is None:
         return _json_error('获取手机号失败，请联系管理员')
 
-    user = get_guest_by_phone(phone)
-    if not user:
-        return _json_error('该手机号未注册')
+    try:
+        user, created = get_or_create_guest_by_wechat(open_id, phone)
+    except ValueError as e:
+        return _json_error(str(e))
 
     return JsonResponse({
         'status': True,
-        'message': '登录成功',
-        'call': phone,
-        'content': _generate_jwt_for_user(user),
+        'message': '注册并登录成功' if created else '登录成功',
+        'is_new': created,
+        'call': user.phone,
+        'content': {
+            **_generate_jwt_for_user(user),
+            'open_id': open_id,
+        },
     })
 
 
@@ -559,6 +673,6 @@ def refresh_access_token(request):
 def VQwxjTJTH5(request):
     """微信域名校验文件，返回纯文本；内容需与小程序后台一致。"""
     return HttpResponse(
-        "c8966dfaa24aa981832913b888981534",
+        get_file_verify_content(),
         content_type='text/plain',
     )
